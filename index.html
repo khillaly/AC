@@ -978,7 +978,7 @@
                         const isChecked = safeIds.indexOf(String(idx + 1)) !== -1;
                         const mark = isChecked ? 'V' : 'X';
                         const color = isChecked ? '#1b6b3f' : '#b33a3a';
-                        return '<li style="padding:2px 0;color:#1f3c54;font-size:0.85rem;"><span style="display:inline-block;width:18px;font-weight:800;font-family:monospace;color:' + color + ';">' + mark + '</span>' + item + '</li>';
+                        return '<li style="padding:3px 0;color:#1f3c54;font-size:0.85rem;"><span style="display:inline-block;width:18px;font-weight:800;font-family:monospace;color:' + color + ';">' + mark + '</span>' + item + '</li>';
                     }).join('');
                 };
 
@@ -996,7 +996,6 @@
                                         <div><strong>Work date:</strong> ${formatDateForPDF(data.workDate)}</div>
                                         <div><strong>Next PM due:</strong> ${nextPmForPDF(data.workDate)}</div>
                                         <div><strong>Technician:</strong> ${data.technician}</div>
-                                        <div><strong>Generated:</strong> ${data.generatedAt}</div>
                                       </div>
                                     </div>
                                 </td></tr>
@@ -1046,19 +1045,20 @@
 <style>
 @page { size: A4; margin: 0; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a2e45; background: white; font-size: 10pt; line-height: 1.35; }
+body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a2e45; background: white; font-size: 10pt; line-height: 1.4; }
 /* ===== REPORT TABLE & PADDING ===== */
 .report-table { width: 100%; border-collapse: collapse; }
 .report-table thead { display: table-header-group; }
 .report-table tbody { display: table-row-group; }
 .report-table th, .report-table td { padding: 0; border: none; }
-.report-thead-td { padding-top: 28mm; padding-left: 15mm; padding-right: 15mm; }
-.report-tbody-td { padding-left: 15mm; padding-right: 15mm; padding-bottom: 25mm; }
+.report-thead-td { padding-top: 30mm; padding-left: 20mm; padding-right: 20mm; }
+.report-tbody-td { padding-left: 20mm; padding-right: 20mm; padding-bottom: 25mm; }
 /* ================================= */
-.header { border-bottom: 3px solid #1e4a6d; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px; }
+.header { border-bottom: 3px solid #1e4a6d; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px; }
 .header h1 { font-size: 1.25rem; color: #12405e; letter-spacing: -0.3px; }
-.header .sub { font-size: 0.85rem; color: #3a6583; margin-top: 3px; }
-.header .meta { font-size: 0.8rem; color: #5b7b96; text-align: right; line-height: 1.4; }
+.header .sub { font-size: 0.85rem; color: #3a6583; margin-top: 4px; }
+.header .meta { font-size: 0.85rem; color: #5b7b96; text-align: right; line-height: 1.5; }
+.header .meta strong { color: #12405e; }
 .gen-banner { background: linear-gradient(90deg, #1e4a6d 0%, #2a6b96 100%); color: white; padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; }
 .gen-banner .gen-name { font-size: 1.1rem; font-weight: 800; }
 .gen-banner .gen-sub { font-size: 0.8rem; color: #cbe4f7; margin-top: 2px; }
@@ -1085,8 +1085,8 @@ ul.check-list li { padding: 2px 0; color: #1f3c54; font-size: 0.85rem; }
 @media print {
     @page { margin: 0; }
     body { margin: 0; padding: 0; }
-    .header-img { position: fixed; top: 0; left: 0; right: 0; height: 22mm; background: white; padding: 4mm 15mm 0 15mm; z-index: 9999; border-bottom: 2px solid #6a8db0; margin-bottom: 0; }
-    .footer-img { position: fixed; bottom: 0; left: 0; right: 0; height: 20mm; background: white; padding: 0 15mm 4mm 15mm; z-index: 9999; }
+    .header-img { position: fixed; top: 0; left: 0; right: 0; height: 25mm; background: white; padding: 6mm 20mm 0 20mm; z-index: 9999; border-bottom: 2px solid #6a8db0; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; }
+    .footer-img { position: fixed; bottom: 0; left: 0; right: 0; height: 20mm; background: white; padding: 0 20mm 6mm 20mm; z-index: 9999; }
     .footer-bar { padding: 6px; font-size: 10px; }
     .report-page { page-break-after: always; }
     .report-page:last-child { page-break-after: auto; }
