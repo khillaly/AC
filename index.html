@@ -526,18 +526,11 @@
                 return true;
             }
 
-            // ============================================================
-            // ⭐ UNIQUE AC IDENTITY — Solves the "N/A" tag collision issue
-            // Combines Tag + Location + Serial + Model so each physical AC
-            // is uniquely identifiable even when the tag is "N/A".
-            // ============================================================
             function normalizeText(val) {
                 return String(val || '').trim().toLowerCase().replace(/\s+/g, ' ');
             }
 
             function buildAcIdentity(obj) {
-                // obj can have either {acTag, acLocation, acSerial, acModel}
-                // or {tag, loc, serial, model}
                 const tag    = normalizeText(obj.acTag    || obj.tag    || '');
                 const loc    = normalizeText(obj.acLocation || obj.loc  || '');
                 const serial = normalizeText(obj.acSerial || obj.serial || '');
@@ -561,10 +554,6 @@
                     return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
                 }
                 return s;
-            }
-
-            function buildRecordKeyFromData(data) {
-                return buildAcIdentity(data) + '||' + normalizeDateForCompare(data.workDate);
             }
 
             async function checkRemoteDuplicate(acIdentity, workDate) {
@@ -600,8 +589,6 @@
                     const res = await fetch(url, { method: 'GET', cache: 'no-store' });
                     const json = await res.json();
                     if (json.records && Array.isArray(json.records)) {
-                        // Track ALL records globally (any technician) so an AC cannot
-                        // be PM'd twice in one day by anyone
                         json.records.forEach(r => {
                             const identity = buildAcIdentity({
                                 acTag: r.acTag,
@@ -900,9 +887,6 @@
                 };
             }
 
-            // ============================================================
-            // ⭐ SIGN-OFF — Duplicate check using UNIQUE IDENTITY
-            // ============================================================
             document.getElementById('signOffBtn').addEventListener('click', async function() {
                 const data = collectFormData();
                 if (!data) { showStatus('⚠️ Please add an AC unit before signing off.', false); return; }
@@ -912,7 +896,6 @@
                 const orig = this.innerHTML;
                 this.disabled = true;
 
-                // 1. LOCAL CHECK (fast)
                 this.innerHTML = '<span>⏳</span> Checking local...';
                 if (USER_PM_KEYS.has(normKey)) {
                     showStatus('⚠️ This AC has already been PM\'d on this date (local cache).', false);
@@ -939,7 +922,6 @@
                     return;
                 }
 
-                // 2. CLOUD CHECK (fresh fetch from Google Sheet)
                 this.innerHTML = '<span>⏳</span> Checking Google Sheet...';
                 const remote = await checkRemoteDuplicate(acIdentity, data.workDate);
 
@@ -973,7 +955,6 @@
                     }
                 }
 
-                // 3. SAVE
                 this.innerHTML = '<span>⏳</span> Sending...';
                 const success = await queueAndSend(data);
                 this.disabled = false;
@@ -998,7 +979,6 @@
 
             document.getElementById('resetBtn').addEventListener('click', () => resetForm(true));
 
-            // ==================== PDF ====================
             function formatDateForPDF(dateVal) {
                 if (!dateVal) return '—';
                 if (Array.isArray(dateVal)) dateVal = dateVal[0];
