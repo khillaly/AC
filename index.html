@@ -1500,7 +1500,7 @@
                     drawSection('Drainage, Controls & Performance', 'Performance', data.drainageRating, drainageItems, data.drainageRemark);
 
                     // ==================== SIGN-OFF BLOCKS (Technician + Dept In-Charge) ====================
-                    const boxHeight = 35;
+                    const boxHeight = 46;
                     if (y > pageHeight - 60) {
                         addFooter();
                         doc.addPage();
@@ -1512,53 +1512,91 @@
                     const leftBoxX = margin;
                     const rightBoxX = margin + halfWidth + gap;
 
-                    // ---- LEFT BOX: Technician (with auto signature) ----
-                    doc.setFillColor(240, 246, 252);
-                    doc.setDrawColor(207, 224, 238);
-                    doc.setLineWidth(0.3);
+                                       // ---- LEFT: TECHNICIAN (visual sig + cert info) ----
+                    doc.setFillColor(240, 246, 252); doc.setDrawColor(207, 224, 238); doc.setLineWidth(0.3);
                     doc.roundedRect(leftBoxX, y, halfWidth, boxHeight, 2, 2, 'FD');
 
-                    doc.setFontSize(7);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(91, 123, 150);
+                    doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(91, 123, 150);
                     doc.text('PERFORMED BY (TECHNICIAN)', leftBoxX + 3, y + 4.5);
 
-                    doc.setFontSize(10);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(10, 42, 63);
-                    doc.text(data.technician, leftBoxX + 3, y + 11);
+                    // Left column: name + dates
+                    doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 42, 63);
+                    doc.text(sanitizeForPDF(data.technician), leftBoxX + 3, y + 11);
 
-                    doc.setFontSize(7.5);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(58, 101, 131);
+                    doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(58, 101, 131);
                     doc.text(`Date: ${formatDateForPDF(data.workDate)}`, leftBoxX + 3, y + 15.5);
                     doc.text(`Next PM: ${nextPmForPDF(data.workDate)}`, leftBoxX + 3, y + 19.5);
-                    // ⭐ Show PKCS#7 digital signature info (from .pfx)
-                                      if (data.signatureSubject) {
-                        const cleanSubject = sanitizeForPDF(data.signatureSubject);
-                        const cleanIssuer  = sanitizeForPDF(data.signatureIssuer || '—');
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(9);
-                        doc.setTextColor(27, 107, 63);
-                        doc.text(cleanSubject, leftBoxX + 3, y + 22.5);
 
-                        doc.setFont('helvetica', 'normal');
-                        doc.setFontSize(6);
-                        doc.setTextColor(58, 101, 131);
-                        doc.text('Issuer: ' + cleanIssuer, leftBoxX + 3, y + 25.5);
-                        if (data.signatureSignedAt) {
-                            doc.text('Signed: ' + new Date(data.signatureSignedAt).toLocaleString('en-GB'), leftBoxX + 3, y + 28.5);
-                        }
+                    // ⭐ RIGHT SIDE: Visual signature image — always draw it
+                    // Reserve the right half of the box: from x = leftBoxX + halfWidth/2 to leftBoxX + halfWidth - 3
+                    const sigAreaX = leftBoxX + (halfWidth / 2) + 2;
+                    const sigAreaW = (halfWidth / 2) - 5;
+                    const sigAreaY = y + 7;
+                    const sigAreaH = 16;
+
+                    // Draw a light "signature" frame so it's clear where the sig goes
+                    doc.setDrawColor(200, 215, 230); doc.setLineWidth(0.2);
+                    doc.roundedRect(sigAreaX, sigAreaY, sigAreaW, sigAreaH, 1, 1, 'S');
+
+                    const techVisualSig = allSignatures[data.technician] || '';
+                    let drawn = false;
+                    if (techVisualSig) {
+                        try {
+                            const techDims = sigDimensions[data.technician];
+                            let sigW, sigH;
+                            if (techDims && techDims.width > 0 && techDims.height > 0) {
+                                // Preserve aspect ratio
+                                const aspect = techDims.width / techDims.height;
+                                sigW = sigAreaW - 4;
+                                sigH = sigW / aspect;
+                                if (sigH > sigAreaH - 3) {
+                                    sigH = sigAreaH - 3;
+                                    sigW = sigH * aspect;
+                                }
+                            } else {
+                                // Fallback: use fixed size if we couldn't measure
+                                sigW = sigAreaW - 6;
+                                sigH = sigAreaH - 6;
+                            }
+                            const sigX = sigAreaX + (sigAreaW - sigW) / 2;
+                            const sigY = sigAreaY + (sigAreaH - sigH) / 2;
+                            doc.addImage(techVisualSig, 'PNG', sigX, sigY, sigW, sigH);
+                            drawn = true;
+                        } catch (e) { console.warn('Could not render visual signature:', e); }
                     }
-                   
 
-                    doc.setDrawColor(150, 180, 200);
-                    doc.setLineWidth(0.3);
-                    doc.line(leftBoxX + 3, y + 30, leftBoxX + halfWidth - 3, y + 30);
-                    doc.setFontSize(6.5);
-                    doc.setFont('helvetica', 'italic');
-                    doc.setTextColor(91, 123, 150);
-                    doc.text(data.signatureSubject ? 'Digitally signed (PKCS#7 — verify with certificate)' : 'Signature', leftBoxX + 3, y + 33);
+                    // If no signature was drawn, show a placeholder label
+                    if (!drawn) {
+                        doc.setFontSize(6); doc.setFont('helvetica', 'italic');
+                        doc.setTextColor(156, 185, 208);
+                        doc.text('(visual signature)', sigAreaX + sigAreaW / 2, sigAreaY + sigAreaH / 2 + 1, { align: 'center' });
+                    }
+
+                    // Divider line above digital signature info
+                    doc.setDrawColor(200, 215, 230); doc.setLineWidth(0.2);
+                    doc.line(leftBoxX + 3, y + 25, leftBoxX + halfWidth - 3, y + 25);
+
+                    // Digital signature info below the divider
+                    if (data.signatureSubject) {
+                        doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(27, 107, 63);
+                        doc.text('Digitally signed (PKCS#7)', leftBoxX + 3, y + 28.5);
+
+                        doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(58, 101, 131);
+                        doc.text('Subject: ' + sanitizeForPDF(data.signatureSubject), leftBoxX + 3, y + 31.5);
+                        doc.text('Issuer: ' + sanitizeForPDF(data.signatureIssuer || '—'), leftBoxX + 3, y + 34);
+                        if (data.signatureSignedAt) {
+                            doc.text('Signed: ' + new Date(data.signatureSignedAt).toLocaleString('en-GB'), leftBoxX + 3, y + 36.5);
+                        }
+                    } else {
+                        doc.setFont('helvetica', 'italic'); doc.setFontSize(6.5); doc.setTextColor(91, 123, 150);
+                        doc.text('No digital signature — visual only', leftBoxX + 3, y + 30);
+                    }
+
+                    // Bottom signature line
+                    doc.setDrawColor(150, 180, 200); doc.setLineWidth(0.3);
+                    doc.line(leftBoxX + 3, y + 39, leftBoxX + halfWidth - 3, y + 39);
+                    doc.setFontSize(6.5); doc.setFont('helvetica', 'italic'); doc.setTextColor(91, 123, 150);
+                    doc.text(data.signatureSubject ? 'Signature + PKCS#7 digital seal' : 'Signature', leftBoxX + 3, y + 42);
 
                     // ---- RIGHT BOX: Department In-Charge ----
                     doc.setFillColor(255, 251, 235);
