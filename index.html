@@ -413,32 +413,40 @@
         </div>
     </div>
 
-        <!-- SIGNATURE MODAL (PFX / P12) -->
+            <!-- COMBINED SIGNATURE + CERTIFICATE MODAL -->
     <div class="modal-overlay" id="signatureModal">
         <div class="modal-box">
-            <h2>🖊️ Digital Signature (.pfx / .p12)</h2>
-            <p>Upload your certificate file and enter its password. It will sign every report you create this session. The private key stays in this browser tab only — it is never saved to disk.</p>
+            <h2>🖊️ Signature &amp; Digital Certificate</h2>
+            <p>Load both for full authenticity — the visual signature for readers, the .pfx certificate for cryptographic proof. The private key stays only in this browser tab.</p>
 
+            <h3 style="font-size:0.95rem; color:#12405e; margin:16px 0 8px; padding-bottom:4px; border-bottom:1px solid #d4e3ef;">✍️ Visual Signature (handwritten PNG)</h3>
             <div class="sig-preview" id="sigPreview">
+                <span class="placeholder">No visual signature uploaded</span>
+            </div>
+            <div class="field-group">
+                <label for="sigFileInput">Choose signature image (PNG, transparent background recommended)</label>
+                <input type="file" id="sigFileInput" accept="image/png, image/jpeg">
+            </div>
+
+            <h3 style="font-size:0.95rem; color:#12405e; margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid #d4e3ef;">🔐 Digital Certificate (.pfx / .p12)</h3>
+            <div class="sig-preview" id="certPreview">
                 <span class="placeholder">No certificate loaded</span>
             </div>
-
             <div class="field-group">
-                <label for="sigFileInput">Your .pfx / .p12 file</label>
-                <input type="file" id="sigFileInput" accept=".pfx,.p12,application/x-pkcs12">
+                <label for="pfxFileInput">Your .pfx / .p12 file</label>
+                <input type="file" id="pfxFileInput" accept=".pfx,.p12,application/x-pkcs12">
             </div>
-
             <div class="field-group">
-                <label for="sigPasswordInput">PFX password</label>
-                <input type="password" id="sigPasswordInput" placeholder="Enter PFX password">
+                <label for="pfxPasswordInput">PFX password</label>
+                <input type="password" id="pfxPasswordInput" placeholder="Enter PFX password">
             </div>
 
             <div id="sigError" style="color:#b33a3a; font-size:0.85rem; min-height:18px; margin-bottom:8px;"></div>
 
             <div class="modal-actions">
                 <button class="btn-cancel" id="sigCancel">Close</button>
-                <button class="btn-cancel" id="sigRemove" style="background:#ffe6e6; color:#b33a3a;">🗑️ Forget</button>
-                <button class="btn-go" id="sigSave">🔓 Load &amp; Use</button>
+                <button class="btn-cancel" id="sigRemove" style="background:#ffe6e6; color:#b33a3a;">🗑️ Forget All</button>
+                <button class="btn-go" id="sigSave">💾 Save &amp; Use</button>
             </div>
         </div>
     </div>
@@ -778,67 +786,66 @@
             });
 
                      const technicianSelect = document.getElementById('technicianSelect');
-            function updateTechnicianDisplay() {
+                 function updateTechnicianDisplay() {
                 if (!technicianSelect) return;
                 const name = technicianSelect.value;
                 document.getElementById('signoffTechName').textContent = name;
                 const pad = document.getElementById('signaturePad');
-                if (isCertLoaded()) {
-                    pad.innerHTML = `<span style="font-size:0.9rem; color:#1b6b3f;">🔐 ${CERT_STATE.subject}</span>`;
+                const visualSig = getSignatureFor(name);
+                const parts = [];
+                if (visualSig) parts.push(`<img src="${visualSig}" alt="signature" style="max-height:40px;">`);
+                if (isCertLoaded()) parts.push(`<span style="color:#1b6b3f; font-size:0.8rem;">🔐 PKCS#7 ready</span>`);
+                if (parts.length) {
+                    pad.innerHTML = `<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">${parts.join('')}</div>`;
                 } else {
                     const initials = name ? name.split(' ').map(p => p[0]).join('') + '.' : '—';
                     pad.textContent = initials;
                 }
             }
 
-                       // ==================== DIGITAL SIGNATURE (.PFX / .P12) ====================
+                                  // ==================== COMBINED SIGNATURE + CERTIFICATE ====================
             const signatureModal = document.getElementById('signatureModal');
             const sigFileInput = document.getElementById('sigFileInput');
-            const sigPasswordInput = document.getElementById('sigPasswordInput');
+            const pfxFileInput = document.getElementById('pfxFileInput');
+            const pfxPasswordInput = document.getElementById('pfxPasswordInput');
             const sigPreview = document.getElementById('sigPreview');
+            const certPreview = document.getElementById('certPreview');
             const sigError = document.getElementById('sigError');
 
             const CERT_STATE = {
-                certificate: null,
-                privateKey:  null,
-                subject:     '',
-                issuer:      '',
-                serial:      '',
-                validFrom:   null,
-                validTo:     null,
-                fingerprint: ''
+                certificate: null, privateKey: null,
+                subject: '', issuer: '', serial: '',
+                validFrom: null, validTo: null, fingerprint: ''
             };
-
             function isCertLoaded() { return !!(CERT_STATE.certificate && CERT_STATE.privateKey); }
-
             function clearCert() {
-                CERT_STATE.certificate = null;
-                CERT_STATE.privateKey  = null;
-                CERT_STATE.subject     = '';
-                CERT_STATE.issuer      = '';
-                CERT_STATE.serial      = '';
-                CERT_STATE.validFrom   = null;
-                CERT_STATE.validTo     = null;
-                CERT_STATE.fingerprint = '';
+                CERT_STATE.certificate = null; CERT_STATE.privateKey = null;
+                CERT_STATE.subject = ''; CERT_STATE.issuer = ''; CERT_STATE.serial = '';
+                CERT_STATE.validFrom = null; CERT_STATE.validTo = null; CERT_STATE.fingerprint = '';
+            }
+
+            let pendingVisualSig = null;
+            let pendingCert = null;
+
+            function renderVisualPreview() {
+                if (pendingVisualSig) sigPreview.innerHTML = `<img src="${pendingVisualSig}" alt="signature">`;
+                else sigPreview.innerHTML = '<span class="placeholder">No visual signature uploaded</span>';
             }
 
             function renderCertPreview() {
-                if (!isCertLoaded()) {
-                    sigPreview.innerHTML = '<span class="placeholder">No certificate loaded</span>';
+                if (!pendingCert) {
+                    certPreview.innerHTML = '<span class="placeholder">No certificate loaded</span>';
                     return;
                 }
-                const vf = CERT_STATE.validFrom ? CERT_STATE.validFrom.toLocaleDateString('en-GB') : '—';
-                const vt = CERT_STATE.validTo   ? CERT_STATE.validTo.toLocaleDateString('en-GB')   : '—';
-                              sigPreview.innerHTML = `
-                    <div style="text-align:left; font-size:0.82rem; line-height:1.55;">
-                        <div style="font-weight:700; color:#1b6b3f; margin-bottom:6px;">✅ Certificate loaded — will sign every report</div>
-                        <div><strong>Signed by:</strong> ${sanitizeForPDF(CERT_STATE.subject)}</div>
-                        <div><strong>Issuer:</strong> ${sanitizeForPDF(CERT_STATE.issuer)}</div>
-                        <div><strong>Serial:</strong> ${CERT_STATE.serial}</div>
+                const vf = pendingCert.validFrom ? pendingCert.validFrom.toLocaleDateString('en-GB') : '—';
+                const vt = pendingCert.validTo   ? pendingCert.validTo.toLocaleDateString('en-GB')   : '—';
+                certPreview.innerHTML = `
+                    <div style="text-align:left; font-size:0.82rem; line-height:1.5;">
+                        <div style="font-weight:700; color:#1b6b3f; margin-bottom:4px;">✅ Certificate ready</div>
+                        <div><strong>Signed by:</strong> ${sanitizeForPDF(pendingCert.subject)}</div>
+                        <div><strong>Issuer:</strong> ${sanitizeForPDF(pendingCert.issuer)}</div>
+                        <div><strong>Serial:</strong> ${pendingCert.serial}</div>
                         <div><strong>Valid:</strong> ${vf} → ${vt}</div>
-                        <div style="font-family:monospace; font-size:0.7rem; margin-top:6px; word-break:break-all; color:#5b7b96;">
-                            <strong>SHA-256:</strong> ${CERT_STATE.fingerprint}
-                        </div>
                     </div>`;
             }
 
@@ -847,85 +854,118 @@
                 if (!name) { alert('Please log in first.'); return; }
                 sigError.textContent = '';
                 sigFileInput.value = '';
-                sigPasswordInput.value = '';
+                pfxFileInput.value = '';
+                pfxPasswordInput.value = '';
+                pendingVisualSig = getSignatureFor(name) || null;
+                pendingCert = isCertLoaded() ? { ...CERT_STATE } : null;
+                renderVisualPreview();
                 renderCertPreview();
                 signatureModal.classList.add('show');
             });
 
             document.getElementById('sigCancel').addEventListener('click', () => {
-                sigPasswordInput.value = '';
+                pfxPasswordInput.value = '';
                 signatureModal.classList.remove('show');
             });
 
             document.getElementById('sigRemove').addEventListener('click', () => {
-                if (!isCertLoaded()) return;
-                if (!confirm('Forget the loaded certificate? You will need to reload the .pfx to sign new reports.')) return;
+                if (!confirm('Forget the current signature and certificate?')) return;
+                const name = technicianSelect.value;
+                saveSignatureFor(name, '');
                 clearCert();
+                pendingVisualSig = null;
+                pendingCert = null;
+                renderVisualPreview();
                 renderCertPreview();
                 updateTechnicianDisplay();
-                showStatus('🗑️ Certificate cleared from memory.', true);
+                showStatus('🗑️ Signature and certificate cleared.', true);
             });
 
+            // PNG file change → preview it
+            sigFileInput.addEventListener('change', function() {
+                const file = this.files && this.files[0];
+                if (!file) return;
+                if (file.size > 500 * 1024) { alert('Image too large — please compress to under 500 KB.'); this.value = ''; return; }
+                const reader = new FileReader();
+                reader.onload = (e) => { pendingVisualSig = e.target.result; renderVisualPreview(); };
+                reader.readAsDataURL(file);
+            });
+
+            // Save & Use — parses PFX if provided, saves both
             document.getElementById('sigSave').addEventListener('click', async () => {
                 sigError.textContent = '';
-                if (!sigFileInput.files || !sigFileInput.files[0]) { sigError.textContent = '⚠️ Please choose your .pfx / .p12 file.'; return; }
-                const password = sigPasswordInput.value;
-                if (!password) { sigError.textContent = '⚠️ Please enter the PFX password.'; return; }
-                if (typeof forge === 'undefined') { sigError.textContent = '⚠️ Crypto library not loaded. Check your internet connection.'; return; }
+                const name = technicianSelect.value;
+                if (!name) { sigError.textContent = '⚠️ Please log in first.'; return; }
 
-                try {
-                    const buf = await sigFileInput.files[0].arrayBuffer();
-                    let binary = '';
-                    const bytes = new Uint8Array(buf);
-                    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+                // Parse PFX if a file was selected
+                if (pfxFileInput.files && pfxFileInput.files[0]) {
+                    const password = pfxPasswordInput.value;
+                    if (!password) { sigError.textContent = '⚠️ Please enter the PFX password.'; return; }
+                    if (typeof forge === 'undefined') { sigError.textContent = '⚠️ Crypto library not loaded.'; return; }
 
-                    const asn1 = forge.asn1.fromDer(binary);
-                    const p12  = forge.pkcs12.pkcs12FromAsn1(asn1, password);
+                    try {
+                        const buf = await pfxFileInput.files[0].arrayBuffer();
+                        let binary = '';
+                        const bytes = new Uint8Array(buf);
+                        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
 
-                    const certBags = p12.getBags({ bagType: forge.pki.oids.certBag });
-                    const certBag  = certBags[forge.pki.oids.certBag] && certBags[forge.pki.oids.certBag][0];
-                    if (!certBag || !certBag.cert) { sigError.textContent = '⚠️ No certificate found in the file.'; return; }
-                    const certificate = certBag.cert;
+                        const asn1 = forge.asn1.fromDer(binary);
+                        const p12  = forge.pkcs12.pkcs12FromAsn1(asn1, password);
 
-                    const keyBags = p12.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
-                    let keyBag = keyBags[forge.pki.oids.pkcs8ShroudedKeyBag] && keyBags[forge.pki.oids.pkcs8ShroudedKeyBag][0];
-                    if (!keyBag) {
-                        const plainBags = p12.getBags({ bagType: forge.pki.oids.keyBag });
-                        keyBag = plainBags[forge.pki.oids.keyBag] && plainBags[forge.pki.oids.keyBag][0];
+                        const certBags = p12.getBags({ bagType: forge.pki.oids.certBag });
+                        const certBag  = certBags[forge.pki.oids.certBag] && certBags[forge.pki.oids.certBag][0];
+                        if (!certBag || !certBag.cert) { sigError.textContent = '⚠️ No certificate found in the PFX.'; return; }
+                        const certificate = certBag.cert;
+
+                        const keyBags = p12.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
+                        let keyBag = keyBags[forge.pki.oids.pkcs8ShroudedKeyBag] && keyBags[forge.pki.oids.pkcs8ShroudedKeyBag][0];
+                        if (!keyBag) {
+                            const plainBags = p12.getBags({ bagType: forge.pki.oids.keyBag });
+                            keyBag = plainBags[forge.pki.oids.keyBag] && plainBags[forge.pki.oids.keyBag][0];
+                        }
+                        if (!keyBag || !keyBag.key) { sigError.textContent = '⚠️ No private key found in the PFX.'; return; }
+
+                        const getField = (obj, nm) => { try { const f = obj.getField(nm); return f ? f.value : ''; } catch (e) { return ''; } };
+                        const derBytes = forge.asn1.toDer(forge.pki.certificateToAsn1(certificate)).getBytes();
+                        const md = forge.md.sha256.create(); md.update(derBytes);
+
+                        pendingCert = {
+                            certificate,
+                            privateKey: keyBag.key,
+                            subject: sanitizeForPDF(getField(certificate.subject, 'CN') || getField(certificate.subject, 'O') || '(unknown)'),
+                            issuer:  sanitizeForPDF(getField(certificate.issuer, 'CN') || '(unknown)'),
+                            serial: certificate.serialNumber || '',
+                            validFrom: certificate.validity.notBefore,
+                            validTo: certificate.validity.notAfter,
+                            fingerprint: md.digest().toHex().match(/.{1,2}/g).join(':').toUpperCase()
+                        };
+                        renderCertPreview();
+                    } catch (e) {
+                        console.error(e);
+                        sigError.textContent = '❌ ' + (e.message || 'Could not read the PFX. Check the password.');
+                        return;
                     }
-                    if (!keyBag || !keyBag.key) { sigError.textContent = '⚠️ No private key found in the file.'; return; }
-
-                    const getField = (obj, name) => { try { const f = obj.getField(name); return f ? f.value : ''; } catch (e) { return ''; } };
-                    CERT_STATE.certificate = certificate;
-                    CERT_STATE.privateKey  = keyBag.key;
-                                      CERT_STATE.subject     = sanitizeForPDF(getField(certificate.subject, 'CN') || getField(certificate.subject, 'O') || '(unknown)');
-                    CERT_STATE.issuer      = sanitizeForPDF(getField(certificate.issuer, 'CN')  || '(unknown)');
-                    CERT_STATE.serial      = certificate.serialNumber || '';
-                    CERT_STATE.validFrom   = certificate.validity.notBefore;
-                    CERT_STATE.validTo     = certificate.validity.notAfter;
-
-                    const derBytes = forge.asn1.toDer(forge.pki.certificateToAsn1(certificate)).getBytes();
-                    const md = forge.md.sha256.create(); md.update(derBytes);
-                    CERT_STATE.fingerprint = md.digest().toHex().match(/.{1,2}/g).join(':').toUpperCase();
-
-                    const now = new Date();
-                    if (certificate.validity.notAfter < now) {
-                        sigError.textContent = '⚠️ Certificate EXPIRED on ' + certificate.validity.notAfter.toLocaleDateString('en-GB');
-                    } else if (certificate.validity.notBefore > now) {
-                        sigError.textContent = '⚠️ Certificate not yet valid until ' + certificate.validity.notBefore.toLocaleDateString('en-GB');
-                    }
-
-                    renderCertPreview();
-                    updateTechnicianDisplay();
-                    sigPasswordInput.value = '';
-                    if (!sigError.textContent) {
-                        showStatus('✅ Certificate loaded. It will sign every report this session.', true);
-                        signatureModal.classList.remove('show');
-                    }
-                } catch (e) {
-                    console.error(e);
-                    sigError.textContent = '❌ ' + (e.message || 'Could not read the PFX. Check the password.');
                 }
+
+                // Commit the visual signature
+                if (pendingVisualSig) saveSignatureFor(name, pendingVisualSig);
+
+                // Commit the certificate to memory
+                if (pendingCert) {
+                    CERT_STATE.certificate = pendingCert.certificate;
+                    CERT_STATE.privateKey  = pendingCert.privateKey;
+                    CERT_STATE.subject     = pendingCert.subject;
+                    CERT_STATE.issuer      = pendingCert.issuer;
+                    CERT_STATE.serial      = pendingCert.serial;
+                    CERT_STATE.validFrom   = pendingCert.validFrom;
+                    CERT_STATE.validTo     = pendingCert.validTo;
+                    CERT_STATE.fingerprint = pendingCert.fingerprint;
+                }
+
+                updateTechnicianDisplay();
+                pfxPasswordInput.value = '';
+                signatureModal.classList.remove('show');
+                showStatus('✅ Signature and certificate saved.', true);
             });
 
             // ---- PKCS#7 detached signature ----
