@@ -464,7 +464,6 @@
 
     <script>
         (function() {
-            // 🔗 REPLACE THIS WITH YOUR NEW GOOGLE APPS SCRIPT URL
             const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzq9Np0rhHJl0W9T4IhMaazb_5JHyUBfYmhWMLL2ny3HuQtRE-XkFZFcRskvHUA9Q6D/exec';
 
             const TECHNICIAN_PINS = {
@@ -503,7 +502,7 @@
             ];
 
             let AC_INVENTORY = [];
-            const USER_PM_KEYS = new Set(); // Tracks acTag_workDate to prevent duplicates
+            const USER_PM_KEYS = new Set();
 
             const CACHE_KEY_PREFIX = 'chub_ac_cache_v1_';
             function getCacheKey(techName) { return CACHE_KEY_PREFIX + (techName || 'default').replace(/\s+/g, '_'); }
@@ -801,10 +800,11 @@
                 const now = new Date();
                 const timestamp = now.toLocaleString('en-GB', { hour12: false, day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-                const getTickedItems = (prefix, max) => {
+                // ⭐ FIXED: collect only the correct range for each section
+                const getTickedItems = (startNum, endNum) => {
                     const items = [];
-                    for (let i = 1; i <= max; i++) {
-                        const cb = document.getElementById(prefix + i);
+                    for (let i = startNum; i <= endNum; i++) {
+                        const cb = document.getElementById('check' + i);
                         if (cb && cb.checked) items.push(String(i));
                     }
                     return items;
@@ -815,13 +815,13 @@
                     acBrand: ac.brand, acModel: ac.model, acSerial: ac.serial,
                     technician: technicianSelect.value, site: 'CHUB',
                     workDate: document.getElementById('workDate').value, generatedAt: timestamp,
-                    airflowItems: getTickedItems('check', 5).join('|'),
+                    airflowItems: getTickedItems(1, 5).join('|'),
                     airflowRemark: document.getElementById('remarkAirflow').value.trim() || '—',
                     airflowRating: document.querySelector('input[name="ratingAirflow"]:checked')?.value || '—',
-                    electricalItems: getTickedItems('check', 10).join('|'),
+                    electricalItems: getTickedItems(6, 10).join('|'),
                     electricalRemark: document.getElementById('remarkElectrical').value.trim() || '—',
                     electricalRating: document.querySelector('input[name="ratingElectrical"]:checked')?.value || '—',
-                    drainageItems: getTickedItems('check', 15).join('|'),
+                    drainageItems: getTickedItems(11, 15).join('|'),
                     drainageRemark: document.getElementById('remarkDrainage').value.trim() || '—',
                     drainageRating: document.querySelector('input[name="ratingDrainage"]:checked')?.value || '—'
                 };
@@ -836,7 +836,6 @@
                 this.disabled = true;
                 this.innerHTML = '<span>⏳</span> Checking...';
 
-                // 1. Check local queue and local keys
                 if (USER_PM_KEYS.has(key) || getQueue().some(item => item.acTag === data.acTag && item.workDate === data.workDate)) {
                     showStatus('⚠️ This AC has already been PM\'d on this date (local).', false);
                     alert('⚠️ Warning: This AC has already been PM\'d on this date. You cannot sign off the same AC twice.');
@@ -845,7 +844,6 @@
                     return;
                 }
 
-                // 2. Check remote (Google Sheet) for duplicates
                 this.innerHTML = '<span>⏳</span> Verifying...';
                 let remoteDuplicate = false;
                 try {
@@ -868,7 +866,6 @@
                     return;
                 }
 
-                // 3. Proceed to save
                 this.innerHTML = '<span>⏳</span> Sending...';
                 const success = await queueAndSend(data);
                 this.disabled = false;
@@ -893,10 +890,7 @@
 
             document.getElementById('resetBtn').addEventListener('click', () => resetForm(true));
 
-            // ============================================================
-            // ============ PDF GENERATION WITH JSPDF ====================
-            // ============================================================
-
+            // ==================== PDF ====================
             function formatDateForPDF(dateVal) {
                 if (!dateVal) return '—';
                 if (Array.isArray(dateVal)) dateVal = dateVal[0];
@@ -946,12 +940,10 @@
                         doc.setTextColor(106, 141, 176);
                         doc.text('CHUB', margin, margin + 6);
                     }
-
                     doc.setFontSize(12);
                     doc.setFont('helvetica', 'bold');
                     doc.setTextColor(18, 64, 94);
                     doc.text('AC Fleet - PM Report', margin + 30, margin + 2);
-
                     doc.setFontSize(8);
                     doc.setFont('helvetica', 'normal');
                     doc.setTextColor(58, 101, 131);
@@ -959,7 +951,6 @@
 
                     const rightX = pageWidth - margin;
                     const labelX = rightX - 45;
-
                     doc.setFontSize(8);
 
                     doc.setFont('helvetica', 'bold');
@@ -1029,10 +1020,7 @@
 
                 for (let i = 0; i < records.length; i++) {
                     const data = records[i];
-                    if (i > 0) {
-                        addFooter();
-                        doc.addPage();
-                    }
+                    if (i > 0) { addFooter(); doc.addPage(); }
 
                     let y = addHeader(data);
 
@@ -1072,7 +1060,6 @@
                             doc.addPage();
                             y = addHeader(data);
                         }
-
                         doc.setFontSize(10);
                         doc.setFont('helvetica', 'bold');
                         doc.setTextColor(18, 64, 94);
@@ -1093,20 +1080,14 @@
                         for (let j = 0; j < items.length; j += 2) {
                             const left = items[j];
                             const right = items[j + 1];
-                            
                             const leftSym = left.checked ? 'V' : 'X';
                             const leftColor = left.checked ? '#1b6b3f' : '#b33a3a';
-                            
-                            let rightSym = '';
-                            let rightColor = '#000000';
-                            let rightText = '';
-                            
+                            let rightSym = '', rightColor = '#000000', rightText = '';
                             if (right) {
                                 rightSym = right.checked ? 'V' : 'X';
                                 rightColor = right.checked ? '#1b6b3f' : '#b33a3a';
                                 rightText = right.text;
                             }
-                            
                             rows.push([
                                 { content: leftSym, styles: { textColor: leftColor, fontStyle: 'bold' } },
                                 { content: left.text, styles: { textColor: '#000000' } },
@@ -1146,14 +1127,15 @@
                         y += 3;
                     }
 
+                    // ⭐ FIXED: correctly map global check numbers to items
                     const airflowSet = new Set(safeSplit(data.airflowItems, '|'));
                     const airflowItems = airflowTexts.map((t, idx) => ({ text: t, checked: airflowSet.has(String(idx + 1)) }));
 
                     const electricalSet = new Set(safeSplit(data.electricalItems, '|'));
-                    const electricalItems = electricalTexts.map((t, idx) => ({ text: t, checked: electricalSet.has(String(idx + 1)) }));
+                    const electricalItems = electricalTexts.map((t, idx) => ({ text: t, checked: electricalSet.has(String(idx + 6)) }));
 
                     const drainageSet = new Set(safeSplit(data.drainageItems, '|'));
-                    const drainageItems = drainageTexts.map((t, idx) => ({ text: t, checked: drainageSet.has(String(idx + 1)) }));
+                    const drainageItems = drainageTexts.map((t, idx) => ({ text: t, checked: drainageSet.has(String(idx + 11)) }));
 
                     drawSection('Filters, Coils & Airflow', 'Condition', data.airflowRating, airflowItems, data.airflowRemark);
                     drawSection('Electrical & Refrigerant', 'Status', data.electricalRating, electricalItems, data.electricalRemark);
@@ -1191,7 +1173,6 @@
                     doc.text(initials, pageWidth - margin - 4, y + 14, { align: 'right' });
 
                     y += 27;
-
                     doc.setFontSize(7);
                     doc.setFont('helvetica', 'normal');
                     doc.setTextColor(91, 123, 150);
@@ -1298,9 +1279,7 @@
                     AC_INVENTORY = inv;
                     cacheInventoryLocally(name, inv);
                     renderAcSelector();
-                    
                     await fetchUserPMs(name);
-                    
                     showStatus('✅ Welcome, ' + name + '! ' + inv.length + ' AC unit(s) loaded.', true);
                 } catch (err) {
                     console.warn('Cloud load failed, using local cache:', err);
@@ -1368,7 +1347,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js?v=21')
+                navigator.serviceWorker.register('sw.js?v=22')
                     .then(reg => console.log('✅ Service Worker registered:', reg.scope))
                     .catch(err => console.warn('⚠️ Service Worker failed:', err));
             });
