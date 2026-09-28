@@ -1093,22 +1093,26 @@
                         for (let j = 0; j < items.length; j += 2) {
                             const left = items[j];
                             const right = items[j + 1];
-                            const mark = (chk) => chk ? 'V' : 'X';
-                            const markColor = (chk) => chk ? '#1b6b3f' : '#b33a3a';
                             
-                            const row = [];
+                            const leftSym = left.checked ? 'V' : 'X';
+                            const leftColor = left.checked ? '#1b6b3f' : '#b33a3a';
                             
-                            // Use HTML strings to make the symbol colored and the text black
-                            const leftContent = `<span style="color:${markColor(left.checked)}; font-weight:bold;">${mark(left.checked)}</span> <span style="color:#000000; font-weight:normal;">${left.text}</span>`;
-                            row.push({ content: leftContent, styles: { textColor: '#000000' } });
+                            let rightSym = '';
+                            let rightColor = '#000000';
+                            let rightText = '';
                             
                             if (right) {
-                                const rightContent = `<span style="color:${markColor(right.checked)}; font-weight:bold;">${mark(right.checked)}</span> <span style="color:#000000; font-weight:normal;">${right.text}</span>`;
-                                row.push({ content: rightContent, styles: { textColor: '#000000' } });
-                            } else {
-                                row.push({ content: '', styles: {} });
+                                rightSym = right.checked ? 'V' : 'X';
+                                rightColor = right.checked ? '#1b6b3f' : '#b33a3a';
+                                rightText = right.text;
                             }
-                            rows.push(row);
+                            
+                            rows.push([
+                                { content: leftSym, styles: { textColor: leftColor, fontStyle: 'bold' } },
+                                { content: left.text, styles: { textColor: '#000000' } },
+                                { content: rightSym, styles: { textColor: rightColor, fontStyle: 'bold' } },
+                                { content: rightText, styles: { textColor: '#000000' } }
+                            ]);
                         }
 
                         doc.autoTable({
@@ -1116,11 +1120,12 @@
                             margin: { left: margin, right: margin },
                             body: rows,
                             theme: 'plain',
-                            useHtml: true, // Enable HTML rendering for mixed colors
                             styles: { fontSize: 8, cellPadding: 1.5, textColor: '#000000', lineWidth: 0, overflow: 'linebreak' },
                             columnStyles: {
-                                0: { cellWidth: (contentWidth / 2) - 2 },
-                                1: { cellWidth: (contentWidth / 2) - 2 }
+                                0: { cellWidth: 6 },
+                                1: { cellWidth: (contentWidth / 2) - 6 },
+                                2: { cellWidth: 6 },
+                                3: { cellWidth: (contentWidth / 2) - 6 }
                             }
                         });
                         y = doc.lastAutoTable.finalY + 3;
@@ -1363,7 +1368,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js?v=20')
+                navigator.serviceWorker.register('sw.js?v=21')
                     .then(reg => console.log('✅ Service Worker registered:', reg.scope))
                     .catch(err => console.warn('⚠️ Service Worker failed:', err));
             });
