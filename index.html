@@ -88,6 +88,7 @@
         .signoff-left .tech { font-size: 1.6rem; font-weight: 700; color: #0a2a3f; line-height: 1.2; }
         .signoff-right { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
         .signature-pad { background: white; border-radius: 40px; padding: 8px 22px; border: 2px dashed #9cb9d0; display: flex; align-items: center; justify-content: center; min-width: 160px; min-height: 55px; font-family: 'Segoe UI', cursive; font-size: 1.3rem; color: #1e4a6d; font-weight: 500; letter-spacing: 1px; white-space: nowrap; }
+        .signature-pad img { max-height: 50px; max-width: 200px; object-fit: contain; }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 30, 50, 0.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
         .modal-overlay.show { display: flex; }
@@ -99,6 +100,10 @@
         .modal-box .modal-actions button { padding: 12px 24px; border-radius: 40px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; transition: 0.15s; }
         .modal-box .btn-cancel { background: #e7f0f8; color: #1e4a6d; }
         .modal-box .btn-go { background: #1e4a6d; color: white; }
+
+        .sig-preview { background: #fbfdff; border: 2px dashed #cfdfeb; border-radius: 16px; padding: 16px; text-align: center; min-height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+        .sig-preview img { max-height: 100px; max-width: 100%; object-fit: contain; }
+        .sig-preview .placeholder { color: #9cb9d0; font-size: 0.9rem; font-style: italic; }
 
         .action-buttons { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-top: 24px; justify-content: center; }
         .status-message { margin-top: 20px; padding: 14px 24px; border-radius: 40px; background: #e2f0e6; color: #1b6b3f; font-weight: 500; display: none; align-items: center; gap: 10px; }
@@ -130,7 +135,7 @@
             .subhead .sync-status { padding: 6px 12px !important; font-size: 0.8rem !important; }
             .subhead > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
             .workdate-tag { padding: 6px 14px; font-size: 0.85rem; width: 100%; justify-content: center; }
-            #logoutBtn { flex: 1; padding: 8px 12px !important; font-size: 0.8rem !important; justify-content: center; }
+            #logoutBtn, #signatureBtn { flex: 1; padding: 8px 12px !important; font-size: 0.8rem !important; justify-content: center; }
             .generator-selector { padding: 14px 14px; border-radius: 16px; gap: 12px; margin-bottom: 14px; }
             .generator-selector label { font-size: 0.9rem; margin-left: 0 !important; }
             select, input[type="date"] { padding: 12px 16px; font-size: 0.95rem; border-radius: 30px; }
@@ -239,6 +244,7 @@
                 <div class="sync-status" id="loggedInUser" style="background:#1e4a6d; color:white; border-color:#1e4a6d;">
                     <span>👤</span> <span id="loggedInUserName">—</span>
                 </div>
+                <button id="signatureBtn" class="btn-secondary" style="padding: 8px 18px; font-size: 0.85rem;">🖊️ Signature</button>
                 <button id="logoutBtn" class="btn-secondary" style="padding: 8px 18px; font-size: 0.85rem;">🚪 Logout</button>
                 <div class="workdate-tag">
                     <span>📅</span> <strong id="workDateDisplay">—</strong>
@@ -406,6 +412,29 @@
         </div>
     </div>
 
+    <!-- SIGNATURE MODAL -->
+    <div class="modal-overlay" id="signatureModal">
+        <div class="modal-box">
+            <h2>🖊️ My Digital Signature</h2>
+            <p>Upload a PNG of your signature (transparent background recommended). It will be stamped automatically on every report you sign.</p>
+
+            <div class="sig-preview" id="sigPreview">
+                <span class="placeholder">No signature uploaded yet</span>
+            </div>
+
+            <div class="field-group">
+                <label for="sigFileInput">Choose signature image (PNG / JPG)</label>
+                <input type="file" id="sigFileInput" accept="image/png, image/jpeg">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" id="sigCancel">Close</button>
+                <button class="btn-cancel" id="sigRemove" style="background:#ffe6e6; color:#b33a3a;">🗑️ Remove</button>
+                <button class="btn-go" id="sigSave">💾 Save</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ADD NEW AC MODAL -->
     <div class="modal-overlay" id="addAcModal">
         <div class="modal-box">
@@ -473,6 +502,53 @@
                 'HABARUREMA Jean Claude': '3904',
                 'GATANGANWA Raissa':      '0401'
             };
+
+            // ============================================================
+            // ⭐ HARDCODED SIGNATURES (Optional)
+            // If you want a signature to appear on ALL devices without needing
+            // to upload it manually, paste the base64 data URL here.
+            // Format: 'data:image/png;base64,iVBORw0KGgoAAAANS...'
+            // Example:
+            //   'Hillaly KUBWIMANA': 'data:image/png;base64,iVBORw0KGgo...'
+            // ============================================================
+            const DEFAULT_TECHNICIAN_SIGNATURES = {
+                // 'Hillaly KUBWIMANA': 'data:image/png;base64,PASTE_YOUR_BASE64_HERE',
+            };
+
+            const SIG_STORAGE_KEY = 'chub_technician_signatures_v1';
+
+            function loadSignatures() {
+                let stored = {};
+                try {
+                    const raw = localStorage.getItem(SIG_STORAGE_KEY);
+                    if (raw) stored = JSON.parse(raw);
+                } catch(e) { stored = {}; }
+                return { ...DEFAULT_TECHNICIAN_SIGNATURES, ...stored };
+            }
+
+            function getSignatureFor(techName) {
+                const sigs = loadSignatures();
+                return sigs[techName] || '';
+            }
+
+            function saveSignatureFor(techName, dataUrl) {
+                if (!techName) return;
+                let stored = {};
+                try {
+                    const raw = localStorage.getItem(SIG_STORAGE_KEY);
+                    if (raw) stored = JSON.parse(raw);
+                } catch(e) { stored = {}; }
+                if (dataUrl) {
+                    stored[techName] = dataUrl;
+                } else {
+                    delete stored[techName];
+                }
+                try {
+                    localStorage.setItem(SIG_STORAGE_KEY, JSON.stringify(stored));
+                } catch(e) {
+                    alert('Could not save signature. Your browser storage may be full.');
+                }
+            }
 
             const DEFAULT_LIST_OWNER = 'Hillaly KUBWIMANA';
 
@@ -736,9 +812,81 @@
                 if (!technicianSelect) return;
                 const name = technicianSelect.value;
                 document.getElementById('signoffTechName').textContent = name;
-                const initials = name ? name.split(' ').map(p => p[0]).join('') + '.' : '—';
-                document.getElementById('signaturePad').textContent = initials;
+                const sig = getSignatureFor(name);
+                const pad = document.getElementById('signaturePad');
+                if (sig) {
+                    pad.innerHTML = `<img src="${sig}" alt="signature">`;
+                } else {
+                    const initials = name ? name.split(' ').map(p => p[0]).join('') + '.' : '—';
+                    pad.textContent = initials;
+                }
             }
+
+            // ==================== SIGNATURE MODAL ====================
+            const signatureModal = document.getElementById('signatureModal');
+            const sigFileInput = document.getElementById('sigFileInput');
+            const sigPreview = document.getElementById('sigPreview');
+            let pendingSignature = null;
+
+            function openSignatureModal() {
+                const name = technicianSelect.value;
+                if (!name) { alert('Please log in first.'); return; }
+                pendingSignature = getSignatureFor(name) || null;
+                renderSigPreview();
+                signatureModal.classList.add('show');
+            }
+
+            function renderSigPreview() {
+                if (pendingSignature) {
+                    sigPreview.innerHTML = `<img src="${pendingSignature}" alt="signature">`;
+                } else {
+                    sigPreview.innerHTML = `<span class="placeholder">No signature uploaded yet</span>`;
+                }
+            }
+
+            document.getElementById('signatureBtn').addEventListener('click', openSignatureModal);
+            document.getElementById('sigCancel').addEventListener('click', () => {
+                signatureModal.classList.remove('show');
+                sigFileInput.value = '';
+                pendingSignature = null;
+            });
+            document.getElementById('sigRemove').addEventListener('click', () => {
+                if (!confirm('Remove your saved signature?')) return;
+                const name = technicianSelect.value;
+                saveSignatureFor(name, '');
+                pendingSignature = null;
+                renderSigPreview();
+                updateTechnicianDisplay();
+                showStatus('🗑️ Signature removed.', true);
+            });
+            document.getElementById('sigSave').addEventListener('click', () => {
+                const name = technicianSelect.value;
+                if (!name) return;
+                if (!pendingSignature) {
+                    alert('Please choose a signature image first.');
+                    return;
+                }
+                saveSignatureFor(name, pendingSignature);
+                updateTechnicianDisplay();
+                signatureModal.classList.remove('show');
+                sigFileInput.value = '';
+                showStatus('✅ Signature saved. It will appear on your PDF reports.', true);
+            });
+            sigFileInput.addEventListener('change', function() {
+                const file = this.files && this.files[0];
+                if (!file) return;
+                if (file.size > 500 * 1024) {
+                    alert('Please choose an image smaller than 500 KB. Compress it or resize it first.');
+                    this.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    pendingSignature = e.target.result;
+                    renderSigPreview();
+                };
+                reader.readAsDataURL(file);
+            });
 
             function setAutoWorkDate() {
                 const today = new Date();
@@ -1019,6 +1167,9 @@
                 const margin = 18;
                 const contentWidth = pageWidth - margin * 2;
 
+                // Load signatures once for the whole document
+                const allSignatures = loadSignatures();
+
                 function addHeader(data) {
                     try {
                         doc.addImage('chub-logo.png', 'PNG', margin, margin - 2, 24, 11);
@@ -1245,7 +1396,7 @@
                     const leftBoxX = margin;
                     const rightBoxX = margin + halfWidth + gap;
 
-                    // ---- LEFT BOX: Technician ----
+                    // ---- LEFT BOX: Technician (with auto signature) ----
                     doc.setFillColor(240, 246, 252);
                     doc.setDrawColor(207, 224, 238);
                     doc.setLineWidth(0.3);
@@ -1266,6 +1417,21 @@
                     doc.setTextColor(58, 101, 131);
                     doc.text(`Date: ${formatDateForPDF(data.workDate)}`, leftBoxX + 3, y + 15.5);
                     doc.text(`Next PM: ${nextPmForPDF(data.workDate)}`, leftBoxX + 3, y + 19.5);
+
+                    // ⭐ Draw signature image if available
+                    const techSignature = allSignatures[data.technician] || '';
+                    if (techSignature) {
+                        try {
+                            // Place signature above the line, centered in the box
+                            const sigW = 45;   // mm width
+                            const sigH = 11;   // mm height
+                            const sigX = leftBoxX + (halfWidth - sigW) / 2;
+                            const sigY = y + 12.5;
+                            doc.addImage(techSignature, 'PNG', sigX, sigY, sigW, sigH);
+                        } catch (e) {
+                            console.warn('Could not render signature for ' + data.technician, e);
+                        }
+                    }
 
                     doc.setDrawColor(150, 180, 200);
                     doc.setLineWidth(0.3);
@@ -1492,7 +1658,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js?v=25')
+                navigator.serviceWorker.register('sw.js?v=26')
                     .then(reg => console.log('✅ Service Worker registered:', reg.scope))
                     .catch(err => console.warn('⚠️ Service Worker failed:', err));
             });
