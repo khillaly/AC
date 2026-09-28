@@ -1157,7 +1157,15 @@
                 if (Array.isArray(val)) return val.map(String);
                 return String(val).split(sep).map(v => v.trim()).filter(Boolean);
             }
-
+// Helper: get natural dimensions of an image from a data URL
+function loadImageDimensions(dataUrl) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+    });
+}
             async function generatePDF(records) {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -1169,6 +1177,14 @@
 
                 // Load signatures once for the whole document
                 const allSignatures = loadSignatures();
+                // Preload signature dimensions so we can preserve aspect ratio
+const sigDimensions = {};
+for (const [techName, dataUrl] of Object.entries(allSignatures)) {
+    if (dataUrl) {
+        const dims = await loadImageDimensions(dataUrl);
+        if (dims) sigDimensions[techName] = dims;
+    }
+}
 
                 function addHeader(data) {
                     try {
@@ -1418,16 +1434,29 @@
                     doc.text(`Date: ${formatDateForPDF(data.workDate)}`, leftBoxX + 3, y + 15.5);
                     doc.text(`Next PM: ${nextPmForPDF(data.workDate)}`, leftBoxX + 3, y + 19.5);
 
-                    
-                 // ⭐ Draw signature image if available — right-aligned, above the
-                    // signature line, so it never overlaps name / date / Next PM text.
+                                    // ⭐ Draw signature — aspect ratio preserved, right-aligned, above the line
                     const techSignature = allSignatures[data.technician] || '';
-                    if (techSignature) {
+                    const techDims = sigDimensions[data.technician];
+                    if (techSignature && techDims && techDims.width > 0 && techDims.height > 0) {
                         try {
-                            const sigW = 42;   // mm width
-                            const sigH = 7;    // mm height
-                            const sigX = leftBoxX + halfWidth - sigW - 5; // right-aligned with padding
-                            const sigY = y + 16; // sits just above the line (y+25)
+                            // Box dimensions (technician box height is 30mm)
+                            const lineY = y + 25;        // signature line
+                            const maxW = 40;             // max mm width
+                            const maxH = 14;             // max mm height
+                            const aspect = techDims.width / techDims.height;
+
+                            // Fit within maxW × maxH while keeping aspect ratio
+                            let sigW = maxW;
+                            let sigH = sigW / aspect;
+                            if (sigH > maxH) {
+                                sigH = maxH;
+                                sigW = sigH * aspect;
+                            }
+
+                            // Right-aligned with 5 mm padding, bottom-aligned above the line
+                            const sigX = leftBoxX + halfWidth - sigW - 5;
+                            const sigY = lineY - sigH - 1;
+
                             doc.addImage(techSignature, 'PNG', sigX, sigY, sigW, sigH);
                         } catch (e) {
                             console.warn('Could not render signature for ' + data.technician, e);
