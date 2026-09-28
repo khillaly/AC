@@ -9,6 +9,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/1.3.1/forge.min.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -412,25 +413,32 @@
         </div>
     </div>
 
-    <!-- SIGNATURE MODAL -->
+        <!-- SIGNATURE MODAL (PFX / P12) -->
     <div class="modal-overlay" id="signatureModal">
         <div class="modal-box">
-            <h2>🖊️ My Digital Signature</h2>
-            <p>Upload a PNG of your signature (transparent background recommended). It will be stamped automatically on every report you sign.</p>
+            <h2>🖊️ Digital Signature (.pfx / .p12)</h2>
+            <p>Upload your certificate file and enter its password. It will sign every report you create this session. The private key stays in this browser tab only — it is never saved to disk.</p>
 
             <div class="sig-preview" id="sigPreview">
-                <span class="placeholder">No signature uploaded yet</span>
+                <span class="placeholder">No certificate loaded</span>
             </div>
 
             <div class="field-group">
-                <label for="sigFileInput">Choose signature image (PNG / JPG)</label>
-                <input type="file" id="sigFileInput" accept="image/png, image/jpeg">
+                <label for="sigFileInput">Your .pfx / .p12 file</label>
+                <input type="file" id="sigFileInput" accept=".pfx,.p12,application/x-pkcs12">
             </div>
+
+            <div class="field-group">
+                <label for="sigPasswordInput">PFX password</label>
+                <input type="password" id="sigPasswordInput" placeholder="Enter PFX password">
+            </div>
+
+            <div id="sigError" style="color:#b33a3a; font-size:0.85rem; min-height:18px; margin-bottom:8px;"></div>
 
             <div class="modal-actions">
                 <button class="btn-cancel" id="sigCancel">Close</button>
-                <button class="btn-cancel" id="sigRemove" style="background:#ffe6e6; color:#b33a3a;">🗑️ Remove</button>
-                <button class="btn-go" id="sigSave">💾 Save</button>
+                <button class="btn-cancel" id="sigRemove" style="background:#ffe6e6; color:#b33a3a;">🗑️ Forget</button>
+                <button class="btn-go" id="sigSave">🔓 Load &amp; Use</button>
             </div>
         </div>
     </div>
@@ -511,45 +519,7 @@
             // Example:
             //   'Hillaly KUBWIMANA': 'data:image/png;base64,iVBORw0KGgo...'
             // ============================================================
-            const DEFAULT_TECHNICIAN_SIGNATURES = {
-                // 'Hillaly KUBWIMANA': 'data:image/png;base64,PASTE_YOUR_BASE64_HERE',
-            };
-
-            const SIG_STORAGE_KEY = 'chub_technician_signatures_v1';
-
-            function loadSignatures() {
-                let stored = {};
-                try {
-                    const raw = localStorage.getItem(SIG_STORAGE_KEY);
-                    if (raw) stored = JSON.parse(raw);
-                } catch(e) { stored = {}; }
-                return { ...DEFAULT_TECHNICIAN_SIGNATURES, ...stored };
-            }
-
-            function getSignatureFor(techName) {
-                const sigs = loadSignatures();
-                return sigs[techName] || '';
-            }
-
-            function saveSignatureFor(techName, dataUrl) {
-                if (!techName) return;
-                let stored = {};
-                try {
-                    const raw = localStorage.getItem(SIG_STORAGE_KEY);
-                    if (raw) stored = JSON.parse(raw);
-                } catch(e) { stored = {}; }
-                if (dataUrl) {
-                    stored[techName] = dataUrl;
-                } else {
-                    delete stored[techName];
-                }
-                try {
-                    localStorage.setItem(SIG_STORAGE_KEY, JSON.stringify(stored));
-                } catch(e) {
-                    alert('Could not save signature. Your browser storage may be full.');
-                }
-            }
-
+           
             const DEFAULT_LIST_OWNER = 'Hillaly KUBWIMANA';
 
             const DEFAULT_AC_INVENTORY = [
@@ -807,86 +777,221 @@
                 }
             });
 
-            const technicianSelect = document.getElementById('technicianSelect');
+                     const technicianSelect = document.getElementById('technicianSelect');
             function updateTechnicianDisplay() {
                 if (!technicianSelect) return;
                 const name = technicianSelect.value;
                 document.getElementById('signoffTechName').textContent = name;
-                const sig = getSignatureFor(name);
                 const pad = document.getElementById('signaturePad');
-                if (sig) {
-                    pad.innerHTML = `<img src="${sig}" alt="signature">`;
+                if (isCertLoaded()) {
+                    pad.innerHTML = `<span style="font-size:0.9rem; color:#1b6b3f;">🔐 ${CERT_STATE.subject}</span>`;
                 } else {
                     const initials = name ? name.split(' ').map(p => p[0]).join('') + '.' : '—';
                     pad.textContent = initials;
                 }
             }
 
-            // ==================== SIGNATURE MODAL ====================
+                       // ==================== DIGITAL SIGNATURE (.PFX / .P12) ====================
             const signatureModal = document.getElementById('signatureModal');
             const sigFileInput = document.getElementById('sigFileInput');
+            const sigPasswordInput = document.getElementById('sigPasswordInput');
             const sigPreview = document.getElementById('sigPreview');
-            let pendingSignature = null;
+            const sigError = document.getElementById('sigError');
 
-            function openSignatureModal() {
+            const CERT_STATE = {
+                certificate: null,
+                privateKey:  null,
+                subject:     '',
+                issuer:      '',
+                serial:      '',
+                validFrom:   null,
+                validTo:     null,
+                fingerprint: ''
+            };
+
+            function isCertLoaded() { return !!(CERT_STATE.certificate && CERT_STATE.privateKey); }
+
+            function clearCert() {
+                CERT_STATE.certificate = null;
+                CERT_STATE.privateKey  = null;
+                CERT_STATE.subject     = '';
+                CERT_STATE.issuer      = '';
+                CERT_STATE.serial      = '';
+                CERT_STATE.validFrom   = null;
+                CERT_STATE.validTo     = null;
+                CERT_STATE.fingerprint = '';
+            }
+
+            function renderCertPreview() {
+                if (!isCertLoaded()) {
+                    sigPreview.innerHTML = '<span class="placeholder">No certificate loaded</span>';
+                    return;
+                }
+                const vf = CERT_STATE.validFrom ? CERT_STATE.validFrom.toLocaleDateString('en-GB') : '—';
+                const vt = CERT_STATE.validTo   ? CERT_STATE.validTo.toLocaleDateString('en-GB')   : '—';
+                sigPreview.innerHTML = `
+                    <div style="text-align:left; font-size:0.82rem; line-height:1.55;">
+                        <div style="font-weight:700; color:#1b6b3f; margin-bottom:6px;">✅ Certificate loaded — will sign every report</div>
+                        <div><strong>Signed by:</strong> ${CERT_STATE.subject}</div>
+                        <div><strong>Issuer:</strong> ${CERT_STATE.issuer}</div>
+                        <div><strong>Serial:</strong> ${CERT_STATE.serial}</div>
+                        <div><strong>Valid:</strong> ${vf} → ${vt}</div>
+                        <div style="font-family:monospace; font-size:0.7rem; margin-top:6px; word-break:break-all; color:#5b7b96;">
+                            <strong>SHA-256:</strong> ${CERT_STATE.fingerprint}
+                        </div>
+                    </div>`;
+            }
+
+            document.getElementById('signatureBtn').addEventListener('click', () => {
                 const name = technicianSelect.value;
                 if (!name) { alert('Please log in first.'); return; }
-                pendingSignature = getSignatureFor(name) || null;
-                renderSigPreview();
+                sigError.textContent = '';
+                sigFileInput.value = '';
+                sigPasswordInput.value = '';
+                renderCertPreview();
                 signatureModal.classList.add('show');
-            }
+            });
 
-            function renderSigPreview() {
-                if (pendingSignature) {
-                    sigPreview.innerHTML = `<img src="${pendingSignature}" alt="signature">`;
-                } else {
-                    sigPreview.innerHTML = `<span class="placeholder">No signature uploaded yet</span>`;
-                }
-            }
-
-            document.getElementById('signatureBtn').addEventListener('click', openSignatureModal);
             document.getElementById('sigCancel').addEventListener('click', () => {
+                sigPasswordInput.value = '';
                 signatureModal.classList.remove('show');
-                sigFileInput.value = '';
-                pendingSignature = null;
             });
+
             document.getElementById('sigRemove').addEventListener('click', () => {
-                if (!confirm('Remove your saved signature?')) return;
-                const name = technicianSelect.value;
-                saveSignatureFor(name, '');
-                pendingSignature = null;
-                renderSigPreview();
+                if (!isCertLoaded()) return;
+                if (!confirm('Forget the loaded certificate? You will need to reload the .pfx to sign new reports.')) return;
+                clearCert();
+                renderCertPreview();
                 updateTechnicianDisplay();
-                showStatus('🗑️ Signature removed.', true);
+                showStatus('🗑️ Certificate cleared from memory.', true);
             });
-            document.getElementById('sigSave').addEventListener('click', () => {
-                const name = technicianSelect.value;
-                if (!name) return;
-                if (!pendingSignature) {
-                    alert('Please choose a signature image first.');
-                    return;
+
+            document.getElementById('sigSave').addEventListener('click', async () => {
+                sigError.textContent = '';
+                if (!sigFileInput.files || !sigFileInput.files[0]) { sigError.textContent = '⚠️ Please choose your .pfx / .p12 file.'; return; }
+                const password = sigPasswordInput.value;
+                if (!password) { sigError.textContent = '⚠️ Please enter the PFX password.'; return; }
+                if (typeof forge === 'undefined') { sigError.textContent = '⚠️ Crypto library not loaded. Check your internet connection.'; return; }
+
+                try {
+                    const buf = await sigFileInput.files[0].arrayBuffer();
+                    let binary = '';
+                    const bytes = new Uint8Array(buf);
+                    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+
+                    const asn1 = forge.asn1.fromDer(binary);
+                    const p12  = forge.pkcs12.pkcs12FromAsn1(asn1, password);
+
+                    const certBags = p12.getBags({ bagType: forge.pki.oids.certBag });
+                    const certBag  = certBags[forge.pki.oids.certBag] && certBags[forge.pki.oids.certBag][0];
+                    if (!certBag || !certBag.cert) { sigError.textContent = '⚠️ No certificate found in the file.'; return; }
+                    const certificate = certBag.cert;
+
+                    const keyBags = p12.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
+                    let keyBag = keyBags[forge.pki.oids.pkcs8ShroudedKeyBag] && keyBags[forge.pki.oids.pkcs8ShroudedKeyBag][0];
+                    if (!keyBag) {
+                        const plainBags = p12.getBags({ bagType: forge.pki.oids.keyBag });
+                        keyBag = plainBags[forge.pki.oids.keyBag] && plainBags[forge.pki.oids.keyBag][0];
+                    }
+                    if (!keyBag || !keyBag.key) { sigError.textContent = '⚠️ No private key found in the file.'; return; }
+
+                    const getField = (obj, name) => { try { const f = obj.getField(name); return f ? f.value : ''; } catch (e) { return ''; } };
+                    CERT_STATE.certificate = certificate;
+                    CERT_STATE.privateKey  = keyBag.key;
+                    CERT_STATE.subject     = getField(certificate.subject, 'CN') || getField(certificate.subject, 'O') || '(unknown)';
+                    CERT_STATE.issuer      = getField(certificate.issuer, 'CN')  || '(unknown)';
+                    CERT_STATE.serial      = certificate.serialNumber || '';
+                    CERT_STATE.validFrom   = certificate.validity.notBefore;
+                    CERT_STATE.validTo     = certificate.validity.notAfter;
+
+                    const derBytes = forge.asn1.toDer(forge.pki.certificateToAsn1(certificate)).getBytes();
+                    const md = forge.md.sha256.create(); md.update(derBytes);
+                    CERT_STATE.fingerprint = md.digest().toHex().match(/.{1,2}/g).join(':').toUpperCase();
+
+                    const now = new Date();
+                    if (certificate.validity.notAfter < now) {
+                        sigError.textContent = '⚠️ Certificate EXPIRED on ' + certificate.validity.notAfter.toLocaleDateString('en-GB');
+                    } else if (certificate.validity.notBefore > now) {
+                        sigError.textContent = '⚠️ Certificate not yet valid until ' + certificate.validity.notBefore.toLocaleDateString('en-GB');
+                    }
+
+                    renderCertPreview();
+                    updateTechnicianDisplay();
+                    sigPasswordInput.value = '';
+                    if (!sigError.textContent) {
+                        showStatus('✅ Certificate loaded. It will sign every report this session.', true);
+                        signatureModal.classList.remove('show');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    sigError.textContent = '❌ ' + (e.message || 'Could not read the PFX. Check the password.');
                 }
-                saveSignatureFor(name, pendingSignature);
-                updateTechnicianDisplay();
-                signatureModal.classList.remove('show');
-                sigFileInput.value = '';
-                showStatus('✅ Signature saved. It will appear on your PDF reports.', true);
             });
-            sigFileInput.addEventListener('change', function() {
-                const file = this.files && this.files[0];
-                if (!file) return;
-                if (file.size > 500 * 1024) {
-                    alert('Please choose an image smaller than 500 KB. Compress it or resize it first.');
-                    this.value = '';
-                    return;
+
+            // ---- PKCS#7 detached signature ----
+            function signCanonical(canonicalString) {
+                if (!isCertLoaded()) return null;
+                try {
+                    const md = forge.md.sha256.create();
+                    md.update(canonicalString, 'utf8');
+                    const signature = CERT_STATE.privateKey.sign(md);
+                    return {
+                        base64: forge.util.encode64(signature),
+                        subject: CERT_STATE.subject,
+                        issuer: CERT_STATE.issuer,
+                        serial: CERT_STATE.serial,
+                        fingerprint: CERT_STATE.fingerprint,
+                        validFrom: CERT_STATE.validFrom ? CERT_STATE.validFrom.toISOString() : '',
+                        validTo:   CERT_STATE.validTo   ? CERT_STATE.validTo.toISOString()   : '',
+                        signedAt:  new Date().toISOString()
+                    };
+                } catch (e) { console.error('Signature failed:', e); return null; }
+            }
+
+            function buildCanonical(data) {
+                return [
+                    data.technician  || '',
+                    data.workDate    || '',
+                    data.acTag       || '',
+                    data.acLocation  || '',
+                    data.acDept      || '',
+                    data.acSerial    || '',
+                    data.acModel     || '',
+                    data.airflowItems    || '',
+                    data.electricalItems || '',
+                    data.drainageItems   || '',
+                    data.airflowRating    || '',
+                    data.electricalRating || '',
+                    data.drainageRating   || '',
+                    data.generatedAt  || ''
+                ].join('|');
+            }
+
+            async function computeSHA256(text) {
+                const buf = new TextEncoder().encode(text);
+                const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+                return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            async function ensureReportHash(data) {
+                if (data.reportHash && data.reportId && data.pkcs7Signature) return data;
+                const canonical = buildCanonical(data);
+                const full = await computeSHA256(canonical);
+                data.reportHash = full.toUpperCase();
+                data.reportId = `CHUB-${(data.workDate||'').replace(/-/g,'')}-${full.substring(0,8).toUpperCase()}`;
+
+                const sig = signCanonical(canonical);
+                if (sig) {
+                    data.pkcs7Signature   = sig.base64;
+                    data.signatureSubject = sig.subject;
+                    data.signatureIssuer  = sig.issuer;
+                    data.signatureSerial  = sig.serial;
+                    data.signatureFingerprint = sig.fingerprint;
+                    data.signatureValidTo = sig.validTo;
+                    data.signatureSignedAt = sig.signedAt;
                 }
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    pendingSignature = e.target.result;
-                    renderSigPreview();
-                };
-                reader.readAsDataURL(file);
-            });
+                return data;
+            }
 
             function setAutoWorkDate() {
                 const today = new Date();
@@ -1035,9 +1140,11 @@
                 };
             }
 
-            document.getElementById('signOffBtn').addEventListener('click', async function() {
+                        document.getElementById('signOffBtn').addEventListener('click', async function() {
                 const data = collectFormData();
                 if (!data) { showStatus('⚠️ Please add an AC unit before signing off.', false); return; }
+
+                await ensureReportHash(data);
 
                 const acIdentity = buildAcIdentity(data);
                 const normKey = acIdentity + '||' + normalizeDateForCompare(data.workDate);
@@ -1157,16 +1264,7 @@
                 if (Array.isArray(val)) return val.map(String);
                 return String(val).split(sep).map(v => v.trim()).filter(Boolean);
             }
-// Helper: get natural dimensions of an image from a data URL
-function loadImageDimensions(dataUrl) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
-        img.onerror = () => resolve(null);
-        img.src = dataUrl;
-    });
-}
-            async function generatePDF(records) {
+         async function generatePDF(records) {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
@@ -1176,17 +1274,8 @@ function loadImageDimensions(dataUrl) {
                 const contentWidth = pageWidth - margin * 2;
 
                 // Load signatures once for the whole document
-                const allSignatures = loadSignatures();
-                // Preload signature dimensions so we can preserve aspect ratio
-const sigDimensions = {};
-for (const [techName, dataUrl] of Object.entries(allSignatures)) {
-    if (dataUrl) {
-        const dims = await loadImageDimensions(dataUrl);
-        if (dims) sigDimensions[techName] = dims;
-    }
-}
-
-                function addHeader(data) {
+                
+                   function addHeader(data) {
                     try {
                         doc.addImage('chub-logo.png', 'PNG', margin, margin - 2, 24, 11);
                     } catch (e) {
@@ -1400,7 +1489,7 @@ for (const [techName, dataUrl] of Object.entries(allSignatures)) {
                     drawSection('Drainage, Controls & Performance', 'Performance', data.drainageRating, drainageItems, data.drainageRemark);
 
                     // ==================== SIGN-OFF BLOCKS (Technician + Dept In-Charge) ====================
-                    const boxHeight = 30;
+                    const boxHeight = 35;
                     if (y > pageHeight - 60) {
                         addFooter();
                         doc.addPage();
@@ -1433,43 +1522,29 @@ for (const [techName, dataUrl] of Object.entries(allSignatures)) {
                     doc.setTextColor(58, 101, 131);
                     doc.text(`Date: ${formatDateForPDF(data.workDate)}`, leftBoxX + 3, y + 15.5);
                     doc.text(`Next PM: ${nextPmForPDF(data.workDate)}`, leftBoxX + 3, y + 19.5);
+                    // ⭐ Show PKCS#7 digital signature info (from .pfx)
+                    if (data.signatureSubject) {
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(9);
+                        doc.setTextColor(27, 107, 63);
+                        doc.text('🔐 ' + data.signatureSubject, leftBoxX + 3, y + 22.5);
 
-                                    // ⭐ Draw signature — aspect ratio preserved, right-aligned, above the line
-                    const techSignature = allSignatures[data.technician] || '';
-                    const techDims = sigDimensions[data.technician];
-                    if (techSignature && techDims && techDims.width > 0 && techDims.height > 0) {
-                        try {
-                            // Box dimensions (technician box height is 30mm)
-                            const lineY = y + 25;        // signature line
-                            const maxW = 40;             // max mm width
-                            const maxH = 14;             // max mm height
-                            const aspect = techDims.width / techDims.height;
-
-                            // Fit within maxW × maxH while keeping aspect ratio
-                            let sigW = maxW;
-                            let sigH = sigW / aspect;
-                            if (sigH > maxH) {
-                                sigH = maxH;
-                                sigW = sigH * aspect;
-                            }
-
-                            // Right-aligned with 5 mm padding, bottom-aligned above the line
-                            const sigX = leftBoxX + halfWidth - sigW - 5;
-                            const sigY = lineY - sigH - 1;
-
-                            doc.addImage(techSignature, 'PNG', sigX, sigY, sigW, sigH);
-                        } catch (e) {
-                            console.warn('Could not render signature for ' + data.technician, e);
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(6);
+                        doc.setTextColor(58, 101, 131);
+                        doc.text('Issuer: ' + (data.signatureIssuer || '—'), leftBoxX + 3, y + 25.5);
+                        if (data.signatureSignedAt) {
+                            doc.text('Signed: ' + new Date(data.signatureSignedAt).toLocaleString('en-GB'), leftBoxX + 3, y + 28.5);
                         }
                     }
 
                     doc.setDrawColor(150, 180, 200);
                     doc.setLineWidth(0.3);
-                    doc.line(leftBoxX + 3, y + 25, leftBoxX + halfWidth - 3, y + 25);
+                    doc.line(leftBoxX + 3, y + 30, leftBoxX + halfWidth - 3, y + 30);
                     doc.setFontSize(6.5);
                     doc.setFont('helvetica', 'italic');
                     doc.setTextColor(91, 123, 150);
-                    doc.text('Signature', leftBoxX + 3, y + 28.5);
+                    doc.text(data.signatureSubject ? 'Digitally signed (PKCS#7 — verify with certificate)' : 'Signature', leftBoxX + 3, y + 33);
 
                     // ---- RIGHT BOX: Department In-Charge ----
                     doc.setFillColor(255, 251, 235);
@@ -1511,9 +1586,11 @@ for (const [techName, dataUrl] of Object.entries(allSignatures)) {
                 doc.save('CHUB_AC_PM_Report.pdf');
             }
 
-            document.getElementById('pdfBtn').addEventListener('click', async function() {
+                      document.getElementById('pdfBtn').addEventListener('click', async function() {
                 const data = collectFormData();
                 if (!data) { showStatus('⚠️ Please add an AC unit first.', false); return; }
+
+                await ensureReportHash(data);
 
                 const acIdentity = buildAcIdentity(data);
                 const normKey = acIdentity + '||' + normalizeDateForCompare(data.workDate);
@@ -1633,6 +1710,7 @@ for (const [techName, dataUrl] of Object.entries(allSignatures)) {
             }
 
             function lockApp() {
+                clearCert();
                 clearSession();
                 AC_INVENTORY = [];
                 renderAcSelector();
