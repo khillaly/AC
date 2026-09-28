@@ -42,6 +42,7 @@
         .generator-banner .gen-title { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.3px; line-height: 1.2; }
         .generator-banner .gen-sub { font-size: 0.92rem; color: #cbe4f7; margin-top: 4px; letter-spacing: 0.3px; font-weight: 500; }
         .generator-banner .gen-badge { background: rgba(255,255,255,0.2); color: white; padding: 6px 16px; border-radius: 40px; font-size: 0.78rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; z-index: 2; }
+        .generator-banner .gen-nextpm { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.16); color: #eaf6ff; padding: 6px 14px; border-radius: 40px; font-size: 0.78rem; font-weight: 600; margin-top: 8px; z-index: 2; position: relative; border: 1px solid rgba(255,255,255,0.25); }
 
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px; }
         .grid-3-wide { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
@@ -156,6 +157,7 @@
             .generator-banner .gen-title { font-size: 1rem; }
             .generator-banner .gen-sub { font-size: 0.78rem; }
             .generator-banner .gen-badge { font-size: 0.65rem; padding: 4px 12px; }
+            .generator-banner .gen-nextpm { font-size: 0.72rem; padding: 5px 12px; margin-top: 6px; }
 
             /* Grids */
             .grid-3 { grid-template-columns: 1fr; gap: 14px; margin-bottom: 18px; }
@@ -301,6 +303,7 @@
             <div class="gen-text">
                 <div class="gen-title" id="acTitle">Select an AC Unit</div>
                 <div class="gen-sub" id="acSub">Location · Brand · Model · Serial</div>
+                <div class="gen-nextpm" id="acNextPm">📅 Next PM due: —</div>
             </div>
             <div class="gen-badge">Active</div>
         </div>
@@ -387,7 +390,7 @@
             <div class="signoff-left">
                 <span class="label">✅ SIGN-OFF · AC PM completed by</span>
                 <span class="tech" id="signoffTechName">—</span>
-                <span style="font-size: 0.9rem; color: #3a6583;">Site: CHUB · Work date: <strong id="signoffWorkDate">—</strong></span>
+                <span style="font-size: 0.9rem; color: #3a6583;">Site: CHUB · Work date: <strong id="signoffWorkDate">—</strong> · Next PM: <strong id="signoffNextPm">—</strong></span>
             </div>
             <div class="signoff-right">
                 <div class="signature-pad" id="signaturePad">—</div>
@@ -596,6 +599,7 @@
             }
 
             function updateAcBanner() {
+                updateNextPmDisplay();
                 const idx = acSelect.value;
                 if (idx === '' || !AC_INVENTORY[idx]) {
                     acTitle.textContent = 'No AC Units Yet';
@@ -705,6 +709,46 @@
                 updateWorkDateDisplay();
             }
 
+            // ===== PM SCHEDULE (every AC is serviced every 6 months) =====
+            const PM_INTERVAL_MONTHS = 6;
+
+            function parseToDate(dateVal) {
+                if (!dateVal) return null;
+                if (Array.isArray(dateVal)) dateVal = dateVal[0];
+                if (dateVal instanceof Date) return isNaN(dateVal.getTime()) ? null : dateVal;
+                let s = String(dateVal).trim();
+                if (s.indexOf('T') !== -1) s = s.split('T')[0];
+                let d = /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(s + 'T00:00:00') : new Date(s);
+                return isNaN(d.getTime()) ? null : d;
+            }
+
+            function addMonths(dateVal, months) {
+                const d = parseToDate(dateVal);
+                if (!d) return null;
+                const day = d.getDate();
+                d.setMonth(d.getMonth() + months);
+                if (d.getDate() < day) d.setDate(0); // clamp (e.g. 31 Aug + 6m → 28/29 Feb)
+                return d;
+            }
+
+            function formatPmDate(d) {
+                if (!d) return '—';
+                return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            }
+
+            function getNextPmDateStr(dateVal) {
+                return formatPmDate(addMonths(dateVal, PM_INTERVAL_MONTHS));
+            }
+
+            function updateNextPmDisplay() {
+                const workDate = document.getElementById('workDate').value;
+                const label = getNextPmDateStr(workDate);
+                const bannerEl = document.getElementById('acNextPm');
+                if (bannerEl) bannerEl.textContent = '📅 Next PM due: ' + label + ' (' + PM_INTERVAL_MONTHS + ' months)';
+                const signoffEl = document.getElementById('signoffNextPm');
+                if (signoffEl) signoffEl.textContent = label;
+            }
+
             function updateWorkDateDisplay() {
                 const val = document.getElementById('workDate').value;
                 if (!val) return;
@@ -712,6 +756,7 @@
                 const formatted = d.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
                 document.getElementById('workDateDisplay').textContent = formatted;
                 document.getElementById('signoffWorkDate').textContent = formatted;
+                updateNextPmDisplay();
             }
 
             const QUEUE_KEY = 'chub_ac_queue';
@@ -901,6 +946,20 @@
                     }
                     return String(dateVal);
                 }
+                // ===== NEXT PM DATE (work date + 6 months) =====
+                function nextPmForPDF(dateVal) {
+                    let d;
+                    if (!dateVal) return '—';
+                    if (Array.isArray(dateVal)) dateVal = dateVal[0];
+                    if (typeof dateVal === 'string' && dateVal.includes('T')) dateVal = dateVal.split('T')[0];
+                    if (typeof dateVal === 'string' && dateVal.match(/^\d{4}-\d{2}-\d{2}$/)) d = new Date(dateVal + 'T00:00:00');
+                    else d = new Date(dateVal);
+                    if (isNaN(d.getTime())) return '—';
+                    const day = d.getDate();
+                    d.setMonth(d.getMonth() + 6);
+                    if (d.getDate() < day) d.setDate(0);
+                    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                }
                 const checkList = (ids, allItems) => {
                     const safeIds = Array.isArray(ids) ? ids.map(String) : safeSplit(ids, '|').map(String);
                     return allItems.map((item, idx) => {
@@ -920,6 +979,7 @@
                           <div><h1>❄️ AC Fleet — Preventive Maintenance Report</h1><div class="sub">Site: CHUB · Split Units · PM Checklist</div></div>
                           <div class="meta">
                             <div><strong>Work date:</strong> ${formatDateForPDF(data.workDate)}</div>
+                            <div><strong>Next PM due:</strong> ${nextPmForPDF(data.workDate)}</div>
                             <div><strong>Technician:</strong> ${data.technician}</div>
                             <div><strong>Generated:</strong> ${data.generatedAt}</div>
                           </div>
@@ -927,6 +987,10 @@
                         <div class="gen-banner">
                           <div class="gen-name">${data.acTag} — ${data.acLocation}</div>
                           <div class="gen-sub">${data.acBrand} · ${data.acModel} · SN: ${data.acSerial}</div>
+                        </div>
+                        <div class="pm-schedule">
+                          <div class="pm-chip"><span class="pm-lbl">PM performed</span><span class="pm-val">${formatDateForPDF(data.workDate)}</span></div>
+                          <div class="pm-chip next"><span class="pm-lbl">Next PM due (every 6 months)</span><span class="pm-val">${nextPmForPDF(data.workDate)}</span></div>
                         </div>
                         <div class="section-title">🌬️ Filters, Coils & Airflow</div>
                         <div class="rating-tag">Condition: ${data.airflowRating}</div>
@@ -944,7 +1008,7 @@
                           <div>
                             <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#5b7b96; font-weight:700; margin-bottom:2px;">Signed off by</div>
                             <div class="tech-name">${data.technician}</div>
-                            <div style="font-size:0.8rem; color:#3a6583;">CHUB Site · Work date: ${formatDateForPDF(data.workDate)}</div>
+                            <div style="font-size:0.8rem; color:#3a6583;">CHUB Site · Work date: ${formatDateForPDF(data.workDate)} · Next PM due: ${nextPmForPDF(data.workDate)}</div>
                           </div>
                           <div class="signature">${initials}</div>
                         </div>
@@ -965,6 +1029,12 @@ body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a2e45; background: w
 .gen-banner { background: linear-gradient(90deg, #1e4a6d 0%, #2a6b96 100%); color: white; padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; }
 .gen-banner .gen-name { font-size: 1.1rem; font-weight: 800; }
 .gen-banner .gen-sub { font-size: 0.8rem; color: #cbe4f7; margin-top: 2px; }
+.pm-schedule { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.pm-chip { flex: 1 1 180px; background: #f0f6fc; border: 1px solid #cfe0ee; border-radius: 8px; padding: 7px 12px; }
+.pm-chip.next { background: #fff8e6; border-color: #f0d99a; }
+.pm-chip .pm-lbl { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.6px; color: #5b7b96; font-weight: 700; }
+.pm-chip .pm-val { display: block; font-size: 0.95rem; font-weight: 800; color: #12405e; margin-top: 1px; }
+.pm-chip.next .pm-val { color: #8a5a00; }
 .section-title { font-size: 0.98rem; font-weight: 700; color: #12405e; margin: 12px 0 6px 0; padding-bottom: 3px; border-bottom: 2px solid #d4e3ef; }
 ul.check-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 1px 20px; margin-bottom: 4px; }
 ul.check-list li { padding: 2px 0; color: #1f3c54; font-size: 0.85rem; }
@@ -991,6 +1061,9 @@ ul.check-list li { padding: 2px 0; color: #1f3c54; font-size: 0.85rem; }
     .header .meta { font-size: 0.75rem; }
     .gen-banner { padding: 8px 12px; margin-bottom: 8px; }
     .gen-banner .gen-name { font-size: 1rem; }
+    .pm-schedule { margin-bottom: 8px; }
+    .pm-chip { padding: 5px 10px; }
+    .pm-chip .pm-val { font-size: 0.85rem; }
     .section-title { margin: 10px 0 4px 0; font-size: 0.9rem; }
     ul.check-list li { font-size: 0.8rem; padding: 1px 0; }
     .rating-tag { font-size: 0.7rem; padding: 1px 8px; margin-bottom: 4px; }
