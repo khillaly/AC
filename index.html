@@ -907,11 +907,23 @@
                     if (json.status === 'error') throw new Error(json.message);
                     if (!json.records || json.records.length === 0) { showStatus('📭 No records in the Google Sheet.', false); this.disabled = false; this.innerHTML = orig; return; }
 
-                    const myRecords = json.records.filter(r => r.technician === currentTech);
-                    if (myRecords.length === 0) { showStatus('📭 No PM history yet.', false); this.disabled = false; this.innerHTML = orig; return; }
+                    // Deduplicate logic: ensures only the latest unique PM per AC is shown if there are duplicates in the sheet.
+                    // If the Google Sheet has duplicate entries for the same AC on the same date, this filters them out.
+                    const uniqueRecords = [];
+                    const seen = new Set();
+                    for (const r of json.records) {
+                        if (r.technician !== currentTech) continue;
+                        const key = `${r.acTag}_${r.workDate}`;
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            uniqueRecords.push(r);
+                        }
+                    }
+                    
+                    if (uniqueRecords.length === 0) { showStatus('📭 No PM history yet.', false); this.disabled = false; this.innerHTML = orig; return; }
 
-                    this.innerHTML = '<span>⏳</span> Preparing ' + myRecords.length + ' PDFs...';
-                    const reportHTML = buildReportHTML(myRecords);
+                    this.innerHTML = '<span>⏳</span> Preparing ' + uniqueRecords.length + ' PDFs...';
+                    const reportHTML = buildReportHTML(uniqueRecords);
                     const iframe = document.createElement('iframe');
                     iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;';
                     document.body.appendChild(iframe);
@@ -977,7 +989,7 @@
                     <div class="report-page">
                         <table class="report-table">
                             <thead>
-                                <tr><td>
+                                <tr><td class="report-thead-td">
                                     <div class="header">
                                       <div><h1>❄️ AC Fleet — Preventive Maintenance Report</h1><div class="sub">Site: CHUB · Split Units · PM Checklist</div></div>
                                       <div class="meta">
@@ -990,7 +1002,7 @@
                                 </td></tr>
                             </thead>
                             <tbody>
-                                <tr><td>
+                                <tr><td class="report-tbody-td">
                                     <div class="gen-banner">
                                       <div class="gen-name">${data.acTag} — ${data.acLocation}</div>
                                       <div class="gen-sub">${data.acBrand} · ${data.acModel} · SN: ${data.acSerial}</div>
@@ -1035,6 +1047,14 @@
 @page { size: A4; margin: 0; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a2e45; background: white; font-size: 10pt; line-height: 1.35; }
+/* ===== REPORT TABLE & PADDING ===== */
+.report-table { width: 100%; border-collapse: collapse; }
+.report-table thead { display: table-header-group; }
+.report-table tbody { display: table-row-group; }
+.report-table th, .report-table td { padding: 0; border: none; }
+.report-thead-td { padding-top: 28mm; padding-left: 15mm; padding-right: 15mm; }
+.report-tbody-td { padding-left: 15mm; padding-right: 15mm; padding-bottom: 25mm; }
+/* ================================= */
 .header { border-bottom: 3px solid #1e4a6d; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px; }
 .header h1 { font-size: 1.25rem; color: #12405e; letter-spacing: -0.3px; }
 .header .sub { font-size: 0.85rem; color: #3a6583; margin-top: 3px; }
@@ -1068,13 +1088,8 @@ ul.check-list li { padding: 2px 0; color: #1f3c54; font-size: 0.85rem; }
     .header-img { position: fixed; top: 0; left: 0; right: 0; height: 22mm; background: white; padding: 4mm 15mm 0 15mm; z-index: 9999; border-bottom: 2px solid #6a8db0; margin-bottom: 0; }
     .footer-img { position: fixed; bottom: 0; left: 0; right: 0; height: 20mm; background: white; padding: 0 15mm 4mm 15mm; z-index: 9999; }
     .footer-bar { padding: 6px; font-size: 10px; }
-    .report-page { padding-top: 26mm; padding-bottom: 24mm; box-sizing: border-box; page-break-after: always; }
+    .report-page { page-break-after: always; }
     .report-page:last-child { page-break-after: auto; }
-    .report-table { width: 100%; border-collapse: collapse; }
-    .report-table thead { display: table-header-group; }
-    .report-table tbody { display: table-row-group; }
-    .report-table th, .report-table td { padding: 0; border: none; }
-    .report-table thead td { padding-bottom: 10px; }
     .header { margin-bottom: 8px; padding-bottom: 6px; }
     .header h1 { font-size: 1.1rem; }
     .header .meta { font-size: 0.75rem; }
