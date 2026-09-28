@@ -503,6 +503,7 @@
             ];
 
             let AC_INVENTORY = [];
+            const USER_PM_KEYS = new Set(); // Tracks acTag_workDate to prevent duplicates
 
             const CACHE_KEY_PREFIX = 'chub_ac_cache_v1_';
             function getCacheKey(techName) { return CACHE_KEY_PREFIX + (techName || 'default').replace(/\s+/g, '_'); }
@@ -524,6 +525,23 @@
                     body: JSON.stringify(payload)
                 });
                 return true;
+            }
+
+            async function fetchUserPMs(techName) {
+                USER_PM_KEYS.clear();
+                try {
+                    const res = await fetch(GOOGLE_SHEET_URL + '?type=logs', { method: 'GET' });
+                    const json = await res.json();
+                    if (json.records) {
+                        json.records.forEach(r => {
+                            if (r.technician === techName) {
+                                USER_PM_KEYS.add(`${r.acTag}_${r.workDate}`);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('Could not fetch PM logs for duplicate check:', e);
+                }
             }
 
             function showStatus(msg, isSuccess = true) {
@@ -812,13 +830,24 @@
             document.getElementById('signOffBtn').addEventListener('click', async function() {
                 const data = collectFormData();
                 if (!data) { showStatus('⚠️ Please add an AC unit before signing off.', false); return; }
+
+                const key = `${data.acTag}_${data.workDate}`;
+                if (USER_PM_KEYS.has(key) || getQueue().some(item => item.acTag === data.acTag && item.workDate === data.workDate)) {
+                    showStatus('⚠️ This AC has already been PM\'d on this date.', false);
+                    alert('⚠️ Warning: This AC has already been PM\'d on this date. You cannot sign off the same AC twice on the same day.');
+                    return;
+                }
+
                 this.disabled = true;
                 const orig = this.innerHTML;
                 this.innerHTML = '<span>⏳</span> Sending...';
                 const success = await queueAndSend(data);
                 this.disabled = false;
                 this.innerHTML = orig;
-                if (success) setTimeout(() => resetForm(false), 1500);
+                if (success) {
+                    USER_PM_KEYS.add(key);
+                    setTimeout(() => resetForm(false), 1500);
+                }
             });
 
             function resetForm(showMsg) {
@@ -864,6 +893,13 @@
                 return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
             }
 
+            // FIX: Helper to safely split data that might be an array or a string
+            function safeSplit(val, sep) {
+                if (!val) return [];
+                if (Array.isArray(val)) return val.map(String);
+                return String(val).split(sep).map(v => v.trim()).filter(Boolean);
+            }
+
             async function generatePDF(records) {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -874,7 +910,6 @@
                 const contentWidth = pageWidth - margin * 2;
 
                 function addHeader(data) {
-                    // Try to add logo, fallback to text
                     try {
                         doc.addImage('chub-logo.png', 'PNG', margin, margin - 2, 24, 11);
                     } catch (e) {
@@ -884,22 +919,20 @@
                         doc.text('CHUB', margin, margin + 6);
                     }
 
-                    // Title block
-                    doc.setFontSize(13);
+                    doc.setFontSize(12);
                     doc.setFont('helvetica', 'bold');
                     doc.setTextColor(18, 64, 94);
-                    doc.text('AC Fleet - Preventive Maintenance Report', margin + 30, margin + 2);
+                    doc.text('AC Fleet - PM Report', margin + 30, margin + 2);
 
-                    doc.setFontSize(8.5);
+                    doc.setFontSize(8);
                     doc.setFont('helvetica', 'normal');
                     doc.setTextColor(58, 101, 131);
-                    doc.text('Site: CHUB  |  Split Units  |  PM Checklist', margin + 30, margin + 7);
+                    doc.text('Site: CHUB  |  Split Units', margin + 30, margin + 7);
 
-                    // Right side metadata
                     const rightX = pageWidth - margin;
-                    const labelX = rightX - 55;
+                    const labelX = rightX - 45;
 
-                    doc.setFontSize(9);
+                    doc.setFontSize(8);
 
                     doc.setFont('helvetica', 'bold');
                     doc.setTextColor(91, 123, 150);
@@ -910,24 +943,27 @@
 
                     doc.setFont('helvetica', 'bold');
                     doc.setTextColor(91, 123, 150);
-                    doc.text('Next PM due:', labelX, margin + 6);
+                    doc.text('Next PM due:', labelX, margin + 5.5);
                     doc.setFont('helvetica', 'normal');
                     doc.setTextColor(18, 64, 94);
-                    doc.text(nextPmForPDF(data.workDate), rightX, margin + 6, { align: 'right' });
+                    doc.text(nextPmForPDF(data.workDate), rightX, margin + 5.5, { align: 'right' });
 
                     doc.setFont('helvetica', 'bold');
                     doc.setTextColor(91, 123, 150);
-                    doc.text('Technician:', labelX, margin + 11);
+                    doc.text('Technician:', labelX, margin + 10);
                     doc.setFont('helvetica', 'normal');
                     doc.setTextColor(18, 64, 94);
-                    doc.text(data.technician, rightX, margin + 11, { align: 'right' });
+                    doc.text(data.technician, rightX, margin + 10, { align: 'right' });
 
-                    // Divider
+                    doc.setDrawColor(200, 210, 220);
+                    doc.setLineWidth(0.3);
+                    doc.line(rightX - 55, margin - 3, rightX - 55, margin + 12);
+
                     doc.setDrawColor(30, 74, 109);
                     doc.setLineWidth(0.5);
-                    doc.line(margin, margin + 15, pageWidth - margin, margin + 15);
+                    doc.line(margin, margin + 14, pageWidth - margin, margin + 14);
 
-                    return margin + 20;
+                    return margin + 19;
                 }
 
                 function addFooter() {
@@ -972,7 +1008,6 @@
 
                     let y = addHeader(data);
 
-                    // AC Unit banner
                     doc.setFillColor(30, 74, 109);
                     doc.rect(margin, y, contentWidth, 13, 'F');
                     doc.setTextColor(255, 255, 255);
@@ -984,7 +1019,6 @@
                     doc.text(`${data.acBrand} | ${data.acModel} | SN: ${data.acSerial}`, margin + 4, y + 11);
                     y += 17;
 
-                    // Legend
                     doc.setFillColor(248, 250, 252);
                     doc.setDrawColor(203, 213, 225);
                     doc.setLineWidth(0.2);
@@ -1078,20 +1112,20 @@
                         y += 3;
                     }
 
-                    const airflowSet = new Set((data.airflowItems || '').split('|').filter(Boolean));
+                    // Use safeSplit to prevent crash when data is an array or string
+                    const airflowSet = new Set(safeSplit(data.airflowItems, '|'));
                     const airflowItems = airflowTexts.map((t, idx) => ({ text: t, checked: airflowSet.has(String(idx + 1)) }));
 
-                    const electricalSet = new Set((data.electricalItems || '').split('|').filter(Boolean));
+                    const electricalSet = new Set(safeSplit(data.electricalItems, '|'));
                     const electricalItems = electricalTexts.map((t, idx) => ({ text: t, checked: electricalSet.has(String(idx + 1)) }));
 
-                    const drainageSet = new Set((data.drainageItems || '').split('|').filter(Boolean));
+                    const drainageSet = new Set(safeSplit(data.drainageItems, '|'));
                     const drainageItems = drainageTexts.map((t, idx) => ({ text: t, checked: drainageSet.has(String(idx + 1)) }));
 
                     drawSection('Filters, Coils & Airflow', 'Condition', data.airflowRating, airflowItems, data.airflowRemark);
                     drawSection('Electrical & Refrigerant', 'Status', data.electricalRating, electricalItems, data.electricalRemark);
                     drawSection('Drainage, Controls & Performance', 'Performance', data.drainageRating, drainageItems, data.drainageRemark);
 
-                    // Sign-off block
                     if (y > pageHeight - 45) {
                         addFooter();
                         doc.addPage();
@@ -1138,6 +1172,14 @@
             document.getElementById('pdfBtn').addEventListener('click', async function() {
                 const data = collectFormData();
                 if (!data) { showStatus('⚠️ Please add an AC unit first.', false); return; }
+
+                const key = `${data.acTag}_${data.workDate}`;
+                if (USER_PM_KEYS.has(key) || getQueue().some(item => item.acTag === data.acTag && item.workDate === data.workDate)) {
+                    showStatus('⚠️ This AC has already been PM\'d on this date.', false);
+                    alert('⚠️ Warning: This AC has already been PM\'d on this date. You cannot export the same AC twice on the same day.');
+                    return;
+                }
+
                 this.disabled = true;
                 const orig = this.innerHTML;
                 this.innerHTML = '<span>⏳</span> Generating...';
@@ -1223,6 +1265,9 @@
                     AC_INVENTORY = inv;
                     cacheInventoryLocally(name, inv);
                     renderAcSelector();
+                    
+                    await fetchUserPMs(name);
+                    
                     showStatus('✅ Welcome, ' + name + '! ' + inv.length + ' AC unit(s) loaded.', true);
                 } catch (err) {
                     console.warn('Cloud load failed, using local cache:', err);
@@ -1290,7 +1335,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js?v=18')
+                navigator.serviceWorker.register('sw.js?v=20')
                     .then(reg => console.log('✅ Service Worker registered:', reg.scope))
                     .catch(err => console.warn('⚠️ Service Worker failed:', err));
             });
