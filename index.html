@@ -1112,17 +1112,21 @@
 
                     let y = addHeader(data);
 
+                    // ==================== AC UNIT BANNER (with Department) ====================
+                    const deptLabel = data.acDept || 'Laboratory';
                     doc.setFillColor(30, 74, 109);
-                    doc.rect(margin, y, contentWidth, 13, 'F');
+                    doc.rect(margin, y, contentWidth, 15, 'F');
                     doc.setTextColor(255, 255, 255);
                     doc.setFontSize(11);
                     doc.setFont('helvetica', 'bold');
-                    doc.text(`${data.acTag} - ${data.acLocation}`, margin + 4, y + 5.5);
+                    doc.text(`${data.acTag} — ${data.acLocation}`, margin + 4, y + 5.5);
                     doc.setFontSize(8);
                     doc.setFont('helvetica', 'normal');
-                    doc.text(`${data.acBrand} | ${data.acModel} | SN: ${data.acSerial}`, margin + 4, y + 11);
-                    y += 17;
+                    doc.setTextColor(203, 228, 247);
+                    doc.text(`Department: ${deptLabel}  |  ${data.acType}  |  ${data.acBrand}  |  ${data.acModel}  |  SN: ${data.acSerial}`, margin + 4, y + 12);
+                    y += 19;
 
+                    // Legend
                     doc.setFillColor(248, 250, 252);
                     doc.setDrawColor(203, 213, 225);
                     doc.setLineWidth(0.2);
@@ -1228,38 +1232,79 @@
                     drawSection('Electrical & Refrigerant', 'Status', data.electricalRating, electricalItems, data.electricalRemark);
                     drawSection('Drainage, Controls & Performance', 'Performance', data.drainageRating, drainageItems, data.drainageRemark);
 
-                    if (y > pageHeight - 45) {
+                    // ==================== SIGN-OFF BLOCKS (Technician + Dept In-Charge) ====================
+                    const boxHeight = 30;
+                    if (y > pageHeight - 60) {
                         addFooter();
                         doc.addPage();
                         y = addHeader(data);
                     }
 
+                    const gap = 4;
+                    const halfWidth = (contentWidth - gap) / 2;
+                    const leftBoxX = margin;
+                    const rightBoxX = margin + halfWidth + gap;
+
+                    // ---- LEFT BOX: Technician ----
                     doc.setFillColor(240, 246, 252);
                     doc.setDrawColor(207, 224, 238);
                     doc.setLineWidth(0.3);
-                    doc.roundedRect(margin, y, contentWidth, 22, 2, 2, 'FD');
+                    doc.roundedRect(leftBoxX, y, halfWidth, boxHeight, 2, 2, 'FD');
 
-                    doc.setFontSize(7.5);
+                    doc.setFontSize(7);
                     doc.setFont('helvetica', 'bold');
                     doc.setTextColor(91, 123, 150);
-                    doc.text('SIGNED OFF BY', margin + 4, y + 5);
+                    doc.text('PERFORMED BY (TECHNICIAN)', leftBoxX + 3, y + 4.5);
 
-                    doc.setFontSize(11);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
                     doc.setTextColor(10, 42, 63);
-                    doc.text(data.technician, margin + 4, y + 12);
+                    doc.text(data.technician, leftBoxX + 3, y + 11);
 
-                    doc.setFontSize(8);
+                    doc.setFontSize(7.5);
                     doc.setFont('helvetica', 'normal');
                     doc.setTextColor(58, 101, 131);
-                    doc.text(`CHUB Site  |  Next PM due: ${nextPmForPDF(data.workDate)}`, margin + 4, y + 18);
+                    doc.text(`Date: ${formatDateForPDF(data.workDate)}`, leftBoxX + 3, y + 15.5);
+                    doc.text(`Next PM: ${nextPmForPDF(data.workDate)}`, leftBoxX + 3, y + 19.5);
 
-                    const initials = (data.technician || 'HK').split(' ').map(p => p[0]).join('') + '.';
-                    doc.setFontSize(12);
-                    doc.setFont('helvetica', 'bolditalic');
-                    doc.setTextColor(30, 74, 109);
-                    doc.text(initials, pageWidth - margin - 4, y + 14, { align: 'right' });
+                    doc.setDrawColor(150, 180, 200);
+                    doc.setLineWidth(0.3);
+                    doc.line(leftBoxX + 3, y + 25, leftBoxX + halfWidth - 3, y + 25);
+                    doc.setFontSize(6.5);
+                    doc.setFont('helvetica', 'italic');
+                    doc.setTextColor(91, 123, 150);
+                    doc.text('Signature', leftBoxX + 3, y + 28.5);
 
-                    y += 27;
+                    // ---- RIGHT BOX: Department In-Charge ----
+                    doc.setFillColor(255, 251, 235);
+                    doc.setDrawColor(244, 217, 122);
+                    doc.setLineWidth(0.3);
+                    doc.roundedRect(rightBoxX, y, halfWidth, boxHeight, 2, 2, 'FD');
+
+                    doc.setFontSize(7);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(122, 83, 0);
+                    doc.text('REVIEWED BY (DEPT. IN-CHARGE)', rightBoxX + 3, y + 4.5);
+
+                    doc.setFontSize(8.5);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(58, 101, 131);
+                    doc.text(`Department: ${deptLabel}`, rightBoxX + 3, y + 11);
+
+                    doc.setFontSize(7.5);
+                    doc.setTextColor(122, 83, 0);
+                    doc.text('Name: ____________________________', rightBoxX + 3, y + 17);
+
+                    doc.setDrawColor(180, 140, 60);
+                    doc.setLineWidth(0.3);
+                    doc.line(rightBoxX + 3, y + 25, rightBoxX + halfWidth - 3, y + 25);
+                    doc.setFontSize(6.5);
+                    doc.setFont('helvetica', 'italic');
+                    doc.setTextColor(122, 83, 0);
+                    doc.text('Signature & Date', rightBoxX + 3, y + 28.5);
+
+                    y += boxHeight + 4;
+
                     doc.setFontSize(7);
                     doc.setFont('helvetica', 'normal');
                     doc.setTextColor(91, 123, 150);
@@ -1447,7 +1492,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js?v=24')
+                navigator.serviceWorker.register('sw.js?v=25')
                     .then(reg => console.log('✅ Service Worker registered:', reg.scope))
                     .catch(err => console.warn('⚠️ Service Worker failed:', err));
             });
