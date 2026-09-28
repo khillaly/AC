@@ -832,14 +832,43 @@
                 if (!data) { showStatus('⚠️ Please add an AC unit before signing off.', false); return; }
 
                 const key = `${data.acTag}_${data.workDate}`;
+                const orig = this.innerHTML;
+                this.disabled = true;
+                this.innerHTML = '<span>⏳</span> Checking...';
+
+                // 1. Check local queue and local keys
                 if (USER_PM_KEYS.has(key) || getQueue().some(item => item.acTag === data.acTag && item.workDate === data.workDate)) {
-                    showStatus('⚠️ This AC has already been PM\'d on this date.', false);
-                    alert('⚠️ Warning: This AC has already been PM\'d on this date. You cannot sign off the same AC twice on the same day.');
+                    showStatus('⚠️ This AC has already been PM\'d on this date (local).', false);
+                    alert('⚠️ Warning: This AC has already been PM\'d on this date. You cannot sign off the same AC twice.');
+                    this.disabled = false;
+                    this.innerHTML = orig;
                     return;
                 }
 
-                this.disabled = true;
-                const orig = this.innerHTML;
+                // 2. Check remote (Google Sheet) for duplicates
+                this.innerHTML = '<span>⏳</span> Verifying...';
+                let remoteDuplicate = false;
+                try {
+                    const res = await fetch(GOOGLE_SHEET_URL + '?type=logs', { method: 'GET' });
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (json.records) {
+                            remoteDuplicate = json.records.some(r => r.technician === technicianSelect.value && `${r.acTag}_${r.workDate}` === key);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not verify duplicate online:', e);
+                }
+
+                if (remoteDuplicate) {
+                    showStatus('⚠️ This AC has already been PM\'d on this date (found in cloud).', false);
+                    alert('⚠️ Warning: This AC has already been PM\'d on this date. You cannot sign off the same AC twice.');
+                    this.disabled = false;
+                    this.innerHTML = orig;
+                    return;
+                }
+
+                // 3. Proceed to save
                 this.innerHTML = '<span>⏳</span> Sending...';
                 const success = await queueAndSend(data);
                 this.disabled = false;
@@ -893,7 +922,6 @@
                 return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
             }
 
-            // FIX: Helper to safely split data that might be an array or a string
             function safeSplit(val, sep) {
                 if (!val) return [];
                 if (Array.isArray(val)) return val.map(String);
@@ -1066,17 +1094,17 @@
                             const left = items[j];
                             const right = items[j + 1];
                             const mark = (chk) => chk ? 'V' : 'X';
-                            const col = (chk) => chk ? '#1b6b3f' : '#b33a3a';
+                            const markColor = (chk) => chk ? '#1b6b3f' : '#b33a3a';
+                            
                             const row = [];
-                            row.push({
-                                content: mark(left.checked) + '  ' + left.text,
-                                styles: { textColor: col(left.checked), fontStyle: 'bold' }
-                            });
+                            
+                            // Use HTML strings to make the symbol colored and the text black
+                            const leftContent = `<span style="color:${markColor(left.checked)}; font-weight:bold;">${mark(left.checked)}</span> <span style="color:#000000; font-weight:normal;">${left.text}</span>`;
+                            row.push({ content: leftContent, styles: { textColor: '#000000' } });
+                            
                             if (right) {
-                                row.push({
-                                    content: mark(right.checked) + '  ' + right.text,
-                                    styles: { textColor: col(right.checked), fontStyle: 'bold' }
-                                });
+                                const rightContent = `<span style="color:${markColor(right.checked)}; font-weight:bold;">${mark(right.checked)}</span> <span style="color:#000000; font-weight:normal;">${right.text}</span>`;
+                                row.push({ content: rightContent, styles: { textColor: '#000000' } });
                             } else {
                                 row.push({ content: '', styles: {} });
                             }
@@ -1088,7 +1116,8 @@
                             margin: { left: margin, right: margin },
                             body: rows,
                             theme: 'plain',
-                            styles: { fontSize: 8, cellPadding: 1.5, textColor: '#1f3c54', lineWidth: 0, overflow: 'linebreak' },
+                            useHtml: true, // Enable HTML rendering for mixed colors
+                            styles: { fontSize: 8, cellPadding: 1.5, textColor: '#000000', lineWidth: 0, overflow: 'linebreak' },
                             columnStyles: {
                                 0: { cellWidth: (contentWidth / 2) - 2 },
                                 1: { cellWidth: (contentWidth / 2) - 2 }
@@ -1112,7 +1141,6 @@
                         y += 3;
                     }
 
-                    // Use safeSplit to prevent crash when data is an array or string
                     const airflowSet = new Set(safeSplit(data.airflowItems, '|'));
                     const airflowItems = airflowTexts.map((t, idx) => ({ text: t, checked: airflowSet.has(String(idx + 1)) }));
 
