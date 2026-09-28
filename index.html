@@ -975,47 +975,57 @@
                     const initials = (data.technician || 'HK').split(' ').map(p => p[0]).join('') + '.';
                     pagesHtml += `
                     <div class="report-page">
-                        <div class="header">
-                          <div><h1>❄️ AC Fleet — Preventive Maintenance Report</h1><div class="sub">Site: CHUB · Split Units · PM Checklist</div></div>
-                          <div class="meta">
-                            <div><strong>Work date:</strong> ${formatDateForPDF(data.workDate)}</div>
-                            <div><strong>Next PM due:</strong> ${nextPmForPDF(data.workDate)}</div>
-                            <div><strong>Technician:</strong> ${data.technician}</div>
-                            <div><strong>Generated:</strong> ${data.generatedAt}</div>
-                          </div>
-                        </div>
-                        <div class="gen-banner">
-                          <div class="gen-name">${data.acTag} — ${data.acLocation}</div>
-                          <div class="gen-sub">${data.acBrand} · ${data.acModel} · SN: ${data.acSerial}</div>
-                        </div>
-                        
-                        <!-- 🏷️ LEGEND -->
-                        <div class="legend-box">
-                          <span class="legend-item"><span class="legend-sym sym-ok">V</span> Checked &amp; OK</span>
-                          <span class="legend-item"><span class="legend-sym sym-bad">X</span> Not checked / Needs attention</span>
-                        </div>
+                        <table class="report-table">
+                            <thead>
+                                <tr><td>
+                                    <div class="header">
+                                      <div><h1>❄️ AC Fleet — Preventive Maintenance Report</h1><div class="sub">Site: CHUB · Split Units · PM Checklist</div></div>
+                                      <div class="meta">
+                                        <div><strong>Work date:</strong> ${formatDateForPDF(data.workDate)}</div>
+                                        <div><strong>Next PM due:</strong> ${nextPmForPDF(data.workDate)}</div>
+                                        <div><strong>Technician:</strong> ${data.technician}</div>
+                                        <div><strong>Generated:</strong> ${data.generatedAt}</div>
+                                      </div>
+                                    </div>
+                                </td></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>
+                                    <div class="gen-banner">
+                                      <div class="gen-name">${data.acTag} — ${data.acLocation}</div>
+                                      <div class="gen-sub">${data.acBrand} · ${data.acModel} · SN: ${data.acSerial}</div>
+                                    </div>
+                                    
+                                    <!-- 🏷️ LEGEND -->
+                                    <div class="legend-box">
+                                      <span class="legend-item"><span class="legend-sym sym-ok">V</span> Checked &amp; OK</span>
+                                      <span class="legend-item"><span class="legend-sym sym-bad">X</span> Not checked / Needs attention</span>
+                                    </div>
 
-                        <div class="section-title">🌬️ Filters, Coils & Airflow</div>
-                        <div class="rating-tag">Condition: ${data.airflowRating}</div>
-                        <ul class="check-list">${checkList(safeSplit(data.airflowItems, '|'), ['Inspect, clean, or replace filters','Clean indoor evaporator coil','Clean outdoor condenser coil','Check blower motor and wheel','Verify proper airflow across unit'])}</ul>
-                        ${data.airflowRemark !== '—' ? '<div class="remark-box">📝 ' + data.airflowRemark + '</div>' : ''}
-                        <div class="section-title">⚡ Electrical & Refrigerant</div>
-                        <div class="rating-tag">Status: ${data.electricalRating}</div>
-                        <ul class="check-list">${checkList(safeSplit(data.electricalItems, '|'), ['Verify correct refrigerant charge (superheat/subcooling)','Tighten and inspect electrical connections','Test relays, contactors, and capacitors','Measure compressor and fan motor amps','Inspect wiring for frays or heat damage'])}</ul>
-                        ${data.electricalRemark !== '—' ? '<div class="remark-box">📝 ' + data.electricalRemark + '</div>' : ''}
-                        <div class="section-title">💧 Drainage, Controls & Performance</div>
-                        <div class="rating-tag">Performance: ${data.drainageRating}</div>
-                        <ul class="check-list">${checkList(safeSplit(data.drainageItems, '|'), ['Clear condensate drain line and pan','Check thermostat calibration and controls','Measure supply/return air temperatures','Verify overall system efficiency','Inspect ductwork for leaks (visible)'])}</ul>
-                        ${data.drainageRemark !== '—' ? '<div class="remark-box">📝 ' + data.drainageRemark + '</div>' : ''}
-                        <div class="signoff-block">
-                          <div>
-                            <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#5b7b96; font-weight:700; margin-bottom:2px;">Signed off by</div>
-                            <div class="tech-name">${data.technician}</div>
-                            <div style="font-size:0.8rem; color:#3a6583;">CHUB Site · Next PM due: ${nextPmForPDF(data.workDate)}</div>
-                          </div>
-                          <div class="signature">${initials}</div>
-                        </div>
-                        <div class="footer-text-block">This report was generated automatically from the CHUB AC Fleet Preventive Maintenance System · ${data.generatedAt}</div>
+                                    <div class="section-title">🌬️ Filters, Coils & Airflow</div>
+                                    <div class="rating-tag">Condition: ${data.airflowRating}</div>
+                                    <ul class="check-list">${checkList(safeSplit(data.airflowItems, '|'), ['Inspect, clean, or replace filters','Clean indoor evaporator coil','Clean outdoor condenser coil','Check blower motor and wheel','Verify proper airflow across unit'])}</ul>
+                                    ${data.airflowRemark !== '—' ? '<div class="remark-box">📝 ' + data.airflowRemark + '</div>' : ''}
+                                    <div class="section-title">⚡ Electrical & Refrigerant</div>
+                                    <div class="rating-tag">Status: ${data.electricalRating}</div>
+                                    <ul class="check-list">${checkList(safeSplit(data.electricalItems, '|'), ['Verify correct refrigerant charge (superheat/subcooling)','Tighten and inspect electrical connections','Test relays, contactors, and capacitors','Measure compressor and fan motor amps','Inspect wiring for frays or heat damage'])}</ul>
+                                    ${data.electricalRemark !== '—' ? '<div class="remark-box">📝 ' + data.electricalRemark + '</div>' : ''}
+                                    <div class="section-title">💧 Drainage, Controls & Performance</div>
+                                    <div class="rating-tag">Performance: ${data.drainageRating}</div>
+                                    <ul class="check-list">${checkList(safeSplit(data.drainageItems, '|'), ['Clear condensate drain line and pan','Check thermostat calibration and controls','Measure supply/return air temperatures','Verify overall system efficiency','Inspect ductwork for leaks (visible)'])}</ul>
+                                    ${data.drainageRemark !== '—' ? '<div class="remark-box">📝 ' + data.drainageRemark + '</div>' : ''}
+                                    <div class="signoff-block">
+                                      <div>
+                                        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#5b7b96; font-weight:700; margin-bottom:2px;">Signed off by</div>
+                                        <div class="tech-name">${data.technician}</div>
+                                        <div style="font-size:0.8rem; color:#3a6583;">CHUB Site · Next PM due: ${nextPmForPDF(data.workDate)}</div>
+                                      </div>
+                                      <div class="signature">${initials}</div>
+                                    </div>
+                                    <div class="footer-text-block">This report was generated automatically from the CHUB AC Fleet Preventive Maintenance System · ${data.generatedAt}</div>
+                                </td></tr>
+                            </tbody>
+                        </table>
                     </div>`;
                 });
 
@@ -1054,12 +1064,17 @@ ul.check-list li { padding: 2px 0; color: #1f3c54; font-size: 0.85rem; }
 .footer-bar { background: #6a8db0; color: white; text-align: center; padding: 10px; font-size: 11px; display: flex; justify-content: center; gap: 30px; font-weight: 500; }
 @media print {
     @page { margin: 0; }
-    body { margin: 0; padding: 26mm 15mm 24mm 15mm; }
+    body { margin: 0; padding: 0; }
     .header-img { position: fixed; top: 0; left: 0; right: 0; height: 22mm; background: white; padding: 4mm 15mm 0 15mm; z-index: 9999; border-bottom: 2px solid #6a8db0; margin-bottom: 0; }
     .footer-img { position: fixed; bottom: 0; left: 0; right: 0; height: 20mm; background: white; padding: 0 15mm 4mm 15mm; z-index: 9999; }
     .footer-bar { padding: 6px; font-size: 10px; }
-    .report-page { page-break-inside: avoid; page-break-after: always; height: 100%; }
+    .report-page { padding-top: 26mm; padding-bottom: 24mm; box-sizing: border-box; page-break-after: always; }
     .report-page:last-child { page-break-after: auto; }
+    .report-table { width: 100%; border-collapse: collapse; }
+    .report-table thead { display: table-header-group; }
+    .report-table tbody { display: table-row-group; }
+    .report-table th, .report-table td { padding: 0; border: none; }
+    .report-table thead td { padding-bottom: 10px; }
     .header { margin-bottom: 8px; padding-bottom: 6px; }
     .header h1 { font-size: 1.1rem; }
     .header .meta { font-size: 0.75rem; }
