@@ -9,7 +9,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/1.3.1/forge.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/1.3.1/forge.min.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -88,22 +88,22 @@
         .signoff-left .label { font-weight: 600; color: #12405e; font-size: 1rem; letter-spacing: 0.3px; }
         .signoff-left .tech { font-size: 1.6rem; font-weight: 700; color: #0a2a3f; line-height: 1.2; }
         .signoff-right { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-        .signature-pad { background: white; border-radius: 40px; padding: 8px 22px; border: 2px dashed #9cb9d0; display: flex; align-items: center; justify-content: center; min-width: 160px; min-height: 55px; font-family: 'Segoe UI', cursive; font-size: 1.3rem; color: #1e4a6d; font-weight: 500; letter-spacing: 1px; white-space: nowrap; }
+        .signature-pad { background: white; border-radius: 40px; padding: 6px 16px; border: 2px dashed #9cb9d0; display: flex; align-items: center; justify-content: center; min-width: 160px; min-height: 55px; font-size: 0.85rem; color: #1e4a6d; font-weight: 500; letter-spacing: 0.5px; white-space: nowrap; }
         .signature-pad img { max-height: 50px; max-width: 200px; object-fit: contain; }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 30, 50, 0.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
         .modal-overlay.show { display: flex; }
-        .modal-box { background: white; border-radius: 24px; padding: 32px 28px; max-width: 500px; width: 100%; box-shadow: 0 25px 60px -12px rgba(0,0,0,0.4); max-height: 90vh; overflow-y: auto; position: relative; z-index: 1001; margin: auto; }
+        .modal-box { background: white; border-radius: 24px; padding: 32px 28px; max-width: 520px; width: 100%; box-shadow: 0 25px 60px -12px rgba(0,0,0,0.4); max-height: 90vh; overflow-y: auto; position: relative; z-index: 1001; margin: auto; }
         .modal-box h2 { font-size: 1.35rem; color: #12405e; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
         .modal-box p { font-size: 0.9rem; color: #5b7b96; margin-bottom: 22px; }
         .modal-box .field-group { margin-bottom: 16px; }
-        .modal-box .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+        .modal-box .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap; }
         .modal-box .modal-actions button { padding: 12px 24px; border-radius: 40px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; transition: 0.15s; }
         .modal-box .btn-cancel { background: #e7f0f8; color: #1e4a6d; }
         .modal-box .btn-go { background: #1e4a6d; color: white; }
 
-        .sig-preview { background: #fbfdff; border: 2px dashed #cfdfeb; border-radius: 16px; padding: 16px; text-align: center; min-height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
-        .sig-preview img { max-height: 100px; max-width: 100%; object-fit: contain; }
+        .sig-preview { background: #fbfdff; border: 2px dashed #cfdfeb; border-radius: 16px; padding: 12px; text-align: center; min-height: 90px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .sig-preview img { max-height: 80px; max-width: 100%; object-fit: contain; }
         .sig-preview .placeholder { color: #9cb9d0; font-size: 0.9rem; font-style: italic; }
 
         .action-buttons { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-top: 24px; justify-content: center; }
@@ -167,7 +167,7 @@
             .signoff-left .tech { font-size: 1.2rem; }
             .signoff-left .label { font-size: 0.85rem; }
             .signoff-right { flex-direction: column; align-items: stretch; gap: 10px; }
-            .signature-pad { min-width: 100%; font-size: 1.1rem; min-height: 48px; }
+            .signature-pad { min-width: 100%; font-size: 0.9rem; min-height: 48px; }
             .signoff-right .btn-primary { width: 100%; justify-content: center; padding: 14px 20px; font-size: 1rem; }
             .action-buttons { flex-direction: column; gap: 10px; margin-top: 18px; }
             .action-buttons button { width: 100%; justify-content: center; padding: 14px 20px; font-size: 0.95rem; }
@@ -176,7 +176,7 @@
             .modal-overlay { padding: 10px; align-items: flex-start; }
             .modal-box { padding: 24px 20px; border-radius: 20px; max-height: 95vh; margin-top: 10px; }
             .modal-box h2 { font-size: 1.15rem; }
-            .modal-box p { font-size: 0.85rem; margin-bottom: 16px; }
+            .modal-box p { font-size: 0.85rem; margin-bottom: 12px; }
             .modal-box .field-group { margin-bottom: 12px; }
             .modal-box .field-group label { font-size: 0.85rem; }
             .modal-box .field-group input, .modal-box .field-group select { padding: 12px 14px; font-size: 0.95rem; border-radius: 14px; }
@@ -245,7 +245,7 @@
                 <div class="sync-status" id="loggedInUser" style="background:#1e4a6d; color:white; border-color:#1e4a6d;">
                     <span>👤</span> <span id="loggedInUserName">—</span>
                 </div>
-                <button id="signatureBtn" class="btn-secondary" style="padding: 8px 18px; font-size: 0.85rem;">🖊️ Signature</button>
+                <button id="signatureBtn" class="btn-secondary" style="padding: 8px 18px; font-size: 0.85rem;">🖊️ Signature &amp; Cert</button>
                 <button id="logoutBtn" class="btn-secondary" style="padding: 8px 18px; font-size: 0.85rem;">🚪 Logout</button>
                 <div class="workdate-tag">
                     <span>📅</span> <strong id="workDateDisplay">—</strong>
@@ -262,8 +262,7 @@
                 <input type="date" id="workDate">
             </div>
             <label for="acSelect">🔽 Select AC Unit:</label>
-            <select id="acSelect">
-            </select>
+            <select id="acSelect"></select>
             <button id="addAcBtn" class="btn-add">➕ Add New AC</button>
             <button id="removeAcBtn" class="btn-remove">➖ Remove AC</button>
             <img src="chub-logo.png" alt="CHUB Logo" class="chub-logo" onerror="this.style.display='none'">
@@ -413,7 +412,7 @@
         </div>
     </div>
 
-            <!-- COMBINED SIGNATURE + CERTIFICATE MODAL -->
+    <!-- COMBINED SIGNATURE + CERTIFICATE MODAL -->
     <div class="modal-overlay" id="signatureModal">
         <div class="modal-box">
             <h2>🖊️ Signature &amp; Digital Certificate</h2>
@@ -424,7 +423,7 @@
                 <span class="placeholder">No visual signature uploaded</span>
             </div>
             <div class="field-group">
-                <label for="sigFileInput">Choose signature image (PNG, transparent background recommended)</label>
+                <label for="sigFileInput">Choose signature image (PNG with transparent background recommended)</label>
                 <input type="file" id="sigFileInput" accept="image/png, image/jpeg">
             </div>
 
@@ -520,14 +519,48 @@
             };
 
             // ============================================================
-            // ⭐ HARDCODED SIGNATURES (Optional)
-            // If you want a signature to appear on ALL devices without needing
-            // to upload it manually, paste the base64 data URL here.
-            // Format: 'data:image/png;base64,iVBORw0KGgoAAAANS...'
-            // Example:
-            //   'Hillaly KUBWIMANA': 'data:image/png;base64,iVBORw0KGgo...'
+            // ⭐ VISUAL SIGNATURE STORAGE (PNG) — per technician, persisted
             // ============================================================
-           
+            const DEFAULT_TECHNICIAN_SIGNATURES = {
+                // 'Hillaly KUBWIMANA': 'data:image/png;base64,PASTE_YOUR_BASE64_HERE',
+            };
+            const SIG_STORAGE_KEY = 'chub_technician_signatures_v1';
+
+            function loadSignatures() {
+                let stored = {};
+                try { const raw = localStorage.getItem(SIG_STORAGE_KEY); if (raw) stored = JSON.parse(raw); } catch(e) { stored = {}; }
+                return { ...DEFAULT_TECHNICIAN_SIGNATURES, ...stored };
+            }
+            function getSignatureFor(techName) { const sigs = loadSignatures(); return sigs[techName] || ''; }
+            function saveSignatureFor(techName, dataUrl) {
+                if (!techName) return;
+                let stored = {};
+                try { const raw = localStorage.getItem(SIG_STORAGE_KEY); if (raw) stored = JSON.parse(raw); } catch(e) { stored = {}; }
+                if (dataUrl) stored[techName] = dataUrl; else delete stored[techName];
+                try { localStorage.setItem(SIG_STORAGE_KEY, JSON.stringify(stored)); } catch(e) { alert('Could not save signature — browser storage may be full.'); }
+            }
+
+            // Strip chars jsPDF cannot render
+            function sanitizeForPDF(str) {
+                if (str === null || str === undefined) return '';
+                return String(str)
+                    .normalize('NFKD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^\x20-\x7E]/g, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            // Get image dimensions from data URL
+            function loadImageDimensions(dataUrl) {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+                    img.onerror = () => resolve(null);
+                    img.src = dataUrl;
+                });
+            }
+
             const DEFAULT_LIST_OWNER = 'Hillaly KUBWIMANA';
 
             const DEFAULT_AC_INVENTORY = [
@@ -569,20 +602,13 @@
                 const json = await res.json();
                 return json.records || [];
             }
-
             async function pushInventoryToCloud(techName, inv) {
                 const payload = { action: 'inventory_update', technician: techName, inventory: inv };
-                await fetch(GOOGLE_SHEET_URL, {
-                    method: 'POST', mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
+                await fetch(GOOGLE_SHEET_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
                 return true;
             }
 
-            function normalizeText(val) {
-                return String(val || '').trim().toLowerCase().replace(/\s+/g, ' ');
-            }
+            function normalizeText(val) { return String(val || '').trim().toLowerCase().replace(/\s+/g, ' '); }
 
             function buildAcIdentity(obj) {
                 const tag    = normalizeText(obj.acTag    || obj.tag    || '');
@@ -617,23 +643,13 @@
                     if (!res.ok) return { checked: false, error: 'HTTP ' + res.status };
                     const json = await res.json();
                     if (!json.records || !Array.isArray(json.records)) return { checked: true, duplicate: false };
-
                     const targetDate = normalizeDateForCompare(workDate);
                     const found = json.records.find(r => {
-                        const rIdentity = buildAcIdentity({
-                            acTag: r.acTag,
-                            acLocation: r.acLocation,
-                            acSerial: r.acSerial,
-                            acModel: r.acModel
-                        });
+                        const rIdentity = buildAcIdentity({ acTag: r.acTag, acLocation: r.acLocation, acSerial: r.acSerial, acModel: r.acModel });
                         return rIdentity === acIdentity && normalizeDateForCompare(r.workDate) === targetDate;
                     });
-
                     return { checked: true, duplicate: !!found, record: found || null };
-                } catch (e) {
-                    console.warn('Remote duplicate check failed:', e);
-                    return { checked: false, error: e.message };
-                }
+                } catch (e) { console.warn('Remote duplicate check failed:', e); return { checked: false, error: e.message }; }
             }
 
             async function fetchUserPMs(techName) {
@@ -644,18 +660,11 @@
                     const json = await res.json();
                     if (json.records && Array.isArray(json.records)) {
                         json.records.forEach(r => {
-                            const identity = buildAcIdentity({
-                                acTag: r.acTag,
-                                acLocation: r.acLocation,
-                                acSerial: r.acSerial,
-                                acModel: r.acModel
-                            });
+                            const identity = buildAcIdentity({ acTag: r.acTag, acLocation: r.acLocation, acSerial: r.acSerial, acModel: r.acModel });
                             USER_PM_KEYS.add(identity + '||' + normalizeDateForCompare(r.workDate));
                         });
                     }
-                } catch (e) {
-                    console.warn('Could not fetch PM logs for duplicate check:', e);
-                }
+                } catch (e) { console.warn('Could not fetch PM logs for duplicate check:', e); }
             }
 
             function showStatus(msg, isSuccess = true) {
@@ -676,8 +685,7 @@
                 acSelect.innerHTML = '';
                 if (AC_INVENTORY.length === 0) {
                     const opt = document.createElement('option');
-                    opt.value = '';
-                    opt.textContent = '— No AC Units in your list —';
+                    opt.value = ''; opt.textContent = '— No AC Units in your list —';
                     acSelect.appendChild(opt);
                     acTitle.textContent = 'No AC Units Yet';
                     acSub.textContent = 'Tap "➕ Add New AC" to start your list.';
@@ -760,12 +768,9 @@
                 const ownerTech = technicianSelect.value;
                 const idx = acSelect.value;
                 if (idx === '' || !AC_INVENTORY[idx]) { showStatus('⚠️ No AC unit selected to remove.', false); return; }
-
                 const ac = AC_INVENTORY[idx];
                 if (!confirm(`Remove this AC from your cloud list?\n\n${ac.tag} — ${ac.loc}\n(${ac.brand} ${ac.model})`)) return;
-
                 AC_INVENTORY.splice(idx, 1);
-
                 try {
                     await pushInventoryToCloud(ownerTech, AC_INVENTORY);
                     cacheInventoryLocally(ownerTech, AC_INVENTORY);
@@ -774,19 +779,29 @@
                     cacheInventoryLocally(ownerTech, AC_INVENTORY);
                     showStatus('⚠️ Removed locally — will sync when online.', false);
                 }
-
                 renderAcSelector();
                 if (AC_INVENTORY.length === 0) {
                     acTitle.textContent = 'No AC Units Yet';
                     acSub.textContent = 'Tap "➕ Add New AC" to start your list.';
-                } else {
-                    acSelect.selectedIndex = 0;
-                    updateAcBanner();
-                }
+                } else { acSelect.selectedIndex = 0; updateAcBanner(); }
             });
 
-                     const technicianSelect = document.getElementById('technicianSelect');
-                 function updateTechnicianDisplay() {
+            const technicianSelect = document.getElementById('technicianSelect');
+
+            // ---- CERT STATE ----
+            const CERT_STATE = {
+                certificate: null, privateKey: null,
+                subject: '', issuer: '', serial: '',
+                validFrom: null, validTo: null, fingerprint: ''
+            };
+            function isCertLoaded() { return !!(CERT_STATE.certificate && CERT_STATE.privateKey); }
+            function clearCert() {
+                CERT_STATE.certificate = null; CERT_STATE.privateKey = null;
+                CERT_STATE.subject = ''; CERT_STATE.issuer = ''; CERT_STATE.serial = '';
+                CERT_STATE.validFrom = null; CERT_STATE.validTo = null; CERT_STATE.fingerprint = '';
+            }
+
+            function updateTechnicianDisplay() {
                 if (!technicianSelect) return;
                 const name = technicianSelect.value;
                 document.getElementById('signoffTechName').textContent = name;
@@ -803,7 +818,7 @@
                 }
             }
 
-                                  // ==================== COMBINED SIGNATURE + CERTIFICATE ====================
+            // ==================== COMBINED MODAL ====================
             const signatureModal = document.getElementById('signatureModal');
             const sigFileInput = document.getElementById('sigFileInput');
             const pfxFileInput = document.getElementById('pfxFileInput');
@@ -811,18 +826,6 @@
             const sigPreview = document.getElementById('sigPreview');
             const certPreview = document.getElementById('certPreview');
             const sigError = document.getElementById('sigError');
-
-            const CERT_STATE = {
-                certificate: null, privateKey: null,
-                subject: '', issuer: '', serial: '',
-                validFrom: null, validTo: null, fingerprint: ''
-            };
-            function isCertLoaded() { return !!(CERT_STATE.certificate && CERT_STATE.privateKey); }
-            function clearCert() {
-                CERT_STATE.certificate = null; CERT_STATE.privateKey = null;
-                CERT_STATE.subject = ''; CERT_STATE.issuer = ''; CERT_STATE.serial = '';
-                CERT_STATE.validFrom = null; CERT_STATE.validTo = null; CERT_STATE.fingerprint = '';
-            }
 
             let pendingVisualSig = null;
             let pendingCert = null;
@@ -881,7 +884,6 @@
                 showStatus('🗑️ Signature and certificate cleared.', true);
             });
 
-            // PNG file change → preview it
             sigFileInput.addEventListener('change', function() {
                 const file = this.files && this.files[0];
                 if (!file) return;
@@ -891,13 +893,11 @@
                 reader.readAsDataURL(file);
             });
 
-            // Save & Use — parses PFX if provided, saves both
             document.getElementById('sigSave').addEventListener('click', async () => {
                 sigError.textContent = '';
                 const name = technicianSelect.value;
                 if (!name) { sigError.textContent = '⚠️ Please log in first.'; return; }
 
-                // Parse PFX if a file was selected
                 if (pfxFileInput.files && pfxFileInput.files[0]) {
                     const password = pfxPasswordInput.value;
                     if (!password) { sigError.textContent = '⚠️ Please enter the PFX password.'; return; }
@@ -947,10 +947,8 @@
                     }
                 }
 
-                // Commit the visual signature
                 if (pendingVisualSig) saveSignatureFor(name, pendingVisualSig);
 
-                // Commit the certificate to memory
                 if (pendingCert) {
                     CERT_STATE.certificate = pendingCert.certificate;
                     CERT_STATE.privateKey  = pendingCert.privateKey;
@@ -977,9 +975,7 @@
                     const signature = CERT_STATE.privateKey.sign(md);
                     return {
                         base64: forge.util.encode64(signature),
-                        subject: CERT_STATE.subject,
-                        issuer: CERT_STATE.issuer,
-                        serial: CERT_STATE.serial,
+                        subject: CERT_STATE.subject, issuer: CERT_STATE.issuer, serial: CERT_STATE.serial,
                         fingerprint: CERT_STATE.fingerprint,
                         validFrom: CERT_STATE.validFrom ? CERT_STATE.validFrom.toISOString() : '',
                         validTo:   CERT_STATE.validTo   ? CERT_STATE.validTo.toISOString()   : '',
@@ -990,20 +986,11 @@
 
             function buildCanonical(data) {
                 return [
-                    data.technician  || '',
-                    data.workDate    || '',
-                    data.acTag       || '',
-                    data.acLocation  || '',
-                    data.acDept      || '',
-                    data.acSerial    || '',
-                    data.acModel     || '',
-                    data.airflowItems    || '',
-                    data.electricalItems || '',
-                    data.drainageItems   || '',
-                    data.airflowRating    || '',
-                    data.electricalRating || '',
-                    data.drainageRating   || '',
-                    data.generatedAt  || ''
+                    data.technician || '', data.workDate || '', data.acTag || '',
+                    data.acLocation || '', data.acDept || '', data.acSerial || '', data.acModel || '',
+                    data.airflowItems || '', data.electricalItems || '', data.drainageItems || '',
+                    data.airflowRating || '', data.electricalRating || '', data.drainageRating || '',
+                    data.generatedAt || ''
                 ].join('|');
             }
 
@@ -1019,7 +1006,6 @@
                 const full = await computeSHA256(canonical);
                 data.reportHash = full.toUpperCase();
                 data.reportId = `CHUB-${(data.workDate||'').replace(/-/g,'')}-${full.substring(0,8).toUpperCase()}`;
-
                 const sig = signCanonical(canonical);
                 if (sig) {
                     data.pkcs7Signature   = sig.base64;
@@ -1043,7 +1029,6 @@
             }
 
             const PM_INTERVAL_MONTHS = 6;
-
             function parseToDate(dateVal) {
                 if (!dateVal) return null;
                 if (Array.isArray(dateVal)) dateVal = dateVal[0];
@@ -1053,25 +1038,14 @@
                 let d = /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(s + 'T00:00:00') : new Date(s);
                 return isNaN(d.getTime()) ? null : d;
             }
-
             function addMonths(dateVal, months) {
-                const d = parseToDate(dateVal);
-                if (!d) return null;
-                const day = d.getDate();
-                d.setMonth(d.getMonth() + months);
+                const d = parseToDate(dateVal); if (!d) return null;
+                const day = d.getDate(); d.setMonth(d.getMonth() + months);
                 if (d.getDate() < day) d.setDate(0);
                 return d;
             }
-
-            function formatPmDate(d) {
-                if (!d) return '—';
-                return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-            }
-
-            function getNextPmDateStr(dateVal) {
-                return formatPmDate(addMonths(dateVal, PM_INTERVAL_MONTHS));
-            }
-
+            function formatPmDate(d) { return d ? d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }
+            function getNextPmDateStr(dateVal) { return formatPmDate(addMonths(dateVal, PM_INTERVAL_MONTHS)); }
             function updateNextPmDisplay() {
                 const workDate = document.getElementById('workDate').value;
                 const label = getNextPmDateStr(workDate);
@@ -1080,7 +1054,6 @@
                 const signoffEl = document.getElementById('signoffNextPm');
                 if (signoffEl) signoffEl.textContent = label;
             }
-
             function updateWorkDateDisplay() {
                 const val = document.getElementById('workDate').value;
                 if (!val) return;
@@ -1103,48 +1076,28 @@
 
             async function sendToSheet(data) {
                 try {
-                    await fetch(GOOGLE_SHEET_URL, {
-                        method: 'POST', mode: 'no-cors',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify(data)
-                    });
+                    await fetch(GOOGLE_SHEET_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
                     return true;
                 } catch (err) { return false; }
             }
-
             async function flushQueue() {
                 const q = getQueue();
                 if (q.length === 0) { setSyncStatus('', 'All synced'); return; }
                 setSyncStatus('', 'Syncing...');
-                const remaining = [];
-                let sent = 0;
+                const remaining = []; let sent = 0;
                 for (const item of q) {
                     const ok = await sendToSheet(item);
                     if (ok) sent++; else remaining.push(item);
                 }
                 saveQueue(remaining);
-                if (remaining.length === 0) {
-                    setSyncStatus('', 'All synced ✓');
-                    showStatus('✅ ' + sent + ' record(s) synced.', true);
-                } else {
-                    setSyncStatus('error', remaining.length + ' pending');
-                    showStatus('⚠️ ' + sent + ' synced, ' + remaining.length + ' pending.', false);
-                }
+                if (remaining.length === 0) { setSyncStatus('', 'All synced ✓'); showStatus('✅ ' + sent + ' record(s) synced.', true); }
+                else { setSyncStatus('error', remaining.length + ' pending'); showStatus('⚠️ ' + sent + ' synced, ' + remaining.length + ' pending.', false); }
             }
-
             async function queueAndSend(data) {
                 setSyncStatus('', 'Sending...');
                 const ok = await sendToSheet(data);
-                if (ok) {
-                    setSyncStatus('', 'Saved ✓');
-                    showStatus('✅ Signed off & saved to Google Sheet.', true);
-                    return true;
-                } else {
-                    const q = getQueue(); q.push(data); saveQueue(q);
-                    setSyncStatus('offline', 'Offline — queued');
-                    showStatus('📥 Saved locally — will sync when online.', false);
-                    return false;
-                }
+                if (ok) { setSyncStatus('', 'Saved ✓'); showStatus('✅ Signed off & saved to Google Sheet.', true); return true; }
+                else { const q = getQueue(); q.push(data); saveQueue(q); setSyncStatus('offline', 'Offline — queued'); showStatus('📥 Saved locally — will sync when online.', false); return false; }
             }
 
             function collectFormData() {
@@ -1180,84 +1133,50 @@
                 };
             }
 
-                        document.getElementById('signOffBtn').addEventListener('click', async function() {
+            document.getElementById('signOffBtn').addEventListener('click', async function() {
                 const data = collectFormData();
                 if (!data) { showStatus('⚠️ Please add an AC unit before signing off.', false); return; }
-
                 await ensureReportHash(data);
 
                 const acIdentity = buildAcIdentity(data);
                 const normKey = acIdentity + '||' + normalizeDateForCompare(data.workDate);
                 const orig = this.innerHTML;
                 this.disabled = true;
-
                 this.innerHTML = '<span>⏳</span> Checking local...';
+
                 if (USER_PM_KEYS.has(normKey)) {
                     showStatus('⚠️ This AC has already been PM\'d on this date (local cache).', false);
-                    alert('⚠️ Warning: This AC has already been PM\'d on this date.\n\n' +
-                          'AC Tag: ' + data.acTag + '\n' +
-                          'Location: ' + data.acLocation + '\n' +
-                          'Serial: ' + data.acSerial + '\n' +
-                          'Date: ' + data.workDate + '\n\n' +
-                          'You cannot sign off the same AC twice on the same day.');
-                    this.disabled = false;
-                    this.innerHTML = orig;
-                    return;
+                    alert('⚠️ Warning: This AC has already been PM\'d on this date.');
+                    this.disabled = false; this.innerHTML = orig; return;
                 }
-
-                const queuedDup = getQueue().some(item => {
-                    const itemIdentity = buildAcIdentity(item);
-                    return itemIdentity === acIdentity && normalizeDateForCompare(item.workDate) === normalizeDateForCompare(data.workDate);
-                });
+                const queuedDup = getQueue().some(item =>
+                    buildAcIdentity(item) === acIdentity &&
+                    normalizeDateForCompare(item.workDate) === normalizeDateForCompare(data.workDate)
+                );
                 if (queuedDup) {
                     showStatus('⚠️ This AC is already pending sync for this date.', false);
                     alert('⚠️ Warning: This AC is already in the offline queue for this date. Please sync first.');
-                    this.disabled = false;
-                    this.innerHTML = orig;
-                    return;
+                    this.disabled = false; this.innerHTML = orig; return;
                 }
 
                 this.innerHTML = '<span>⏳</span> Checking Google Sheet...';
                 const remote = await checkRemoteDuplicate(acIdentity, data.workDate);
-
                 if (remote.checked && remote.duplicate) {
                     const rec = remote.record || {};
                     showStatus('⚠️ Already saved in Google Sheet for this date!', false);
-                    alert('⛔ DUPLICATE FOUND IN GOOGLE SHEET\n\n' +
-                          'AC Tag: ' + data.acTag + '\n' +
-                          'Location: ' + data.acLocation + '\n' +
-                          'Serial: ' + data.acSerial + '\n' +
-                          'Work Date: ' + data.workDate + '\n' +
-                          'Saved by: ' + (rec.technician || 'unknown') + '\n' +
-                          (rec.generatedAt ? 'Saved at: ' + rec.generatedAt : '') + '\n\n' +
-                          'This AC already has a PM record for this day.');
-                    this.disabled = false;
-                    this.innerHTML = orig;
-                    return;
+                    alert('⛔ DUPLICATE FOUND IN GOOGLE SHEET\n\nAC Tag: ' + data.acTag + '\nWork Date: ' + data.workDate + '\nSaved by: ' + (rec.technician || 'unknown'));
+                    this.disabled = false; this.innerHTML = orig; return;
                 }
-
                 if (!remote.checked) {
-                    const proceed = confirm(
-                        '⚠️ Could not verify with the Google Sheet (offline or network issue).\n\n' +
-                        'Error: ' + (remote.error || 'unknown') + '\n\n' +
-                        'Do you want to save anyway? (Local duplicate check passed.)'
-                    );
-                    if (!proceed) {
-                        showStatus('❌ Save cancelled — cloud could not be verified.', false);
-                        this.disabled = false;
-                        this.innerHTML = orig;
-                        return;
+                    if (!confirm('⚠️ Could not verify with Google Sheet. Save anyway? (Local check passed.)')) {
+                        this.disabled = false; this.innerHTML = orig; return;
                     }
                 }
 
                 this.innerHTML = '<span>⏳</span> Sending...';
                 const success = await queueAndSend(data);
-                this.disabled = false;
-                this.innerHTML = orig;
-                if (success) {
-                    USER_PM_KEYS.add(normKey);
-                    setTimeout(() => resetForm(false), 1500);
-                }
+                this.disabled = false; this.innerHTML = orig;
+                if (success) { USER_PM_KEYS.add(normKey); setTimeout(() => resetForm(false), 1500); }
             });
 
             function resetForm(showMsg) {
@@ -1266,12 +1185,9 @@
                 document.querySelectorAll('input[type="radio"]').forEach(rb => rb.checked = false);
                 document.querySelectorAll('input[type="radio"][value="good"]').forEach(rb => rb.checked = true);
                 if (AC_INVENTORY.length > 0) acSelect.selectedIndex = 0;
-                updateAcBanner();
-                updateTechnicianDisplay();
-                setAutoWorkDate();
+                updateAcBanner(); updateTechnicianDisplay(); setAutoWorkDate();
                 if (showMsg) showStatus('Form has been reset.', true);
             }
-
             document.getElementById('resetBtn').addEventListener('click', () => resetForm(true));
 
             function formatDateForPDF(dateVal) {
@@ -1284,7 +1200,6 @@
                 }
                 return String(dateVal);
             }
-
             function nextPmForPDF(dateVal) {
                 let d;
                 if (!dateVal) return '—';
@@ -1293,29 +1208,17 @@
                 if (typeof dateVal === 'string' && dateVal.match(/^\d{4}-\d{2}-\d{2}$/)) d = new Date(dateVal + 'T00:00:00');
                 else d = new Date(dateVal);
                 if (isNaN(d.getTime())) return '—';
-                const day = d.getDate();
-                d.setMonth(d.getMonth() + 6);
+                const day = d.getDate(); d.setMonth(d.getMonth() + 6);
                 if (d.getDate() < day) d.setDate(0);
                 return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
             }
-
             function safeSplit(val, sep) {
                 if (!val) return [];
                 if (Array.isArray(val)) return val.map(String);
                 return String(val).split(sep).map(v => v.trim()).filter(Boolean);
             }
-                        // Strip characters that jsPDF's built-in fonts cannot render
-            // (removes unicode escape chars, private-use codepoints, and diacritics)
-            function sanitizeForPDF(str) {
-                if (str === null || str === undefined) return '';
-                return String(str)
-                    .normalize('NFKD')
-                    .replace(/[\u0300-\u036f]/g, '')       // remove diacritics
-                    .replace(/[^\x20-\x7E]/g, '')          // keep only printable ASCII
-                    .replace(/\s+/g, ' ')                  // collapse whitespace
-                    .trim();
-            }
-         async function generatePDF(records) {
+
+            async function generatePDF(records) {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
@@ -1324,23 +1227,28 @@
                 const margin = 18;
                 const contentWidth = pageWidth - margin * 2;
 
-                // Load signatures once for the whole document
-                
-                   function addHeader(data) {
+                // ⭐ Load visual signatures once for the whole document
+                const allSignatures = loadSignatures();
+                const sigDimensions = {};
+                for (const [techName, dataUrl] of Object.entries(allSignatures)) {
+                    if (dataUrl) {
+                        const dims = await loadImageDimensions(dataUrl);
+                        if (dims) sigDimensions[techName] = dims;
+                    }
+                }
+
+                function addHeader(data) {
                     try {
                         doc.addImage('chub-logo.png', 'PNG', margin, margin - 2, 24, 11);
                     } catch (e) {
-                        doc.setFontSize(14);
-                        doc.setFont('helvetica', 'bolditalic');
+                        doc.setFontSize(14); doc.setFont('helvetica', 'bolditalic');
                         doc.setTextColor(106, 141, 176);
                         doc.text('CHUB', margin, margin + 6);
                     }
-                    doc.setFontSize(12);
-                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(12); doc.setFont('helvetica', 'bold');
                     doc.setTextColor(18, 64, 94);
                     doc.text('AC Fleet - PM Report', margin + 30, margin + 2);
-                    doc.setFontSize(8);
-                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(8); doc.setFont('helvetica', 'normal');
                     doc.setTextColor(58, 101, 131);
                     doc.text('Site: CHUB  |  Split Units', margin + 30, margin + 7);
 
@@ -1348,33 +1256,25 @@
                     const labelX = rightX - 45;
                     doc.setFontSize(8);
 
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(91, 123, 150);
+                    doc.setFont('helvetica', 'bold'); doc.setTextColor(91, 123, 150);
                     doc.text('Work date:', labelX, margin + 1);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(18, 64, 94);
+                    doc.setFont('helvetica', 'normal'); doc.setTextColor(18, 64, 94);
                     doc.text(formatDateForPDF(data.workDate), rightX, margin + 1, { align: 'right' });
 
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(91, 123, 150);
+                    doc.setFont('helvetica', 'bold'); doc.setTextColor(91, 123, 150);
                     doc.text('Next PM due:', labelX, margin + 5.5);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(18, 64, 94);
+                    doc.setFont('helvetica', 'normal'); doc.setTextColor(18, 64, 94);
                     doc.text(nextPmForPDF(data.workDate), rightX, margin + 5.5, { align: 'right' });
 
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(91, 123, 150);
+                    doc.setFont('helvetica', 'bold'); doc.setTextColor(91, 123, 150);
                     doc.text('Technician:', labelX, margin + 10);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(18, 64, 94);
-                    doc.text(data.technician, rightX, margin + 10, { align: 'right' });
+                    doc.setFont('helvetica', 'normal'); doc.setTextColor(18, 64, 94);
+                    doc.text(sanitizeForPDF(data.technician), rightX, margin + 10, { align: 'right' });
 
-                    doc.setDrawColor(200, 210, 220);
-                    doc.setLineWidth(0.3);
+                    doc.setDrawColor(200, 210, 220); doc.setLineWidth(0.3);
                     doc.line(rightX - 55, margin - 3, rightX - 55, margin + 12);
 
-                    doc.setDrawColor(30, 74, 109);
-                    doc.setLineWidth(0.5);
+                    doc.setDrawColor(30, 74, 109); doc.setLineWidth(0.5);
                     doc.line(margin, margin + 14, pageWidth - margin, margin + 14);
 
                     return margin + 19;
@@ -1382,12 +1282,9 @@
 
                 function addFooter() {
                     const footerY = pageHeight - 12;
-                    doc.setDrawColor(106, 141, 176);
-                    doc.setLineWidth(0.3);
+                    doc.setDrawColor(106, 141, 176); doc.setLineWidth(0.3);
                     doc.line(margin, footerY - 4, pageWidth - margin, footerY - 4);
-                    doc.setFontSize(8);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(91, 123, 150);
+                    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(91, 123, 150);
                     doc.text('P.O Box: 254 Butare  |  Email: info@chub.rw  |  Hotline: 2030', pageWidth / 2, footerY + 1, { align: 'center' });
                 }
 
@@ -1419,61 +1316,38 @@
 
                     let y = addHeader(data);
 
-                    // ==================== AC UNIT BANNER (with Department) ====================
-                    const deptLabel = data.acDept || 'Laboratory';
+                    // ---- AC UNIT BANNER ----
+                    const deptLabel = sanitizeForPDF(data.acDept || 'Laboratory');
                     doc.setFillColor(30, 74, 109);
                     doc.rect(margin, y, contentWidth, 15, 'F');
                     doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(11);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(`${data.acTag} — ${data.acLocation}`, margin + 4, y + 5.5);
-                    doc.setFontSize(8);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(203, 228, 247);
-                    doc.text(`Department: ${deptLabel}  |  ${data.acType}  |  ${data.acBrand}  |  ${data.acModel}  |  SN: ${data.acSerial}`, margin + 4, y + 12);
+                    doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+                    doc.text(sanitizeForPDF(`${data.acTag} — ${data.acLocation}`), margin + 4, y + 5.5);
+                    doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(203, 228, 247);
+                    doc.text(sanitizeForPDF(`Department: ${deptLabel}  |  ${data.acType}  |  ${data.acBrand}  |  ${data.acModel}  |  SN: ${data.acSerial}`), margin + 4, y + 12);
                     y += 19;
 
                     // Legend
-                    doc.setFillColor(248, 250, 252);
-                    doc.setDrawColor(203, 213, 225);
-                    doc.setLineWidth(0.2);
+                    doc.setFillColor(248, 250, 252); doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.2);
                     doc.roundedRect(margin, y, contentWidth, 7, 1.5, 1.5, 'FD');
-                    doc.setFontSize(8);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(27, 107, 63);
+                    doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(27, 107, 63);
                     doc.text('V', margin + 4, y + 5);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(51, 65, 85);
+                    doc.setFont('helvetica', 'normal'); doc.setTextColor(51, 65, 85);
                     doc.text('Checked & OK', margin + 9, y + 5);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(179, 58, 58);
+                    doc.setFont('helvetica', 'bold'); doc.setTextColor(179, 58, 58);
                     doc.text('X', margin + 60, y + 5);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(51, 65, 85);
+                    doc.setFont('helvetica', 'normal'); doc.setTextColor(51, 65, 85);
                     doc.text('Not checked / Needs attention', margin + 65, y + 5);
                     y += 12;
 
                     function drawSection(title, label, value, items, remark) {
-                        if (y > pageHeight - 60) {
-                            addFooter();
-                            doc.addPage();
-                            y = addHeader(data);
-                        }
-                        doc.setFontSize(10);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setTextColor(18, 64, 94);
-                        doc.text(title, margin, y);
-                        y += 1.5;
-                        doc.setDrawColor(212, 227, 239);
-                        doc.setLineWidth(0.3);
-                        doc.line(margin, y, pageWidth - margin, y);
-                        y += 4.5;
-
-                        doc.setFontSize(8);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setTextColor(18, 64, 94);
-                        doc.text(`${label}: ${value}`, margin, y);
-                        y += 4;
+                        if (y > pageHeight - 60) { addFooter(); doc.addPage(); y = addHeader(data); }
+                        doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(18, 64, 94);
+                        doc.text(title, margin, y); y += 1.5;
+                        doc.setDrawColor(212, 227, 239); doc.setLineWidth(0.3);
+                        doc.line(margin, y, pageWidth - margin, y); y += 4.5;
+                        doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(18, 64, 94);
+                        doc.text(`${label}: ${value}`, margin, y); y += 4;
 
                         const rows = [];
                         for (let j = 0; j < items.length; j += 2) {
@@ -1494,44 +1368,25 @@
                                 { content: rightText, styles: { textColor: '#000000' } }
                             ]);
                         }
-
                         doc.autoTable({
-                            startY: y,
-                            margin: { left: margin, right: margin },
-                            body: rows,
-                            theme: 'plain',
+                            startY: y, margin: { left: margin, right: margin }, body: rows, theme: 'plain',
                             styles: { fontSize: 8, cellPadding: 1.5, textColor: '#000000', lineWidth: 0, overflow: 'linebreak' },
-                            columnStyles: {
-                                0: { cellWidth: 6 },
-                                1: { cellWidth: (contentWidth / 2) - 6 },
-                                2: { cellWidth: 6 },
-                                3: { cellWidth: (contentWidth / 2) - 6 }
-                            }
+                            columnStyles: { 0: { cellWidth: 6 }, 1: { cellWidth: (contentWidth / 2) - 6 }, 2: { cellWidth: 6 }, 3: { cellWidth: (contentWidth / 2) - 6 } }
                         });
                         y = doc.lastAutoTable.finalY + 3;
-
                         if (remark && remark !== '—' && remark !== '') {
-                            if (y > pageHeight - 35) {
-                                addFooter();
-                                doc.addPage();
-                                y = addHeader(data);
-                            }
-                            doc.setFontSize(8);
-                            doc.setFont('helvetica', 'italic');
-                            doc.setTextColor(58, 101, 131);
-                            const lines = doc.splitTextToSize('Note: ' + remark, contentWidth - 6);
-                            doc.text(lines, margin + 3, y);
-                            y += lines.length * 3.5 + 3;
+                            if (y > pageHeight - 35) { addFooter(); doc.addPage(); y = addHeader(data); }
+                            doc.setFontSize(8); doc.setFont('helvetica', 'italic'); doc.setTextColor(58, 101, 131);
+                            const lines = doc.splitTextToSize('Note: ' + sanitizeForPDF(remark), contentWidth - 6);
+                            doc.text(lines, margin + 3, y); y += lines.length * 3.5 + 3;
                         }
                         y += 3;
                     }
 
                     const airflowSet = new Set(safeSplit(data.airflowItems, '|'));
                     const airflowItems = airflowTexts.map((t, idx) => ({ text: t, checked: airflowSet.has(String(idx + 1)) }));
-
                     const electricalSet = new Set(safeSplit(data.electricalItems, '|'));
                     const electricalItems = electricalTexts.map((t, idx) => ({ text: t, checked: electricalSet.has(String(idx + 6)) }));
-
                     const drainageSet = new Set(safeSplit(data.drainageItems, '|'));
                     const drainageItems = drainageTexts.map((t, idx) => ({ text: t, checked: drainageSet.has(String(idx + 11)) }));
 
@@ -1539,27 +1394,22 @@
                     drawSection('Electrical & Refrigerant', 'Status', data.electricalRating, electricalItems, data.electricalRemark);
                     drawSection('Drainage, Controls & Performance', 'Performance', data.drainageRating, drainageItems, data.drainageRemark);
 
-                    // ==================== SIGN-OFF BLOCKS (Technician + Dept In-Charge) ====================
+                    // ==================== SIGN-OFF BLOCKS ====================
                     const boxHeight = 46;
-                    if (y > pageHeight - 60) {
-                        addFooter();
-                        doc.addPage();
-                        y = addHeader(data);
-                    }
+                    if (y > pageHeight - 70) { addFooter(); doc.addPage(); y = addHeader(data); }
 
                     const gap = 4;
                     const halfWidth = (contentWidth - gap) / 2;
                     const leftBoxX = margin;
                     const rightBoxX = margin + halfWidth + gap;
 
-                                       // ---- LEFT: TECHNICIAN (visual sig + cert info) ----
+                    // ---- LEFT: TECHNICIAN ----
                     doc.setFillColor(240, 246, 252); doc.setDrawColor(207, 224, 238); doc.setLineWidth(0.3);
                     doc.roundedRect(leftBoxX, y, halfWidth, boxHeight, 2, 2, 'FD');
 
                     doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(91, 123, 150);
                     doc.text('PERFORMED BY (TECHNICIAN)', leftBoxX + 3, y + 4.5);
 
-                    // Left column: name + dates
                     doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(10, 42, 63);
                     doc.text(sanitizeForPDF(data.technician), leftBoxX + 3, y + 11);
 
@@ -1567,14 +1417,12 @@
                     doc.text(`Date: ${formatDateForPDF(data.workDate)}`, leftBoxX + 3, y + 15.5);
                     doc.text(`Next PM: ${nextPmForPDF(data.workDate)}`, leftBoxX + 3, y + 19.5);
 
-                    // ⭐ RIGHT SIDE: Visual signature image — always draw it
-                    // Reserve the right half of the box: from x = leftBoxX + halfWidth/2 to leftBoxX + halfWidth - 3
+                    // RIGHT-SIDE VISUAL SIGNATURE AREA
                     const sigAreaX = leftBoxX + (halfWidth / 2) + 2;
                     const sigAreaW = (halfWidth / 2) - 5;
                     const sigAreaY = y + 7;
                     const sigAreaH = 16;
 
-                    // Draw a light "signature" frame so it's clear where the sig goes
                     doc.setDrawColor(200, 215, 230); doc.setLineWidth(0.2);
                     doc.roundedRect(sigAreaX, sigAreaY, sigAreaW, sigAreaH, 1, 1, 'S');
 
@@ -1585,16 +1433,11 @@
                             const techDims = sigDimensions[data.technician];
                             let sigW, sigH;
                             if (techDims && techDims.width > 0 && techDims.height > 0) {
-                                // Preserve aspect ratio
                                 const aspect = techDims.width / techDims.height;
                                 sigW = sigAreaW - 4;
                                 sigH = sigW / aspect;
-                                if (sigH > sigAreaH - 3) {
-                                    sigH = sigAreaH - 3;
-                                    sigW = sigH * aspect;
-                                }
+                                if (sigH > sigAreaH - 3) { sigH = sigAreaH - 3; sigW = sigH * aspect; }
                             } else {
-                                // Fallback: use fixed size if we couldn't measure
                                 sigW = sigAreaW - 6;
                                 sigH = sigAreaH - 6;
                             }
@@ -1604,23 +1447,18 @@
                             drawn = true;
                         } catch (e) { console.warn('Could not render visual signature:', e); }
                     }
-
-                    // If no signature was drawn, show a placeholder label
                     if (!drawn) {
                         doc.setFontSize(6); doc.setFont('helvetica', 'italic');
                         doc.setTextColor(156, 185, 208);
                         doc.text('(visual signature)', sigAreaX + sigAreaW / 2, sigAreaY + sigAreaH / 2 + 1, { align: 'center' });
                     }
 
-                    // Divider line above digital signature info
                     doc.setDrawColor(200, 215, 230); doc.setLineWidth(0.2);
                     doc.line(leftBoxX + 3, y + 25, leftBoxX + halfWidth - 3, y + 25);
 
-                    // Digital signature info below the divider
                     if (data.signatureSubject) {
                         doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(27, 107, 63);
                         doc.text('Digitally signed (PKCS#7)', leftBoxX + 3, y + 28.5);
-
                         doc.setFont('helvetica', 'normal'); doc.setFontSize(6.2); doc.setTextColor(58, 101, 131);
                         doc.text('Subject: ' + sanitizeForPDF(data.signatureSubject), leftBoxX + 3, y + 31.5);
                         doc.text('Issuer: ' + sanitizeForPDF(data.signatureIssuer || '—'), leftBoxX + 3, y + 34);
@@ -1632,56 +1470,43 @@
                         doc.text('No digital signature — visual only', leftBoxX + 3, y + 30);
                     }
 
-                    // Bottom signature line
                     doc.setDrawColor(150, 180, 200); doc.setLineWidth(0.3);
                     doc.line(leftBoxX + 3, y + 39, leftBoxX + halfWidth - 3, y + 39);
                     doc.setFontSize(6.5); doc.setFont('helvetica', 'italic'); doc.setTextColor(91, 123, 150);
                     doc.text(data.signatureSubject ? 'Signature + PKCS#7 digital seal' : 'Signature', leftBoxX + 3, y + 42);
 
-                    // ---- RIGHT BOX: Department In-Charge ----
-                    doc.setFillColor(255, 251, 235);
-                    doc.setDrawColor(244, 217, 122);
-                    doc.setLineWidth(0.3);
+                    // ---- RIGHT: DEPT IN-CHARGE ----
+                    doc.setFillColor(255, 251, 235); doc.setDrawColor(244, 217, 122); doc.setLineWidth(0.3);
                     doc.roundedRect(rightBoxX, y, halfWidth, boxHeight, 2, 2, 'FD');
 
-                    doc.setFontSize(7);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(122, 83, 0);
+                    doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(122, 83, 0);
                     doc.text('REVIEWED BY (DEPT. IN-CHARGE)', rightBoxX + 3, y + 4.5);
 
-                    doc.setFontSize(8.5);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(58, 101, 131);
+                    doc.setFontSize(8.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(58, 101, 131);
                     doc.text(`Department: ${deptLabel}`, rightBoxX + 3, y + 11);
 
-                    doc.setFontSize(7.5);
-                    doc.setTextColor(122, 83, 0);
-                    doc.text('Name: ____________________________', rightBoxX + 3, y + 17);
+                    doc.setFontSize(7.5); doc.setTextColor(122, 83, 0);
+                    doc.text('Name: ____________________________', rightBoxX + 3, y + 18);
+                    doc.text('Signature: _________________________', rightBoxX + 3, y + 25);
 
-                    doc.setDrawColor(180, 140, 60);
-                    doc.setLineWidth(0.3);
-                    doc.line(rightBoxX + 3, y + 25, rightBoxX + halfWidth - 3, y + 25);
-                    doc.setFontSize(6.5);
-                    doc.setFont('helvetica', 'italic');
-                    doc.setTextColor(122, 83, 0);
-                    doc.text('Signature & Date', rightBoxX + 3, y + 28.5);
+                    doc.setDrawColor(180, 140, 60); doc.setLineWidth(0.3);
+                    doc.line(rightBoxX + 3, y + 33, rightBoxX + halfWidth - 3, y + 33);
+                    doc.setFontSize(6.5); doc.setFont('helvetica', 'italic'); doc.setTextColor(122, 83, 0);
+                    doc.text('Signature & Date', rightBoxX + 3, y + 36.5);
 
                     y += boxHeight + 4;
 
-                    doc.setFontSize(7);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(91, 123, 150);
-                    doc.text(`Generated from CHUB AC Fleet PM System | ${data.generatedAt}`, margin, y);
+                    doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(91, 123, 150);
+                    doc.text(sanitizeForPDF(`Generated from CHUB AC Fleet PM System | ${data.generatedAt}`), margin, y);
                 }
 
                 addFooter();
                 doc.save('CHUB_AC_PM_Report.pdf');
             }
 
-                      document.getElementById('pdfBtn').addEventListener('click', async function() {
+            document.getElementById('pdfBtn').addEventListener('click', async function() {
                 const data = collectFormData();
                 if (!data) { showStatus('⚠️ Please add an AC unit first.', false); return; }
-
                 await ensureReportHash(data);
 
                 const acIdentity = buildAcIdentity(data);
@@ -1690,31 +1515,20 @@
                 this.disabled = true;
 
                 if (USER_PM_KEYS.has(normKey)) {
-                    alert('⚠️ This AC has already been PM\'d on this date. You cannot export the same AC twice.');
-                    this.disabled = false;
-                    this.innerHTML = orig;
-                    return;
+                    alert('⚠️ This AC has already been PM\'d on this date.');
+                    this.disabled = false; this.innerHTML = orig; return;
                 }
-
                 this.innerHTML = '<span>⏳</span> Checking Sheet...';
                 const remote = await checkRemoteDuplicate(acIdentity, data.workDate);
                 if (remote.checked && remote.duplicate) {
-                    alert('⛔ This AC is already saved in Google Sheet for this date. PDF export blocked.');
-                    this.disabled = false;
-                    this.innerHTML = orig;
-                    return;
+                    alert('⛔ This AC is already saved for this date. PDF export blocked.');
+                    this.disabled = false; this.innerHTML = orig; return;
                 }
 
                 this.innerHTML = '<span>⏳</span> Generating...';
-                try {
-                    await generatePDF([data]);
-                    showStatus('📄 PDF generated successfully.', true);
-                } catch (e) {
-                    console.error(e);
-                    showStatus('⚠️ Could not generate PDF: ' + e.message, false);
-                }
-                this.disabled = false;
-                this.innerHTML = orig;
+                try { await generatePDF([data]); showStatus('📄 PDF generated successfully.', true); }
+                catch (e) { console.error(e); showStatus('⚠️ Could not generate PDF: ' + e.message, false); }
+                this.disabled = false; this.innerHTML = orig;
             });
 
             document.getElementById('historyPdfBtn').addEventListener('click', async function() {
@@ -1737,19 +1551,17 @@
                         if (normalizeText(r.technician) !== normalizeText(currentTech)) continue;
                         const identity = buildAcIdentity({ acTag: r.acTag, acLocation: r.acLocation, acSerial: r.acSerial, acModel: r.acModel });
                         const key = identity + '||' + normalizeDateForCompare(r.workDate);
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            uniqueRecords.push(r);
-                        }
+                        if (!seen.has(key)) { seen.add(key); uniqueRecords.push(r); }
                     }
 
-                     if (uniqueRecords.length === 0) { showStatus('📭 No PM history yet.', false); this.disabled = false; this.innerHTML = orig; return; }
+                    if (uniqueRecords.length === 0) { showStatus('📭 No PM history yet.', false); this.disabled = false; this.innerHTML = orig; return; }
 
-                    // If a certificate is loaded, sign each historical record on the fly
                     if (isCertLoaded()) {
                         this.innerHTML = '<span>⏳</span> Signing ' + uniqueRecords.length + ' record(s)...';
                         for (const r of uniqueRecords) {
-                            try { await ensureReportHash(r); } catch (e) { console.warn('Signing failed for one record:', e); }
+                            if (!r.pkcs7Signature) {
+                                try { await ensureReportHash(r); } catch (e) { console.warn('Signing failed for one record:', e); }
+                            }
                         }
                     }
 
@@ -1760,8 +1572,7 @@
                     console.error(err);
                     showStatus('⚠️ Could not generate PDF: ' + err.message, false);
                 }
-                this.disabled = false;
-                this.innerHTML = orig;
+                this.disabled = false; this.innerHTML = orig;
             });
 
             const SESSION_KEY = 'chub_ac_session';
@@ -1866,7 +1677,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js?v=26')
+                navigator.serviceWorker.register('sw.js?v=27')
                     .then(reg => console.log('✅ Service Worker registered:', reg.scope))
                     .catch(err => console.warn('⚠️ Service Worker failed:', err));
             });
