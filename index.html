@@ -16,13 +16,13 @@
         body { background: linear-gradient(135deg, #eef4fa 0%, #f5f7fa 100%); padding: 24px 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
         body::before { content: 'CHUB AC MAINTENANCE'; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: clamp(24px, 4vw, 72px); font-weight: 900; color: rgba(30, 74, 109, 0.12); letter-spacing: 6px; pointer-events: none; user-select: none; white-space: nowrap; z-index: 50; text-align: center; width: 100%; }
         .app-container { max-width: 1300px; width: 100%; background: white; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); padding: 32px 28px; margin-bottom: 30px; }
-        
+
         .title-hero { text-align: center; padding: 22px 20px 30px 20px; margin-bottom: 24px; background: linear-gradient(135deg, #0b3b5c 0%, #1e4a6d 50%, #2a6b96 100%); border-radius: 24px; position: relative; overflow: hidden; box-shadow: 0 14px 30px -10px rgba(15, 56, 82, 0.5); }
         .title-hero h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px; color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; position: relative; z-index: 2; text-shadow: 0 3px 12px rgba(0,0,0,0.25); }
         .title-hero h1 .title-accent { background: linear-gradient(90deg, #7fc8ff, #b3e0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 900; }
         .title-hero .title-sub { margin-top: 12px; font-size: 1rem; color: #cbe4f7; letter-spacing: 2px; text-transform: uppercase; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .title-hero .title-sub .dot-sep { width: 5px; height: 5px; border-radius: 50%; background: #7fc8ff; display: inline-block; }
-        
+
         .subhead { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; background: #eef6fc; padding: 16px 24px; border-radius: 24px; margin-bottom: 24px; border: 1px solid #d8e8f4; gap: 14px; }
         .tech-info { display: flex; align-items: center; gap: 14px; font-size: 1.05rem; color: #0b3b5c; font-weight: 500; flex-wrap: wrap; }
         .workdate-tag { background: #fff3cd; color: #7a5300; padding: 8px 22px; border-radius: 40px; font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 8px; border: 1px solid #f4d97a; }
@@ -76,7 +76,7 @@
         .btn-sync:hover { background: #1e4a6d; }
         .btn-secondary { background: white; border: 1.5px solid #b8cfdf; color: #1e4a6d; padding: 12px 26px; border-radius: 40px; font-weight: 500; cursor: pointer; transition: 0.15s; }
         .btn-secondary:hover { background: #e7f0f8; }
-        
+
         .btn-add { background: #1b6b3f; color: white; border: none; padding: 12px 24px; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 8px; }
         .btn-add:hover { background: #155231; }
         .btn-remove { background: #b33a3a; color: white; border: none; padding: 12px 24px; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 8px; }
@@ -99,17 +99,12 @@
         .modal-box .modal-actions button { padding: 12px 24px; border-radius: 40px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; transition: 0.15s; }
         .modal-box .btn-cancel { background: #e7f0f8; color: #1e4a6d; }
         .modal-box .btn-go { background: #1e4a6d; color: white; }
-        
+
         .action-buttons { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-top: 24px; justify-content: center; }
         .status-message { margin-top: 20px; padding: 14px 24px; border-radius: 40px; background: #e2f0e6; color: #1b6b3f; font-weight: 500; display: none; align-items: center; gap: 10px; }
         .status-message.show { display: flex; }
         .footer-note { font-size: 0.85rem; color: #5b7b96; text-align: center; margin-top: 12px; }
 
-        /* ============================================================
-           📱 MOBILE / TABLET RESPONSIVE STYLES
-           ============================================================ */
-
-        /* Tablets (up to 900px) */
         @media (max-width: 900px) {
             .generator-selector { flex-direction: column; align-items: stretch; }
             .generator-selector label { margin-left: 0 !important; }
@@ -119,21 +114,16 @@
             .chub-logo { margin: 10px auto; max-width: 220px; }
         }
 
-        /* Phones (up to 700px) */
         @media (max-width: 700px) {
             body { padding: 12px 8px; }
             body::before { font-size: 40px; letter-spacing: 4px; }
             .app-container { padding: 16px 12px; border-radius: 20px; margin-bottom: 16px; }
-
-            /* Hero */
             .title-hero { padding: 16px 12px 20px 12px; border-radius: 18px; margin-bottom: 14px; }
             .title-hero h1 { font-size: 1.3rem; gap: 8px; line-height: 1.3; }
             .title-hero h1 .title-accent { display: block; font-size: 1.05rem; }
             .title-hero .title-ornament { font-size: 1.4rem; }
             .title-hero .title-sub { font-size: 0.7rem; letter-spacing: 1px; gap: 6px; }
             .title-hero .title-sub .dot-sep { width: 4px; height: 4px; }
-
-            /* Subhead */
             .subhead { padding: 12px 14px; border-radius: 16px; margin-bottom: 14px; gap: 10px; flex-direction: column; align-items: stretch; }
             .tech-info { font-size: 0.9rem; gap: 8px; justify-content: space-between; }
             .tech-info > span:first-child { font-size: 0.85rem; }
@@ -141,8 +131,6 @@
             .subhead > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
             .workdate-tag { padding: 6px 14px; font-size: 0.85rem; width: 100%; justify-content: center; }
             #logoutBtn { flex: 1; padding: 8px 12px !important; font-size: 0.8rem !important; justify-content: center; }
-
-            /* Generator selector */
             .generator-selector { padding: 14px 14px; border-radius: 16px; gap: 12px; margin-bottom: 14px; }
             .generator-selector label { font-size: 0.9rem; margin-left: 0 !important; }
             select, input[type="date"] { padding: 12px 16px; font-size: 0.95rem; border-radius: 30px; }
@@ -150,25 +138,17 @@
             .field-group label { font-size: 0.85rem; }
             .btn-add, .btn-remove { padding: 12px 16px; font-size: 0.9rem; width: 100%; justify-content: center; }
             .chub-logo { max-width: 180px; margin: 8px auto; }
-
-            /* Banner */
             .generator-banner { padding: 14px 16px; border-radius: 16px; margin-bottom: 18px; gap: 10px; }
             .generator-banner .gen-icon { width: 40px; height: 40px; font-size: 1.3rem; border-radius: 12px; }
             .generator-banner .gen-title { font-size: 1rem; }
             .generator-banner .gen-sub { font-size: 0.78rem; }
             .generator-banner .gen-badge { font-size: 0.65rem; padding: 4px 12px; }
             .generator-banner .gen-nextpm { font-size: 0.72rem; padding: 5px 12px; margin-top: 6px; }
-
-            /* Grids */
             .grid-3 { grid-template-columns: 1fr; gap: 14px; margin-bottom: 18px; }
             .grid-3-wide { grid-template-columns: 1fr; gap: 14px; margin-bottom: 18px; }
-
-            /* Cards */
             .card { border-radius: 18px; }
             .card-header { padding: 12px 16px; font-size: 1rem; border-radius: 18px 18px 0 0; }
             .card-body { padding: 14px 16px; }
-
-            /* Checklist */
             .check-item { margin-bottom: 14px; gap: 10px; }
             .check-item input[type="checkbox"] { width: 20px; height: 20px; }
             .check-item label { font-size: 0.9rem; }
@@ -176,29 +156,17 @@
             .rating-block { gap: 8px 14px; }
             .rating-option label { font-size: 0.85rem; }
             .rating-option input[type="radio"] { width: 16px; height: 16px; }
-
-            /* Section title */
             .section-title { font-size: 1.05rem !important; margin-bottom: 14px !important; }
-
-            /* Sign-off */
             .signoff-section { flex-direction: column; align-items: stretch; padding: 18px 16px; border-radius: 18px; gap: 14px; }
             .signoff-left .tech { font-size: 1.2rem; }
             .signoff-left .label { font-size: 0.85rem; }
             .signoff-right { flex-direction: column; align-items: stretch; gap: 10px; }
             .signature-pad { min-width: 100%; font-size: 1.1rem; min-height: 48px; }
             .signoff-right .btn-primary { width: 100%; justify-content: center; padding: 14px 20px; font-size: 1rem; }
-
-            /* Action buttons */
             .action-buttons { flex-direction: column; gap: 10px; margin-top: 18px; }
             .action-buttons button { width: 100%; justify-content: center; padding: 14px 20px; font-size: 0.95rem; }
-
-            /* Status message */
             .status-message { padding: 12px 18px; font-size: 0.9rem; border-radius: 30px; }
-
-            /* Footer */
             .footer-note { font-size: 0.72rem; padding: 0 8px; }
-
-            /* Modals */
             .modal-overlay { padding: 10px; align-items: flex-start; }
             .modal-box { padding: 24px 20px; border-radius: 20px; max-height: 95vh; margin-top: 10px; }
             .modal-box h2 { font-size: 1.15rem; }
@@ -210,7 +178,6 @@
             .modal-box .modal-actions button { width: 100%; padding: 14px 20px; font-size: 0.95rem; }
         }
 
-        /* Small phones (up to 420px) */
         @media (max-width: 420px) {
             body { padding: 8px 6px; }
             .app-container { padding: 12px 10px; border-radius: 16px; }
@@ -226,14 +193,12 @@
             .signoff-left .tech { font-size: 1.05rem; }
         }
 
-        /* Landscape phone - optimize spacing */
         @media (max-height: 500px) and (orientation: landscape) {
             .title-hero { padding: 10px 14px 14px 14px; }
             .title-hero h1 { font-size: 1.1rem; }
             .modal-box { max-height: 85vh; }
         }
 
-        /* Prevent iOS input zoom on focus (needs 16px min font) */
         @media (max-width: 700px) {
             input, select, textarea { font-size: 16px !important; }
         }
@@ -291,7 +256,6 @@
             </div>
             <label for="acSelect">🔽 Select AC Unit:</label>
             <select id="acSelect">
-                <!-- Populated via JavaScript -->
             </select>
             <button id="addAcBtn" class="btn-add">➕ Add New AC</button>
             <button id="removeAcBtn" class="btn-remove">➖ Remove AC</button>
@@ -308,12 +272,10 @@
             <div class="gen-badge">Active</div>
         </div>
 
-        <!-- ======================== INSPECTION CHECKLIST ======================== -->
         <div class="section-title" style="font-size: 1.3rem; font-weight: 600; color: #12405e; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
             <span>🔍</span> Inspection Checklist
         </div>
         <div class="grid-3">
-            <!-- Card 1: Filters, Coils & Airflow -->
             <div class="card">
                 <div class="card-header"><span>🌬️</span> Filters, Coils & Airflow</div>
                 <div class="card-body">
@@ -337,7 +299,6 @@
                 </div>
             </div>
 
-            <!-- Card 2: Electrical & Refrigerant -->
             <div class="card">
                 <div class="card-header"><span>⚡</span> Electrical & Refrigerant</div>
                 <div class="card-body">
@@ -361,7 +322,6 @@
                 </div>
             </div>
 
-            <!-- Card 3: Drainage, Controls & Performance -->
             <div class="card">
                 <div class="card-header"><span>💧</span> Drainage & Performance</div>
                 <div class="card-body">
@@ -451,7 +411,7 @@
         <div class="modal-box">
             <h2>➕ Add New AC Unit</h2>
             <p>This AC will be saved to the cloud under your name: <strong id="addAcOwnerName">—</strong></p>
-            
+
             <div class="grid-3-wide" style="grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div class="field-group">
                     <label for="newAcTag">Tag Number / ID *</label>
@@ -462,7 +422,7 @@
                     <input type="text" id="newAcDept" placeholder="e.g. Laboratory" value="Laboratory">
                 </div>
             </div>
-            
+
             <div class="field-group">
                 <label for="newAcLocation">Location *</label>
                 <input type="text" id="newAcLocation" placeholder="e.g. Genetics Room 2">
@@ -541,6 +501,8 @@
                 { tag: 'N/A', dept: 'Laboratory', loc: 'Refrigerators Room', type: 'Split', brand: 'Samsung', model: 'AR24CQHGAWKX', serial: 'BVQQP9CX500839A' },
                 { tag: 'N/A', dept: 'Laboratory', loc: 'Hematology', type: 'Split', brand: 'Carrier', model: '38QHG024D85', serial: '54CQ6164440649120120061' }
             ];
+
+            let AC_INVENTORY = [];
 
             const CACHE_KEY_PREFIX = 'chub_ac_cache_v1_';
             function getCacheKey(techName) { return CACHE_KEY_PREFIX + (techName || 'default').replace(/\s+/g, '_'); }
@@ -709,7 +671,6 @@
                 updateWorkDateDisplay();
             }
 
-            // ===== PM SCHEDULE (every AC is serviced every 6 months) =====
             const PM_INTERVAL_MONTHS = 6;
 
             function parseToDate(dateVal) {
@@ -727,7 +688,7 @@
                 if (!d) return null;
                 const day = d.getDate();
                 d.setMonth(d.getMonth() + months);
-                if (d.getDate() < day) d.setDate(0); // clamp (e.g. 31 Aug + 6m → 28/29 Feb)
+                if (d.getDate() < day) d.setDate(0);
                 return d;
             }
 
@@ -821,7 +782,7 @@
                 if (!ac) return null;
                 const now = new Date();
                 const timestamp = now.toLocaleString('en-GB', { hour12: false, day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-                
+
                 const getTickedItems = (prefix, max) => {
                     const items = [];
                     for (let i = 1; i <= max; i++) {
@@ -874,23 +835,321 @@
 
             document.getElementById('resetBtn').addEventListener('click', () => resetForm(true));
 
-            document.getElementById('pdfBtn').addEventListener('click', function() {
+            // ============================================================
+            // ============ PDF GENERATION WITH JSPDF ====================
+            // ============================================================
+
+            function formatDateForPDF(dateVal) {
+                if (!dateVal) return '—';
+                if (Array.isArray(dateVal)) dateVal = dateVal[0];
+                if (typeof dateVal === 'string' && dateVal.includes('T')) dateVal = dateVal.split('T')[0];
+                if (typeof dateVal === 'string' && dateVal.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    const d = new Date(dateVal + 'T00:00:00');
+                    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                }
+                return String(dateVal);
+            }
+
+            function nextPmForPDF(dateVal) {
+                let d;
+                if (!dateVal) return '—';
+                if (Array.isArray(dateVal)) dateVal = dateVal[0];
+                if (typeof dateVal === 'string' && dateVal.includes('T')) dateVal = dateVal.split('T')[0];
+                if (typeof dateVal === 'string' && dateVal.match(/^\d{4}-\d{2}-\d{2}$/)) d = new Date(dateVal + 'T00:00:00');
+                else d = new Date(dateVal);
+                if (isNaN(d.getTime())) return '—';
+                const day = d.getDate();
+                d.setMonth(d.getMonth() + 6);
+                if (d.getDate() < day) d.setDate(0);
+                return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            }
+
+            async function generatePDF(records) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 18;
+                const contentWidth = pageWidth - margin * 2;
+
+                function addHeader(data) {
+                    // Try to add logo, fallback to text
+                    try {
+                        doc.addImage('chub-logo.png', 'PNG', margin, margin - 2, 24, 11);
+                    } catch (e) {
+                        doc.setFontSize(14);
+                        doc.setFont('helvetica', 'bolditalic');
+                        doc.setTextColor(106, 141, 176);
+                        doc.text('CHUB', margin, margin + 6);
+                    }
+
+                    // Title block
+                    doc.setFontSize(13);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(18, 64, 94);
+                    doc.text('AC Fleet - Preventive Maintenance Report', margin + 30, margin + 2);
+
+                    doc.setFontSize(8.5);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(58, 101, 131);
+                    doc.text('Site: CHUB  |  Split Units  |  PM Checklist', margin + 30, margin + 7);
+
+                    // Right side metadata
+                    const rightX = pageWidth - margin;
+                    const labelX = rightX - 55;
+
+                    doc.setFontSize(9);
+
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(91, 123, 150);
+                    doc.text('Work date:', labelX, margin + 1);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(18, 64, 94);
+                    doc.text(formatDateForPDF(data.workDate), rightX, margin + 1, { align: 'right' });
+
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(91, 123, 150);
+                    doc.text('Next PM due:', labelX, margin + 6);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(18, 64, 94);
+                    doc.text(nextPmForPDF(data.workDate), rightX, margin + 6, { align: 'right' });
+
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(91, 123, 150);
+                    doc.text('Technician:', labelX, margin + 11);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(18, 64, 94);
+                    doc.text(data.technician, rightX, margin + 11, { align: 'right' });
+
+                    // Divider
+                    doc.setDrawColor(30, 74, 109);
+                    doc.setLineWidth(0.5);
+                    doc.line(margin, margin + 15, pageWidth - margin, margin + 15);
+
+                    return margin + 20;
+                }
+
+                function addFooter() {
+                    const footerY = pageHeight - 12;
+                    doc.setDrawColor(106, 141, 176);
+                    doc.setLineWidth(0.3);
+                    doc.line(margin, footerY - 4, pageWidth - margin, footerY - 4);
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(91, 123, 150);
+                    doc.text('P.O Box: 254 Butare  |  Email: info@chub.rw  |  Hotline: 2030', pageWidth / 2, footerY + 1, { align: 'center' });
+                }
+
+                const airflowTexts = [
+                    'Inspect, clean, or replace filters',
+                    'Clean indoor evaporator coil',
+                    'Clean outdoor condenser coil',
+                    'Check blower motor and wheel',
+                    'Verify proper airflow across unit'
+                ];
+                const electricalTexts = [
+                    'Verify correct refrigerant charge (superheat/subcooling)',
+                    'Tighten and inspect electrical connections',
+                    'Test relays, contactors, and capacitors',
+                    'Measure compressor and fan motor amps',
+                    'Inspect wiring for frays or heat damage'
+                ];
+                const drainageTexts = [
+                    'Clear condensate drain line and pan',
+                    'Check thermostat calibration and controls',
+                    'Measure supply/return air temperatures',
+                    'Verify overall system efficiency',
+                    'Inspect ductwork for leaks (visible)'
+                ];
+
+                for (let i = 0; i < records.length; i++) {
+                    const data = records[i];
+                    if (i > 0) {
+                        addFooter();
+                        doc.addPage();
+                    }
+
+                    let y = addHeader(data);
+
+                    // AC Unit banner
+                    doc.setFillColor(30, 74, 109);
+                    doc.rect(margin, y, contentWidth, 13, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(11);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`${data.acTag} - ${data.acLocation}`, margin + 4, y + 5.5);
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`${data.acBrand} | ${data.acModel} | SN: ${data.acSerial}`, margin + 4, y + 11);
+                    y += 17;
+
+                    // Legend
+                    doc.setFillColor(248, 250, 252);
+                    doc.setDrawColor(203, 213, 225);
+                    doc.setLineWidth(0.2);
+                    doc.roundedRect(margin, y, contentWidth, 7, 1.5, 1.5, 'FD');
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(27, 107, 63);
+                    doc.text('V', margin + 4, y + 5);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(51, 65, 85);
+                    doc.text('Checked & OK', margin + 9, y + 5);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(179, 58, 58);
+                    doc.text('X', margin + 60, y + 5);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(51, 65, 85);
+                    doc.text('Not checked / Needs attention', margin + 65, y + 5);
+                    y += 12;
+
+                    function drawSection(title, label, value, items, remark) {
+                        if (y > pageHeight - 60) {
+                            addFooter();
+                            doc.addPage();
+                            y = addHeader(data);
+                        }
+
+                        doc.setFontSize(10);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(18, 64, 94);
+                        doc.text(title, margin, y);
+                        y += 1.5;
+                        doc.setDrawColor(212, 227, 239);
+                        doc.setLineWidth(0.3);
+                        doc.line(margin, y, pageWidth - margin, y);
+                        y += 4.5;
+
+                        doc.setFontSize(8);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(18, 64, 94);
+                        doc.text(`${label}: ${value}`, margin, y);
+                        y += 4;
+
+                        const rows = [];
+                        for (let j = 0; j < items.length; j += 2) {
+                            const left = items[j];
+                            const right = items[j + 1];
+                            const mark = (chk) => chk ? 'V' : 'X';
+                            const col = (chk) => chk ? '#1b6b3f' : '#b33a3a';
+                            const row = [];
+                            row.push({
+                                content: mark(left.checked) + '  ' + left.text,
+                                styles: { textColor: col(left.checked), fontStyle: 'bold' }
+                            });
+                            if (right) {
+                                row.push({
+                                    content: mark(right.checked) + '  ' + right.text,
+                                    styles: { textColor: col(right.checked), fontStyle: 'bold' }
+                                });
+                            } else {
+                                row.push({ content: '', styles: {} });
+                            }
+                            rows.push(row);
+                        }
+
+                        doc.autoTable({
+                            startY: y,
+                            margin: { left: margin, right: margin },
+                            body: rows,
+                            theme: 'plain',
+                            styles: { fontSize: 8, cellPadding: 1.5, textColor: '#1f3c54', lineWidth: 0, overflow: 'linebreak' },
+                            columnStyles: {
+                                0: { cellWidth: (contentWidth / 2) - 2 },
+                                1: { cellWidth: (contentWidth / 2) - 2 }
+                            }
+                        });
+                        y = doc.lastAutoTable.finalY + 3;
+
+                        if (remark && remark !== '—' && remark !== '') {
+                            if (y > pageHeight - 35) {
+                                addFooter();
+                                doc.addPage();
+                                y = addHeader(data);
+                            }
+                            doc.setFontSize(8);
+                            doc.setFont('helvetica', 'italic');
+                            doc.setTextColor(58, 101, 131);
+                            const lines = doc.splitTextToSize('Note: ' + remark, contentWidth - 6);
+                            doc.text(lines, margin + 3, y);
+                            y += lines.length * 3.5 + 3;
+                        }
+                        y += 3;
+                    }
+
+                    const airflowSet = new Set((data.airflowItems || '').split('|').filter(Boolean));
+                    const airflowItems = airflowTexts.map((t, idx) => ({ text: t, checked: airflowSet.has(String(idx + 1)) }));
+
+                    const electricalSet = new Set((data.electricalItems || '').split('|').filter(Boolean));
+                    const electricalItems = electricalTexts.map((t, idx) => ({ text: t, checked: electricalSet.has(String(idx + 1)) }));
+
+                    const drainageSet = new Set((data.drainageItems || '').split('|').filter(Boolean));
+                    const drainageItems = drainageTexts.map((t, idx) => ({ text: t, checked: drainageSet.has(String(idx + 1)) }));
+
+                    drawSection('Filters, Coils & Airflow', 'Condition', data.airflowRating, airflowItems, data.airflowRemark);
+                    drawSection('Electrical & Refrigerant', 'Status', data.electricalRating, electricalItems, data.electricalRemark);
+                    drawSection('Drainage, Controls & Performance', 'Performance', data.drainageRating, drainageItems, data.drainageRemark);
+
+                    // Sign-off block
+                    if (y > pageHeight - 45) {
+                        addFooter();
+                        doc.addPage();
+                        y = addHeader(data);
+                    }
+
+                    doc.setFillColor(240, 246, 252);
+                    doc.setDrawColor(207, 224, 238);
+                    doc.setLineWidth(0.3);
+                    doc.roundedRect(margin, y, contentWidth, 22, 2, 2, 'FD');
+
+                    doc.setFontSize(7.5);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(91, 123, 150);
+                    doc.text('SIGNED OFF BY', margin + 4, y + 5);
+
+                    doc.setFontSize(11);
+                    doc.setTextColor(10, 42, 63);
+                    doc.text(data.technician, margin + 4, y + 12);
+
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(58, 101, 131);
+                    doc.text(`CHUB Site  |  Next PM due: ${nextPmForPDF(data.workDate)}`, margin + 4, y + 18);
+
+                    const initials = (data.technician || 'HK').split(' ').map(p => p[0]).join('') + '.';
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bolditalic');
+                    doc.setTextColor(30, 74, 109);
+                    doc.text(initials, pageWidth - margin - 4, y + 14, { align: 'right' });
+
+                    y += 27;
+
+                    doc.setFontSize(7);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(91, 123, 150);
+                    doc.text(`Generated from CHUB AC Fleet PM System | ${data.generatedAt}`, margin, y);
+                }
+
+                addFooter();
+                doc.save('CHUB_AC_PM_Report.pdf');
+            }
+
+            document.getElementById('pdfBtn').addEventListener('click', async function() {
                 const data = collectFormData();
                 if (!data) { showStatus('⚠️ Please add an AC unit first.', false); return; }
                 this.disabled = true;
                 const orig = this.innerHTML;
-                this.innerHTML = '<span>⏳</span> Preparing PDF...';
-
-                const reportHTML = buildReportHTML([data]);
-                const iframe = document.createElement('iframe');
-                iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;';
-                document.body.appendChild(iframe);
-                iframe.onload = function() {
-                    try { iframe.contentWindow.focus(); iframe.contentWindow.print(); showStatus('📄 PDF opened — choose "Save as PDF".', true); }
-                    catch(e) { showStatus('⚠️ Could not open print dialog.', false); }
-                    setTimeout(() => { document.body.removeChild(iframe); document.getElementById('pdfBtn').disabled = false; document.getElementById('pdfBtn').innerHTML = orig; }, 1500);
-                };
-                iframe.srcdoc = reportHTML;
+                this.innerHTML = '<span>⏳</span> Generating...';
+                try {
+                    await generatePDF([data]);
+                    showStatus('📄 PDF generated successfully.', true);
+                } catch (e) {
+                    console.error(e);
+                    showStatus('⚠️ Could not generate PDF: ' + e.message, false);
+                }
+                this.disabled = false;
+                this.innerHTML = orig;
             });
 
             document.getElementById('historyPdfBtn').addEventListener('click', async function() {
@@ -907,8 +1166,6 @@
                     if (json.status === 'error') throw new Error(json.message);
                     if (!json.records || json.records.length === 0) { showStatus('📭 No records in the Google Sheet.', false); this.disabled = false; this.innerHTML = orig; return; }
 
-                    // Deduplicate logic: ensures only the latest unique PM per AC is shown if there are duplicates in the sheet.
-                    // If the Google Sheet has duplicate entries for the same AC on the same date, this filters them out.
                     const uniqueRecords = [];
                     const seen = new Set();
                     for (const r of json.records) {
@@ -919,198 +1176,19 @@
                             uniqueRecords.push(r);
                         }
                     }
-                    
+
                     if (uniqueRecords.length === 0) { showStatus('📭 No PM history yet.', false); this.disabled = false; this.innerHTML = orig; return; }
 
-                    this.innerHTML = '<span>⏳</span> Preparing ' + uniqueRecords.length + ' PDFs...';
-                    const reportHTML = buildReportHTML(uniqueRecords);
-                    const iframe = document.createElement('iframe');
-                    iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;';
-                    document.body.appendChild(iframe);
-                    iframe.onload = function() {
-                        try { iframe.contentWindow.focus(); iframe.contentWindow.print(); showStatus('📄 PDF opened.', true); }
-                        catch(e) { showStatus('⚠️ Could not open print dialog.', false); }
-                        setTimeout(() => { document.body.removeChild(iframe); document.getElementById('historyPdfBtn').disabled = false; document.getElementById('historyPdfBtn').innerHTML = orig; }, 1500);
-                    };
-                    iframe.srcdoc = reportHTML;
+                    this.innerHTML = '<span>⏳</span> Generating ' + uniqueRecords.length + '...';
+                    await generatePDF(uniqueRecords);
+                    showStatus('📄 PDF generated with ' + uniqueRecords.length + ' record(s).', true);
                 } catch (err) {
                     console.error(err);
-                    showStatus('⚠️ Could not load records: ' + err.message, false);
-                    this.disabled = false;
-                    this.innerHTML = orig;
+                    showStatus('⚠️ Could not generate PDF: ' + err.message, false);
                 }
+                this.disabled = false;
+                this.innerHTML = orig;
             });
-
-            function buildReportHTML(records) {
-                const dataArray = Array.isArray(records) ? records : [records];
-                function safeSplit(val, sep) {
-                    if (val === null || val === undefined) return [];
-                    if (Array.isArray(val)) return val.reduce((acc, v) => acc.concat(Array.isArray(v) ? v : [v]), []).map(v => String(v).trim()).filter(Boolean);
-                    return String(val).split(sep).map(v => v.trim()).filter(Boolean);
-                }
-                function formatDateForPDF(dateVal) {
-                    if (!dateVal) return '—';
-                    if (Array.isArray(dateVal)) dateVal = dateVal[0];
-                    if (typeof dateVal === 'string' && dateVal.includes('T')) dateVal = dateVal.split('T')[0];
-                    if (typeof dateVal === 'string' && dateVal.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                        const d = new Date(dateVal + 'T00:00:00');
-                        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-                    }
-                    return String(dateVal);
-                }
-                // ===== NEXT PM DATE (work date + 6 months) =====
-                function nextPmForPDF(dateVal) {
-                    let d;
-                    if (!dateVal) return '—';
-                    if (Array.isArray(dateVal)) dateVal = dateVal[0];
-                    if (typeof dateVal === 'string' && dateVal.includes('T')) dateVal = dateVal.split('T')[0];
-                    if (typeof dateVal === 'string' && dateVal.match(/^\d{4}-\d{2}-\d{2}$/)) d = new Date(dateVal + 'T00:00:00');
-                    else d = new Date(dateVal);
-                    if (isNaN(d.getTime())) return '—';
-                    const day = d.getDate();
-                    d.setMonth(d.getMonth() + 6);
-                    if (d.getDate() < day) d.setDate(0);
-                    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-                }
-                const checkList = (ids, allItems) => {
-                    const safeIds = Array.isArray(ids) ? ids.map(String) : safeSplit(ids, '|').map(String);
-                    return allItems.map((item, idx) => {
-                        const isChecked = safeIds.indexOf(String(idx + 1)) !== -1;
-                        const mark = isChecked ? 'V' : 'X';
-                        const color = isChecked ? '#1b6b3f' : '#b33a3a';
-                        return '<li style="padding:3px 0;color:#1f3c54;font-size:0.85rem;"><span style="display:inline-block;width:18px;font-weight:800;font-family:monospace;color:' + color + ';">' + mark + '</span>' + item + '</li>';
-                    }).join('');
-                };
-
-                let pagesHtml = '';
-                dataArray.forEach((data) => {
-                    const initials = (data.technician || 'HK').split(' ').map(p => p[0]).join('') + '.';
-                    pagesHtml += `
-                    <div class="report-page">
-                        <table class="report-table">
-                            <thead>
-                                <tr><td class="report-thead-td">
-                                    <div class="header">
-                                      <div><h1>❄️ AC Fleet — Preventive Maintenance Report</h1><div class="sub">Site: CHUB · Split Units · PM Checklist</div></div>
-                                      <div class="meta">
-                                        <div><strong>Work date:</strong> ${formatDateForPDF(data.workDate)}</div>
-                                        <div><strong>Next PM due:</strong> ${nextPmForPDF(data.workDate)}</div>
-                                        <div><strong>Technician:</strong> ${data.technician}</div>
-                                      </div>
-                                    </div>
-                                </td></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td class="report-tbody-td">
-                                    <div class="gen-banner">
-                                      <div class="gen-name">${data.acTag} — ${data.acLocation}</div>
-                                      <div class="gen-sub">${data.acBrand} · ${data.acModel} · SN: ${data.acSerial}</div>
-                                    </div>
-                                    
-                                    <!-- 🏷️ LEGEND -->
-                                    <div class="legend-box">
-                                      <span class="legend-item"><span class="legend-sym sym-ok">V</span> Checked &amp; OK</span>
-                                      <span class="legend-item"><span class="legend-sym sym-bad">X</span> Not checked / Needs attention</span>
-                                    </div>
-
-                                    <div class="section-title">🌬️ Filters, Coils & Airflow</div>
-                                    <div class="rating-tag">Condition: ${data.airflowRating}</div>
-                                    <ul class="check-list">${checkList(safeSplit(data.airflowItems, '|'), ['Inspect, clean, or replace filters','Clean indoor evaporator coil','Clean outdoor condenser coil','Check blower motor and wheel','Verify proper airflow across unit'])}</ul>
-                                    ${data.airflowRemark !== '—' ? '<div class="remark-box">📝 ' + data.airflowRemark + '</div>' : ''}
-                                    <div class="section-title">⚡ Electrical & Refrigerant</div>
-                                    <div class="rating-tag">Status: ${data.electricalRating}</div>
-                                    <ul class="check-list">${checkList(safeSplit(data.electricalItems, '|'), ['Verify correct refrigerant charge (superheat/subcooling)','Tighten and inspect electrical connections','Test relays, contactors, and capacitors','Measure compressor and fan motor amps','Inspect wiring for frays or heat damage'])}</ul>
-                                    ${data.electricalRemark !== '—' ? '<div class="remark-box">📝 ' + data.electricalRemark + '</div>' : ''}
-                                    <div class="section-title">💧 Drainage, Controls & Performance</div>
-                                    <div class="rating-tag">Performance: ${data.drainageRating}</div>
-                                    <ul class="check-list">${checkList(safeSplit(data.drainageItems, '|'), ['Clear condensate drain line and pan','Check thermostat calibration and controls','Measure supply/return air temperatures','Verify overall system efficiency','Inspect ductwork for leaks (visible)'])}</ul>
-                                    ${data.drainageRemark !== '—' ? '<div class="remark-box">📝 ' + data.drainageRemark + '</div>' : ''}
-                                    <div class="signoff-block">
-                                      <div>
-                                        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#5b7b96; font-weight:700; margin-bottom:2px;">Signed off by</div>
-                                        <div class="tech-name">${data.technician}</div>
-                                        <div style="font-size:0.8rem; color:#3a6583;">CHUB Site · Next PM due: ${nextPmForPDF(data.workDate)}</div>
-                                      </div>
-                                      <div class="signature">${initials}</div>
-                                    </div>
-                                    <div class="footer-text-block">This report was generated automatically from the CHUB AC Fleet Preventive Maintenance System · ${data.generatedAt}</div>
-                                </td></tr>
-                            </tbody>
-                        </table>
-                    </div>`;
-                });
-
-                return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>CHUB AC PM Report</title>
-<style>
-@page { size: A4; margin: 0; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a2e45; background: white; font-size: 10pt; line-height: 1.4; }
-/* ===== REPORT TABLE & PADDING ===== */
-.report-table { width: 100%; border-collapse: collapse; }
-.report-table thead { display: table-header-group; }
-.report-table tbody { display: table-row-group; }
-.report-table th, .report-table td { padding: 0; border: none; }
-.report-thead-td { padding-top: 30mm; padding-left: 20mm; padding-right: 20mm; }
-.report-tbody-td { padding-left: 20mm; padding-right: 20mm; padding-bottom: 25mm; }
-/* ================================= */
-.header { border-bottom: 3px solid #1e4a6d; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px; }
-.header h1 { font-size: 1.25rem; color: #12405e; letter-spacing: -0.3px; }
-.header .sub { font-size: 0.85rem; color: #3a6583; margin-top: 4px; }
-.header .meta { font-size: 0.85rem; color: #5b7b96; text-align: right; line-height: 1.5; }
-.header .meta strong { color: #12405e; }
-.gen-banner { background: linear-gradient(90deg, #1e4a6d 0%, #2a6b96 100%); color: white; padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; }
-.gen-banner .gen-name { font-size: 1.1rem; font-weight: 800; }
-.gen-banner .gen-sub { font-size: 0.8rem; color: #cbe4f7; margin-top: 2px; }
-/* ===== LEGEND STYLES ===== */
-.legend-box { margin: 0 0 12px 0; padding: 8px 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; font-size: 0.8rem; color: #334155; display: flex; gap: 20px; align-items: center; }
-.legend-item { display: inline-flex; align-items: center; gap: 6px; }
-.legend-sym { font-weight: 800; font-family: monospace; font-size: 0.95rem; width: 16px; text-align: center; }
-.sym-ok { color: #1b6b3f; }
-.sym-bad { color: #b33a3a; }
-/* ======================== */
-.section-title { font-size: 0.98rem; font-weight: 700; color: #12405e; margin: 12px 0 6px 0; padding-bottom: 3px; border-bottom: 2px solid #d4e3ef; }
-ul.check-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 1px 20px; margin-bottom: 4px; }
-ul.check-list li { padding: 2px 0; color: #1f3c54; font-size: 0.85rem; }
-.rating-tag { display: inline-block; background: #e7f0f8; color: #12405e; padding: 2px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; margin-bottom: 6px; text-transform: capitalize; }
-.remark-box { background: #fbfdff; border-left: 3px solid #9cb9d0; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; color: #3a6583; margin-bottom: 6px; font-style: italic; }
-.signoff-block { margin-top: 14px; padding: 12px 16px; background: #f0f6fc; border-radius: 10px; border: 1px solid #cfe0ee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; page-break-inside: avoid; }
-.signoff-block .tech-name { font-size: 1.05rem; font-weight: 700; color: #0a2a3f; }
-.signature { font-family: 'Segoe UI', cursive; font-size: 1.1rem; color: #1e4a6d; border-bottom: 2px dashed #9cb9d0; padding: 0 16px 3px 16px; }
-.footer-text-block { text-align: center; font-size: 9px; color: #5b7b96; margin-top: 15px; padding-top: 5px; border-top: 1px solid #d4e3ef; }
-.header-img { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #6a8db0; padding-bottom: 10px; margin-bottom: 15px; }
-.header-img img { height: 55px; object-fit: contain; }
-.header-img .domain { font-size: 16px; font-weight: 800; color: #6a8db0; font-style: italic; }
-.footer-bar { background: #6a8db0; color: white; text-align: center; padding: 10px; font-size: 11px; display: flex; justify-content: center; gap: 30px; font-weight: 500; }
-@media print {
-    @page { margin: 0; }
-    body { margin: 0; padding: 0; }
-    .header-img { position: fixed; top: 0; left: 0; right: 0; height: 25mm; background: white; padding: 6mm 20mm 0 20mm; z-index: 9999; border-bottom: 2px solid #6a8db0; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; }
-    .footer-img { position: fixed; bottom: 0; left: 0; right: 0; height: 20mm; background: white; padding: 0 20mm 6mm 20mm; z-index: 9999; }
-    .footer-bar { padding: 6px; font-size: 10px; }
-    .report-page { page-break-after: always; }
-    .report-page:last-child { page-break-after: auto; }
-    .header { margin-bottom: 8px; padding-bottom: 6px; }
-    .header h1 { font-size: 1.1rem; }
-    .header .meta { font-size: 0.75rem; }
-    .gen-banner { padding: 8px 12px; margin-bottom: 8px; }
-    .gen-banner .gen-name { font-size: 1rem; }
-    .legend-box { margin-bottom: 8px; padding: 6px 10px; }
-    .section-title { margin: 10px 0 4px 0; font-size: 0.9rem; }
-    ul.check-list li { font-size: 0.8rem; padding: 1px 0; }
-    .rating-tag { font-size: 0.7rem; padding: 1px 8px; margin-bottom: 4px; }
-    .remark-box { padding: 4px 8px; font-size: 0.75rem; margin-bottom: 4px; }
-    .signoff-block { margin-top: 10px; padding: 8px 12px; }
-    .signoff-block .tech-name { font-size: 0.95rem; }
-    .signature { font-size: 1rem; }
-    .footer-text-block { margin-top: 8px; font-size: 8px; padding-top: 4px; }
-}
-</style></head><body>
-<div class="header-img"><img src="chub-logo.png" alt="CHUB Logo" style="height: 55px; object-fit: contain;"><span class="domain">chub.rw</span></div>
-${pagesHtml}
-<div class="footer-img"><div class="footer-bar"><span>P.O Box: 254 Butare</span> | <span>Email: info@chub.rw</span> | <span>Hotline: 2030</span></div></div>
-</body></html>`;
-            }
 
             const SESSION_KEY = 'chub_ac_session';
             function saveSession(name) { try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ name, time: Date.now() })); } catch(e) {} }
@@ -1212,7 +1290,7 @@ ${pagesHtml}
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js?v=17')
+                navigator.serviceWorker.register('sw.js?v=18')
                     .then(reg => console.log('✅ Service Worker registered:', reg.scope))
                     .catch(err => console.warn('⚠️ Service Worker failed:', err));
             });
