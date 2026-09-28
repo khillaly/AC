@@ -964,9 +964,9 @@
                     const safeIds = Array.isArray(ids) ? ids.map(String) : safeSplit(ids, '|').map(String);
                     return allItems.map((item, idx) => {
                         const isChecked = safeIds.indexOf(String(idx + 1)) !== -1;
-                        const mark = isChecked ? 'v' : 'x';
+                        const mark = isChecked ? 'V' : 'X';
                         const color = isChecked ? '#1b6b3f' : '#b33a3a';
-                        return '<li style="padding:2px 0;color:#1f3c54;font-size:0.85rem;"><span style="display:inline-block;width:18px;font-weight:700;color:' + color + ';">' + mark + '</span>' + item + '</li>';
+                        return '<li style="padding:2px 0;color:#1f3c54;font-size:0.85rem;"><span style="display:inline-block;width:18px;font-weight:800;font-family:monospace;color:' + color + ';">' + mark + '</span>' + item + '</li>';
                     }).join('');
                 };
 
@@ -988,10 +988,13 @@
                           <div class="gen-name">${data.acTag} — ${data.acLocation}</div>
                           <div class="gen-sub">${data.acBrand} · ${data.acModel} · SN: ${data.acSerial}</div>
                         </div>
-                        <div class="pm-schedule">
-                          <div class="pm-chip"><span class="pm-lbl">PM performed</span><span class="pm-val">${formatDateForPDF(data.workDate)}</span></div>
-                          <div class="pm-chip next"><span class="pm-lbl">Next PM due (every 6 months)</span><span class="pm-val">${nextPmForPDF(data.workDate)}</span></div>
+                        
+                        <!-- 🏷️ LEGEND -->
+                        <div class="legend-box">
+                          <span class="legend-item"><span class="legend-sym sym-ok">V</span> Checked &amp; OK</span>
+                          <span class="legend-item"><span class="legend-sym sym-bad">X</span> Not checked / Needs attention</span>
                         </div>
+
                         <div class="section-title">🌬️ Filters, Coils & Airflow</div>
                         <div class="rating-tag">Condition: ${data.airflowRating}</div>
                         <ul class="check-list">${checkList(safeSplit(data.airflowItems, '|'), ['Inspect, clean, or replace filters','Clean indoor evaporator coil','Clean outdoor condenser coil','Check blower motor and wheel','Verify proper airflow across unit'])}</ul>
@@ -1029,12 +1032,13 @@ body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a2e45; background: w
 .gen-banner { background: linear-gradient(90deg, #1e4a6d 0%, #2a6b96 100%); color: white; padding: 10px 16px; border-radius: 8px; margin-bottom: 12px; }
 .gen-banner .gen-name { font-size: 1.1rem; font-weight: 800; }
 .gen-banner .gen-sub { font-size: 0.8rem; color: #cbe4f7; margin-top: 2px; }
-.pm-schedule { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-.pm-chip { flex: 1 1 180px; background: #f0f6fc; border: 1px solid #cfe0ee; border-radius: 8px; padding: 7px 12px; }
-.pm-chip.next { background: #fff8e6; border-color: #f0d99a; }
-.pm-chip .pm-lbl { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.6px; color: #5b7b96; font-weight: 700; }
-.pm-chip .pm-val { display: block; font-size: 0.95rem; font-weight: 800; color: #12405e; margin-top: 1px; }
-.pm-chip.next .pm-val { color: #8a5a00; }
+/* ===== LEGEND STYLES ===== */
+.legend-box { margin: 0 0 12px 0; padding: 8px 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; font-size: 0.8rem; color: #334155; display: flex; gap: 20px; align-items: center; }
+.legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.legend-sym { font-weight: 800; font-family: monospace; font-size: 0.95rem; width: 16px; text-align: center; }
+.sym-ok { color: #1b6b3f; }
+.sym-bad { color: #b33a3a; }
+/* ======================== */
 .section-title { font-size: 0.98rem; font-weight: 700; color: #12405e; margin: 12px 0 6px 0; padding-bottom: 3px; border-bottom: 2px solid #d4e3ef; }
 ul.check-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 1px 20px; margin-bottom: 4px; }
 ul.check-list li { padding: 2px 0; color: #1f3c54; font-size: 0.85rem; }
@@ -1061,9 +1065,7 @@ ul.check-list li { padding: 2px 0; color: #1f3c54; font-size: 0.85rem; }
     .header .meta { font-size: 0.75rem; }
     .gen-banner { padding: 8px 12px; margin-bottom: 8px; }
     .gen-banner .gen-name { font-size: 1rem; }
-    .pm-schedule { margin-bottom: 8px; }
-    .pm-chip { padding: 5px 10px; }
-    .pm-chip .pm-val { font-size: 0.85rem; }
+    .legend-box { margin-bottom: 8px; padding: 6px 10px; }
     .section-title { margin: 10px 0 4px 0; font-size: 0.9rem; }
     ul.check-list li { font-size: 0.8rem; padding: 1px 0; }
     .rating-tag { font-size: 0.7rem; padding: 1px 8px; margin-bottom: 4px; }
