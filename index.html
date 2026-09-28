@@ -527,39 +527,47 @@
             }
 
             // ============================================================
-            // ⭐ STRONG DUPLICATE CHECK — Normalizes everything for comparison
+            // ⭐ UNIQUE AC IDENTITY — Solves the "N/A" tag collision issue
+            // Combines Tag + Location + Serial + Model so each physical AC
+            // is uniquely identifiable even when the tag is "N/A".
             // ============================================================
+            function normalizeText(val) {
+                return String(val || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            }
+
+            function buildAcIdentity(obj) {
+                // obj can have either {acTag, acLocation, acSerial, acModel}
+                // or {tag, loc, serial, model}
+                const tag    = normalizeText(obj.acTag    || obj.tag    || '');
+                const loc    = normalizeText(obj.acLocation || obj.loc  || '');
+                const serial = normalizeText(obj.acSerial || obj.serial || '');
+                const model  = normalizeText(obj.acModel  || obj.model || '');
+                return `${tag}::${loc}::${serial}::${model}`;
+            }
+
             function normalizeDateForCompare(dateVal) {
                 if (!dateVal) return '';
                 if (Array.isArray(dateVal)) dateVal = dateVal[0];
                 if (dateVal instanceof Date) {
                     if (isNaN(dateVal.getTime())) return '';
-                    const yyyy = dateVal.getFullYear();
-                    const mm = String(dateVal.getMonth() + 1).padStart(2, '0');
-                    const dd = String(dateVal.getDate()).padStart(2, '0');
-                    return `${yyyy}-${mm}-${dd}`;
+                    return `${dateVal.getFullYear()}-${String(dateVal.getMonth() + 1).padStart(2, '0')}-${String(dateVal.getDate()).padStart(2, '0')}`;
                 }
                 let s = String(dateVal).trim();
                 if (!s) return '';
                 if (s.includes('T')) s = s.split('T')[0];
                 if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-                // Try parsing other formats
                 const parsed = new Date(s);
                 if (!isNaN(parsed.getTime())) {
-                    const yyyy = parsed.getFullYear();
-                    const mm = String(parsed.getMonth() + 1).padStart(2, '0');
-                    const dd = String(parsed.getDate()).padStart(2, '0');
-                    return `${yyyy}-${mm}-${dd}`;
+                    return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
                 }
                 return s;
             }
 
-            function normalizeTextForCompare(val) {
-                return String(val || '').trim().toLowerCase();
+            function buildRecordKeyFromData(data) {
+                return buildAcIdentity(data) + '||' + normalizeDateForCompare(data.workDate);
             }
 
-            // Fetch logs from sheet with cache-busting and look for duplicate
-            async function checkRemoteDuplicate(acTag, workDate, technician) {
+            async function checkRemoteDuplicate(acIdentity, workDate) {
                 try {
                     const url = GOOGLE_SHEET_URL + '?type=logs&_ts=' + Date.now();
                     const res = await fetch(url, { method: 'GET', cache: 'no-store' });
@@ -567,15 +575,15 @@
                     const json = await res.json();
                     if (!json.records || !Array.isArray(json.records)) return { checked: true, duplicate: false };
 
-                    const targetTag = normalizeTextForCompare(acTag);
                     const targetDate = normalizeDateForCompare(workDate);
-                    const targetTech = normalizeTextForCompare(technician);
-
                     const found = json.records.find(r => {
-                        const rTag = normalizeTextForCompare(r.acTag);
-                        const rDate = normalizeDateForCompare(r.workDate);
-                        const rTech = normalizeTextForCompare(r.technician);
-                        return rTag === targetTag && rDate === targetDate && rTech === targetTech;
+                        const rIdentity = buildAcIdentity({
+                            acTag: r.acTag,
+                            acLocation: r.acLocation,
+                            acSerial: r.acSerial,
+                            acModel: r.acModel
+                        });
+                        return rIdentity === acIdentity && normalizeDateForCompare(r.workDate) === targetDate;
                     });
 
                     return { checked: true, duplicate: !!found, record: found || null };
@@ -585,7 +593,6 @@
                 }
             }
 
-            // Preload list of PM keys for this technician (from cloud)
             async function fetchUserPMs(techName) {
                 USER_PM_KEYS.clear();
                 try {
@@ -593,10 +600,16 @@
                     const res = await fetch(url, { method: 'GET', cache: 'no-store' });
                     const json = await res.json();
                     if (json.records && Array.isArray(json.records)) {
+                        // Track ALL records globally (any technician) so an AC cannot
+                        // be PM'd twice in one day by anyone
                         json.records.forEach(r => {
-                            if (normalizeTextForCompare(r.technician) === normalizeTextForCompare(techName)) {
-                                USER_PM_KEYS.add(normalizeTextForCompare(r.acTag) + '_' + normalizeDateForCompare(r.workDate));
-                            }
+                            const identity = buildAcIdentity({
+                                acTag: r.acTag,
+                                acLocation: r.acLocation,
+                                acSerial: r.acSerial,
+                                acModel: r.acModel
+                            });
+                            USER_PM_KEYS.add(identity + '||' + normalizeDateForCompare(r.workDate));
                         });
                     }
                 } catch (e) {
@@ -888,13 +901,14 @@
             }
 
             // ============================================================
-            // ⭐ SIGN-OFF — Full duplicate enforcement (local + cloud)
+            // ⭐ SIGN-OFF — Duplicate check using UNIQUE IDENTITY
             // ============================================================
             document.getElementById('signOffBtn').addEventListener('click', async function() {
                 const data = collectFormData();
                 if (!data) { showStatus('⚠️ Please add an AC unit before signing off.', false); return; }
 
-                const normKey = normalizeTextForCompare(data.acTag) + '_' + normalizeDateForCompare(data.workDate);
+                const acIdentity = buildAcIdentity(data);
+                const normKey = acIdentity + '||' + normalizeDateForCompare(data.workDate);
                 const orig = this.innerHTML;
                 this.disabled = true;
 
@@ -903,19 +917,22 @@
                 if (USER_PM_KEYS.has(normKey)) {
                     showStatus('⚠️ This AC has already been PM\'d on this date (local cache).', false);
                     alert('⚠️ Warning: This AC has already been PM\'d on this date.\n\n' +
-                          'AC Tag: ' + data.acTag + '\nDate: ' + data.workDate + '\n\n' +
+                          'AC Tag: ' + data.acTag + '\n' +
+                          'Location: ' + data.acLocation + '\n' +
+                          'Serial: ' + data.acSerial + '\n' +
+                          'Date: ' + data.workDate + '\n\n' +
                           'You cannot sign off the same AC twice on the same day.');
                     this.disabled = false;
                     this.innerHTML = orig;
                     return;
                 }
 
-                const queuedDup = getQueue().some(item =>
-                    normalizeTextForCompare(item.acTag) === normalizeTextForCompare(data.acTag) &&
-                    normalizeDateForCompare(item.workDate) === normalizeDateForCompare(data.workDate)
-                );
+                const queuedDup = getQueue().some(item => {
+                    const itemIdentity = buildAcIdentity(item);
+                    return itemIdentity === acIdentity && normalizeDateForCompare(item.workDate) === normalizeDateForCompare(data.workDate);
+                });
                 if (queuedDup) {
-                    showStatus('⚠️ This AC has already been PM\'d on this date (pending queue).', false);
+                    showStatus('⚠️ This AC is already pending sync for this date.', false);
                     alert('⚠️ Warning: This AC is already in the offline queue for this date. Please sync first.');
                     this.disabled = false;
                     this.innerHTML = orig;
@@ -924,17 +941,19 @@
 
                 // 2. CLOUD CHECK (fresh fetch from Google Sheet)
                 this.innerHTML = '<span>⏳</span> Checking Google Sheet...';
-                const remote = await checkRemoteDuplicate(data.acTag, data.workDate, data.technician);
+                const remote = await checkRemoteDuplicate(acIdentity, data.workDate);
 
                 if (remote.checked && remote.duplicate) {
                     const rec = remote.record || {};
                     showStatus('⚠️ Already saved in Google Sheet for this date!', false);
                     alert('⛔ DUPLICATE FOUND IN GOOGLE SHEET\n\n' +
                           'AC Tag: ' + data.acTag + '\n' +
+                          'Location: ' + data.acLocation + '\n' +
+                          'Serial: ' + data.acSerial + '\n' +
                           'Work Date: ' + data.workDate + '\n' +
                           'Saved by: ' + (rec.technician || 'unknown') + '\n' +
                           (rec.generatedAt ? 'Saved at: ' + rec.generatedAt : '') + '\n\n' +
-                          'This AC already has a PM record for this day. You cannot save it again.');
+                          'This AC already has a PM record for this day.');
                     this.disabled = false;
                     this.innerHTML = orig;
                     return;
@@ -944,7 +963,7 @@
                     const proceed = confirm(
                         '⚠️ Could not verify with the Google Sheet (offline or network issue).\n\n' +
                         'Error: ' + (remote.error || 'unknown') + '\n\n' +
-                        'Do you want to save anyway? (Local duplicate check already passed.)'
+                        'Do you want to save anyway? (Local duplicate check passed.)'
                     );
                     if (!proceed) {
                         showStatus('❌ Save cancelled — cloud could not be verified.', false);
@@ -1275,7 +1294,8 @@
                 const data = collectFormData();
                 if (!data) { showStatus('⚠️ Please add an AC unit first.', false); return; }
 
-                const normKey = normalizeTextForCompare(data.acTag) + '_' + normalizeDateForCompare(data.workDate);
+                const acIdentity = buildAcIdentity(data);
+                const normKey = acIdentity + '||' + normalizeDateForCompare(data.workDate);
                 const orig = this.innerHTML;
                 this.disabled = true;
 
@@ -1287,7 +1307,7 @@
                 }
 
                 this.innerHTML = '<span>⏳</span> Checking Sheet...';
-                const remote = await checkRemoteDuplicate(data.acTag, data.workDate, data.technician);
+                const remote = await checkRemoteDuplicate(acIdentity, data.workDate);
                 if (remote.checked && remote.duplicate) {
                     alert('⛔ This AC is already saved in Google Sheet for this date. PDF export blocked.');
                     this.disabled = false;
@@ -1324,8 +1344,9 @@
                     const uniqueRecords = [];
                     const seen = new Set();
                     for (const r of json.records) {
-                        if (normalizeTextForCompare(r.technician) !== normalizeTextForCompare(currentTech)) continue;
-                        const key = normalizeTextForCompare(r.acTag) + '_' + normalizeDateForCompare(r.workDate);
+                        if (normalizeText(r.technician) !== normalizeText(currentTech)) continue;
+                        const identity = buildAcIdentity({ acTag: r.acTag, acLocation: r.acLocation, acSerial: r.acSerial, acModel: r.acModel });
+                        const key = identity + '||' + normalizeDateForCompare(r.workDate);
                         if (!seen.has(key)) {
                             seen.add(key);
                             uniqueRecords.push(r);
@@ -1446,7 +1467,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js?v=23')
+                navigator.serviceWorker.register('sw.js?v=24')
                     .then(reg => console.log('✅ Service Worker registered:', reg.scope))
                     .catch(err => console.warn('⚠️ Service Worker failed:', err));
             });
