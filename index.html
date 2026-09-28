@@ -1418,15 +1418,16 @@
                     doc.text(`Date: ${formatDateForPDF(data.workDate)}`, leftBoxX + 3, y + 15.5);
                     doc.text(`Next PM: ${nextPmForPDF(data.workDate)}`, leftBoxX + 3, y + 19.5);
 
-                    // ⭐ Draw signature image if available
+                    
+                 // ⭐ Draw signature image if available — right-aligned, above the
+                    // signature line, so it never overlaps name / date / Next PM text.
                     const techSignature = allSignatures[data.technician] || '';
                     if (techSignature) {
                         try {
-                            // Place signature above the line, centered in the box
-                            const sigW = 45;   // mm width
-                            const sigH = 11;   // mm height
-                            const sigX = leftBoxX + (halfWidth - sigW) / 2;
-                            const sigY = y + 12.5;
+                            const sigW = 42;   // mm width
+                            const sigH = 7;    // mm height
+                            const sigX = leftBoxX + halfWidth - sigW - 5; // right-aligned with padding
+                            const sigY = y + 16; // sits just above the line (y+25)
                             doc.addImage(techSignature, 'PNG', sigX, sigY, sigW, sigH);
                         } catch (e) {
                             console.warn('Could not render signature for ' + data.technician, e);
