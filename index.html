@@ -458,11 +458,14 @@
                 </select>
             </div>
 
-            <div class="field-group" style="text-align: left; display:none;" id="loginInchargeGroup">
-                <label for="loginInchargeName">Your full name (In-Charge)</label>
-                <input type="text" id="loginInchargeName" list="loginInchargeSuggestions" placeholder="Start typing your name..." autocomplete="off">
-                <datalist id="loginInchargeSuggestions"></datalist>
-            </div>
+          <div class="field-group" style="text-align: left; display:none;" id="loginInchargeGroup">
+    <label for="loginInchargeDept">Your Department</label>
+    <select id="loginInchargeDept" style="width:100%;">
+        <option value="">— Choose your department —</option>
+    </select>
+    <label for="loginInchargeName" style="margin-top:14px;">Your full name (as it appears in reports)</label>
+    <input type="text" id="loginInchargeName" placeholder="e.g. NZABANTERURA innocent" autocomplete="off">
+</div>
 
             <div class="field-group" style="text-align: left;">
                 <label for="loginPinInput">Your PIN</label>
@@ -618,49 +621,53 @@
                 'GATANGANWA Raissa':      '0401'
             };
 
-            // ⭐ DEPARTMENT + SERVICE + DEFAULT IN-CHARGE
-            const DEPARTMENTS = {
-                'Laboratory': {
-                    defaultIncharge: 'GATANGANWA Raissa',
-                    services: ['Genetics', 'Hematology', 'Biochemistry', 'Parasitology', 'TB', 'Sterilization', 'Molecular Pre-PCR', 'Molecular Post-PCR', 'Immunology', 'Culture Media', 'Direct Examination', 'Grossing Room', 'Embedding Room', 'Staining Room', 'Refrigerators Room', 'Stock Consumables', "Doctor's Office – Pathology", 'Lab UPS Room', 'Immunoserology', 'Old lab server-room', 'Cold chain fridge room']
-                },
-                'Radiology': {
-                    defaultIncharge: 'RADIOLOGY In-Charge',
-                    services: ['X-Ray Room', 'CT Scan Room', 'Ultrasound Room', 'MRI Room', 'Reporting Room']
-                },
-                'Pharmacy': {
-                    defaultIncharge: 'PHARMACY In-Charge',
-                    services: ['Main Store', 'Dispensary', 'Cold Chain', 'Compounding Room']
-                },
-                'Administration': {
-                    defaultIncharge: 'ADMIN In-Charge',
-                    services: ['Reception', 'Records Office', 'Accounts', 'HR Office', 'Director Office', 'Boardroom']
-                },
-                'IT': {
-                    defaultIncharge: 'IT In-Charge',
-                    services: ['Server Room', 'Network Room', 'IT Office', 'Data Closet']
-                },
-                'Maternity': {
-                    defaultIncharge: 'MATERNITY In-Charge',
-                    services: ['Delivery Room', 'Antenatal', 'Postnatal', 'Nursery', 'Labor Ward']
-                },
-                'Surgery': {
-                    defaultIncharge: 'SURGERY In-Charge',
-                    services: ['Operating Theatre 1', 'Operating Theatre 2', 'Recovery Room', 'CSSD', 'Scrub Room']
-                },
-                'OPD': {
-                    defaultIncharge: 'OPD In-Charge',
-                    services: ['Consultation 1', 'Consultation 2', 'Triage', 'Vaccination', 'Waiting Area']
-                },
-                'Emergency': {
-                    defaultIncharge: 'EMERGENCY In-Charge',
-                    services: ['Triage', 'Resuscitation', 'Observation', 'Isolation']
-                },
-                'Dental': {
-                    defaultIncharge: 'DENTAL In-Charge',
-                    services: ['Dental Chair 1', 'Dental Chair 2', 'Sterilization', 'X-Ray Room']
-                }
-            };
+          // ⭐ DEPARTMENT + SERVICE + DEFAULT IN-CHARGE
+// Used by the in-charge login dropdown AND the "Add New AC" form
+const DEPARTMENTS = {
+    'Laboratory': {
+        defaultIncharge: 'Laboratory In-Charge',
+        services: [
+            'Genetics', 'Hematology', 'Biochemistry', 'Parasitology', 'TB',
+            'Sterilization', 'Molecular Pre-PCR', 'Molecular Post-PCR',
+            'Immunology', 'Culture Media', 'Direct Examination', 'Grossing Room',
+            'Embedding Room', 'Staining Room', 'Refrigerators Room',
+            'Stock Consumables', "Doctor's Office – Pathology", 'Lab UPS Room',
+            'Immunoserology', 'Old lab server-room', 'Cold chain fridge room'
+        ]
+    },
+    'Operating Theatre': {
+        defaultIncharge: 'Operating Theatre In-Charge',
+        services: ['Theatre 1', 'Theatre 2', 'Theatre 3', 'Recovery Room', 'Scrub Room', 'Anesthesia Room', 'CSSD']
+    },
+    'Pharmacy': {
+        defaultIncharge: 'Pharmacy In-Charge',
+        services: ['Main Store', 'Dispensary', 'Cold Chain', 'Compounding Room', 'Drug Store']
+    },
+    'Radiology': {
+        defaultIncharge: 'Radiology In-Charge',
+        services: ['X-Ray Room', 'CT Scan Room', 'Ultrasound Room', 'MRI Room', 'Reporting Room', 'Reception']
+    },
+    'Administration': {
+        defaultIncharge: 'Administration In-Charge',
+        services: ['Reception', 'Records Office', 'Accounts', 'HR Office', 'Director Office', 'Boardroom', 'Archives']
+    },
+    'Cancer Center': {
+        defaultIncharge: 'Cancer Center In-Charge',
+        services: ['Chemotherapy Room', 'Consultation Room', 'Day Care Ward', 'Reception', 'Radiotherapy Room']
+    },
+    'Simulation Center': {
+        defaultIncharge: 'Simulation Center In-Charge',
+        services: ['Simulation Lab 1', 'Simulation Lab 2', 'Debriefing Room', 'Control Room', 'Storage']
+    },
+    'I.M OPD': {
+        defaultIncharge: 'I.M OPD In-Charge',
+        services: ['Consultation 1', 'Consultation 2', 'Consultation 3', 'Triage', 'Waiting Area', 'Vaccination']
+    },
+    'Gynecology and Surgery': {
+        defaultIncharge: 'Gynecology and Surgery In-Charge',
+        services: ['Gynecology Ward', 'Antenatal', 'Postnatal', 'Delivery Room', 'Nursery', 'Surgical Ward', 'Consultation Room']
+    }
+};
 
             const DEFAULT_TECHNICIAN_SIGNATURES = {};
             const SIG_STORAGE_KEY = 'chub_ac_technician_signatures_v4';
@@ -736,7 +743,24 @@
             function formatPmDate(d) { return d ? d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }
             function nextPmForPDF(dateVal) { return formatPmDate(addMonths(dateVal, PM_INTERVAL_MONTHS)); }
             function recordTime(rec) { const raw = rec['Timestamp'] || rec.timestamp || rec.workDate; const t = new Date(raw).getTime(); return isNaN(t) ? 0 : t; }
-            function normalizeText(val) { return String(val || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+         function normalizeText(val) {
+    if (val === null || val === undefined) return '';
+    return String(val)
+        // Unicode normalize (decompose accents)
+        .normalize('NFKD')
+        // Remove diacritics
+        .replace(/[\u0300-\u036f]/g, '')
+        // Remove zero-width and other invisible chars
+        .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '')
+        // Convert non-breaking spaces to normal spaces
+        .replace(/\u00A0/g, ' ')
+        // Collapse all whitespace runs into a single space
+        .replace(/\s+/g, ' ')
+        // Trim
+        .trim()
+        // Uppercase (case-insensitive matching)
+        .toUpperCase();
+}
 
             // ================= SIGNATURE STORAGE =================
             function loadSignatures() {
