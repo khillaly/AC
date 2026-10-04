@@ -1503,13 +1503,28 @@ const DEPARTMENTS = {
                 pendingApprovalsList.innerHTML = '<div style="text-align:center; color:#5b7b96; font-style:italic; padding: 12px;">Loading…</div>';
                 try {
                     const records = await fetchAllLogs();
-                    const myName = technicianSelect.value;
+                                     const myDept = currentInchargeDept || '';
+                    const myName = normalizeText(technicianSelect.value);
+
+                    console.log('🔍 Pending filter — dept:', JSON.stringify(myDept), '| name:', JSON.stringify(myName));
+
                     const pending = records.filter(r => {
                         const at = safeStr(r['In-Charge Signed At'] || r.inchargeSignedAt).trim();
                         if (at) return false;
+
                         if (inchargeFilterScope === 'mine') {
-                            const recIncharge = safeStr(r['In-Charge Name'] || r.inchargeName).trim();
-                            if (recIncharge && recIncharge.toLowerCase() !== myName.toLowerCase()) return false;
+                            const recDept = normalizeText(r['Department'] || r.acDept);
+                            const recIncharge = normalizeText(r['In-Charge Name'] || r.inchargeName);
+
+                            // 1) Match by department (primary)
+                            if (myDept && recDept === normalizeText(myDept)) return true;
+                            // 2) Fallback: match by name
+                            if (recIncharge === myName) return true;
+                            // 3) Safety: show records with no metadata
+                            if (!recDept && !recIncharge) return true;
+
+                            console.log('   ❌ Filtered out:', safeStr(r['AC Tag'] || r.acTag), '| recDept:', JSON.stringify(recDept), '| recIncharge:', JSON.stringify(recIncharge));
+                            return false;
                         }
                         return true;
                     }).sort((a, b) => recordTime(b) - recordTime(a));
@@ -1624,19 +1639,16 @@ const DEPARTMENTS = {
                 return { status, lastPm: lastDate, nextPm: nextDateStr };
             }
 
-            async function loadDepartmentInventory() {
+                        async function loadDepartmentInventory() {
                 const tbody = document.getElementById('inventoryTableBody');
                 const deptBadge = document.getElementById('invDeptBadge');
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#5b7b96; font-style:italic; padding: 14px;">Loading…</td></tr>';
 
-                const myName = technicianSelect.value;
-                let dept = inferDepartmentFromIncharge(myName);
+                const dept = currentInchargeDept;
                 if (!dept) {
-                    // Ask the user to specify
-                    dept = prompt('Could not auto-detect your department. Please type it (e.g. Laboratory):', '');
-                    if (!dept) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#b33a3a; padding: 14px;">Department not set.</td></tr>'; return; }
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#b33a3a; padding: 14px;">No department set. Please log out and pick a department at login.</td></tr>';
+                    return;
                 }
-                currentInchargeDept = dept;
                 deptBadge.textContent = dept;
 
                 // Fetch all inventory + records
@@ -2585,8 +2597,14 @@ const DEPARTMENTS = {
                 fetchTechnicianAssetsFromCloud(payload.name);
                 populateInchargeSuggestions();
 
-                if (currentRole === 'incharge') {
+                               if (currentRole === 'incharge') {
+                    // ⭐ Use the department from login dropdown
+                    currentInchargeDept = payload.dept || inferDepartmentFromIncharge(payload.name);
+                    console.log('🔍 In-charge logged in — dept:', currentInchargeDept, '| name:', payload.name);
                     fetchInchargeSignatureFromCloud(payload.name).then(sig => { if (sig) currentInchargeSignature = sig; });
+                    // Refresh views now that department is set
+                    setTimeout(() => refreshPendingApprovals(), 300);
+                    setTimeout(() => loadDepartmentInventory(), 400);
                 } else {
                     AC_INVENTORY = [];
                     renderAcSelector();
@@ -2649,15 +2667,18 @@ const DEPARTMENTS = {
                 }
 
                 // In-Charge
+                                // In-Charge
+                const inDept = document.getElementById('loginInchargeDept').value;
                 const iname = loginInchargeName.value.trim();
-                if (!iname) { loginError.textContent = 'Enter your full name.'; return; }
+                if (!inDept) { loginError.textContent = 'Please choose your department.'; return; }
+                if (!iname) { loginError.textContent = 'Please enter your full name.'; return; }
                 if (pin !== INCHARGE_PIN) {
                     loginError.textContent = 'Wrong In-Charge PIN.';
                     loginPinInput.value = ''; loginPinInput.focus();
                     return;
                 }
-                saveSession({ name: iname, role: 'incharge' });
-                unlockApp({ name: iname, role: 'incharge' });
+                saveSession({ name: iname, dept: inDept, role: 'incharge' });
+                unlockApp({ name: iname, dept: inDept, role: 'incharge' });
             });
             loginPinInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); loginBtn.click(); } });
             logoutBtn.addEventListener('click', function() { if (confirm('Log out?')) { lockApp(); showStatus('Logged out.', true); } });
@@ -2667,6 +2688,7 @@ const DEPARTMENTS = {
             syncBtn.addEventListener('click', flushQueue);
             setAutoWorkDate();
             populateDepartmentSelect();
+            populateLoginDepartmentSelect();
             renderAcSelector();
             updatePendingCount();
             populateInchargeSuggestions();
