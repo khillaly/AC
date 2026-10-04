@@ -458,27 +458,58 @@
                 </select>
             </div>
 
-          <div class="field-group" style="text-align: left; display:none;" id="loginInchargeGroup">
-    <label for="loginInchargeDept">Your Department</label>
-    <select id="loginInchargeDept" style="width:100%;">
-        <option value="">— Choose your department —</option>
-    </select>
-    <label for="loginInchargeName" style="margin-top:14px;">Your full name (as it appears in reports)</label>
-    <input type="text" id="loginInchargeName" placeholder="e.g. NZABANTERURA innocent" autocomplete="off">
-</div>
+   <!-- LOGIN MODAL -->
+<div class="modal-overlay show" id="loginModal">
+    <div class="modal-box" style="max-width: 420px; text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 12px;">🔐</div>
+        <h2 style="justify-content: center;">Login</h2>
+        <p style="margin-bottom: 22px;">Select your role and enter your PIN.</p>
 
-            <div class="field-group" style="text-align: left;">
-                <label for="loginPinInput">Your PIN</label>
-                <input type="password" id="loginPinInput" inputmode="numeric" maxlength="8" placeholder="••••" style="text-align: center; font-size: 1.5rem; letter-spacing: 8px;">
-            </div>
-
-            <div id="loginError" style="color: #b33a3a; font-size: 0.9rem; margin-top: 6px; min-height: 20px;"></div>
-
-            <button class="btn-primary" id="loginBtn" style="width: 100%; justify-content: center; margin-top: 14px;">
-                🔓 Unlock &amp; Continue
-            </button>
+        <!-- ====== ROLE SELECTOR ====== -->
+        <div class="field-group" style="text-align: left;">
+            <label for="loginRoleSelect">Login as</label>
+            <select id="loginRoleSelect" style="width: 100%;">
+                <option value="technician">👨‍🔧 Technician</option>
+                <option value="incharge">👔 In-Charge</option>
+            </select>
         </div>
+
+        <!-- ====== TECHNICIAN: name dropdown ====== -->
+        <div class="field-group" style="text-align: left;" id="loginTechGroup">
+            <label for="loginTechSelect">Your name</label>
+            <select id="loginTechSelect" style="width: 100%;">
+                <option value="">— Choose your name —</option>
+                <option value="Hillaly KUBWIMANA">Hillaly KUBWIMANA</option>
+                <option value="YANDEREYE Felecien">YANDEREYE Felecien</option>
+                <option value="HIRWA Jean Deluce">HIRWA Jean Deluce</option>
+                <option value="HABARUREMA Jean Claude">HABARUREMA Jean Claude</option>
+                <option value="GATANGANWA Raissa">GATANGANWA Raissa</option>
+            </select>
+        </div>
+
+        <!-- ====== IN-CHARGE: department + name ====== -->
+        <div class="field-group" style="text-align: left; display:none;" id="loginInchargeGroup">
+            <label for="loginInchargeDept">Your Department</label>
+            <select id="loginInchargeDept" style="width:100%;">
+                <option value="">— Choose your department —</option>
+            </select>
+            <label for="loginInchargeName" style="margin-top:14px;">Your full name (as it appears in reports)</label>
+            <input type="text" id="loginInchargeName" placeholder="e.g. NZABANTERURA innocent" autocomplete="off">
+        </div>
+
+        <!-- ====== PIN ====== -->
+        <div class="field-group" style="text-align: left;">
+            <label for="loginPinInput">Your PIN</label>
+            <input type="password" id="loginPinInput" inputmode="numeric" maxlength="8" placeholder="••••" style="text-align: center; font-size: 1.5rem; letter-spacing: 8px;">
+        </div>
+
+        <div id="loginError" style="color: #b33a3a; font-size: 0.9rem; margin-top: 6px; min-height: 20px;"></div>
+
+        <button class="btn-primary" id="loginBtn" style="width: 100%; justify-content: center; margin-top: 14px;">
+            🔓 Unlock &amp; Continue
+        </button>
     </div>
+</div>
 
     <!-- PFX AUTO PASSWORD MODAL -->
     <div class="modal-overlay" id="pfxPasswordModal">
@@ -621,8 +652,6 @@
                 'GATANGANWA Raissa':      '0401'
             };
 
-          // ⭐ DEPARTMENT + SERVICE + DEFAULT IN-CHARGE
-// Used by the in-charge login dropdown AND the "Add New AC" form
 const DEPARTMENTS = {
     'Laboratory': {
         defaultIncharge: 'Laboratory In-Charge',
@@ -1223,6 +1252,17 @@ const DEPARTMENTS = {
                     newAcDeptSelect.appendChild(opt);
                 });
                 populateServiceSelect();
+            }
+                        function populateLoginDepartmentSelect() {
+                const sel = document.getElementById('loginInchargeDept');
+                if (!sel) return;
+                sel.innerHTML = '<option value="">— Choose your department —</option>';
+                Object.keys(DEPARTMENTS).forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d;
+                    opt.textContent = d;
+                    sel.appendChild(opt);
+                });
             }
             function populateServiceSelect() {
                 const dept = newAcDeptSelect.value;
