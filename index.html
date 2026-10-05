@@ -84,6 +84,10 @@
         .btn-approve { background: #1b6b3f; color: white; border: none; padding: 10px 22px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 8px; }
         .btn-approve:hover { background: #155231; }
         .btn-approve:disabled { opacity: 0.6; cursor: wait; }
+        .btn-edit { background: #2a6b96; color: white; border: none; padding: 8px 16px; border-radius: 40px; font-weight: 600; font-size: 0.82rem; cursor: pointer; transition: 0.15s; }
+        .btn-edit:hover { background: #1e4a6d; }
+        .btn-danger { background: #b33a3a; color: white; border: none; padding: 8px 16px; border-radius: 40px; font-weight: 600; font-size: 0.82rem; cursor: pointer; transition: 0.15s; }
+        .btn-danger:hover { background: #8f2929; }
 
         .btn-add { background: #1b6b3f; color: white; border: none; padding: 12px 24px; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 8px; }
         .btn-add:hover { background: #155231; }
@@ -137,7 +141,6 @@
         .incharge-picker input { flex: 1; min-width: 240px; padding: 12px 18px; border-radius: 40px; border: 1.5px solid #e8c96a; background: white; font-size: 1rem; font-weight: 600; color: #7a5300; }
         .incharge-picker .hint { font-size: 0.82rem; color: #7a5300; flex-basis: 100%; margin-top: 4px; }
 
-        /* ⭐ In-charge inventory table */
         .inv-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .inv-table th { background: #eef6fc; color: #12405e; padding: 10px 12px; text-align: left; font-size: 0.85rem; font-weight: 700; border: 1px solid #d4e3ef; }
         .inv-table td { padding: 9px 12px; border: 1px solid #d4e3ef; font-size: 0.85rem; color: #1f3c54; }
@@ -147,6 +150,12 @@
         .status-badge.pending { background: #fff3cd; color: #7a5300; border: 1px solid #f4d97a; }
         .status-badge.overdue { background: #ffe6e6; color: #b33a3a; border: 1px solid #f0b8b8; }
         .status-badge.never { background: #e7f0f8; color: #5b7b96; border: 1px solid #cfdfeb; }
+
+        .dept-editor-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 10px; align-items: start; padding: 14px; background: #fbfdff; border: 1px solid #d4e3ef; border-radius: 14px; margin-bottom: 10px; }
+        .dept-editor-row input { padding: 10px 14px; border-radius: 12px; border: 1px solid #cfdfeb; font-size: 0.9rem; font-family: inherit; }
+        .dept-editor-row textarea { padding: 10px 14px; border-radius: 12px; border: 1px solid #cfdfeb; font-size: 0.9rem; font-family: inherit; min-height: 70px; resize: vertical; }
+        .dept-editor-row .actions { display: flex; gap: 6px; }
+        .dept-services-tag { display: inline-block; background: #eef6fc; color: #12405e; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; margin: 2px; }
 
         @media (max-width: 900px) {
             .generator-selector { flex-direction: column; align-items: stretch; }
@@ -173,6 +182,7 @@
             .pending-row { flex-direction: column; align-items: stretch; }
             .inv-table { font-size: 0.75rem; }
             .inv-table th, .inv-table td { padding: 6px 8px; }
+            .dept-editor-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -224,7 +234,9 @@
             </div>
         </div>
 
-        <!-- ⭐ TECHNICIAN-ONLY SECTION -->
+        <!-- ============================================================ -->
+        <!-- ⭐ TECHNICIAN SECTION (for standard technicians) -->
+        <!-- ============================================================ -->
         <div id="technicianSection">
 
             <div class="generator-selector">
@@ -343,7 +355,9 @@
             </div>
         </div>
 
-        <!-- ⭐ IN-CHARGE-ONLY SECTION -->
+        <!-- ============================================================ -->
+        <!-- ⭐ IN-CHARGE SECTION -->
+        <!-- ============================================================ -->
         <div id="inchargeSection" style="display:none;">
 
             <div class="card" id="pendingApprovalsCard" style="margin-bottom: 28px; border: 2px solid #1b6b3f;">
@@ -412,6 +426,94 @@
 
         </div>
 
+        <!-- ============================================================ -->
+        <!-- ⭐ RAISSA SUPERVISOR SECTION (no checklist) -->
+        <!-- ============================================================ -->
+        <div id="supervisorSection" style="display:none;">
+
+            <!-- Department Management -->
+            <div class="card" style="margin-bottom: 28px; border: 2px solid #7a4c9c;">
+                <div class="card-header" style="background:#f3e8ff; color:#5d3578;">
+                    <span>🏢</span> Department Management
+                    <span style="margin-left:auto; font-size:0.78rem; background:#7a4c9c; color:white; padding: 3px 12px; border-radius: 20px; font-weight:700;">Supervisor Only</span>
+                </div>
+                <div class="card-body">
+                    <p style="font-size: 0.88rem; color: #5b7b96; margin-bottom: 14px;">
+                        Add, edit, or remove departments and their service locations. Changes sync to the cloud for all users.
+                    </p>
+                    <div id="deptEditorList" style="margin-bottom: 16px;"></div>
+                    <button class="btn-add" id="addDeptBtn" style="margin-top: 8px;">➕ Add New Department</button>
+                    <button class="btn-primary" id="saveDeptsBtn" style="margin-top: 8px; padding: 12px 24px; font-size: 0.95rem;">💾 Save All Changes to Cloud</button>
+                </div>
+            </div>
+
+            <!-- All ACs across departments -->
+            <div class="card" style="margin-bottom: 28px;">
+                <div class="card-header">
+                    <span>🌐</span> All AC Units — All Departments
+                    <span id="supervisorInvCount" style="margin-left:auto; background:#eef6fc; color:#12405e; padding: 3px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">—</span>
+                </div>
+                <div class="card-body">
+                    <p style="font-size: 0.88rem; color: #3a6583; margin-bottom: 14px;">
+                        Full inventory across every department with real-time maintenance status (last PM, next PM, overdue).
+                    </p>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 12px;">
+                        <select id="supervisorDeptFilter" style="padding:10px 16px; border-radius:40px; border:1.5px solid #cfdfeb; font-weight:600;">
+                            <option value="all">🏢 All Departments</option>
+                        </select>
+                        <div class="filter-selector" id="supervisorStatusFilterBar" style="margin-bottom:0;">
+                            <div class="filter-chip active" data-status="all">📋 All</div>
+                            <div class="filter-chip" data-status="maintained">✅ Maintained</div>
+                            <div class="filter-chip" data-status="pending">⏳ Pending</div>
+                            <div class="filter-chip" data-status="overdue">🚨 Overdue</div>
+                            <div class="filter-chip" data-status="never">⚪ Never serviced</div>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="inv-table" id="supervisorInventoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Tag</th>
+                                    <th>Department</th>
+                                    <th>Location</th>
+                                    <th>Brand / Model</th>
+                                    <th>Last PM</th>
+                                    <th>Next PM</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="supervisorInventoryTableBody">
+                                <tr><td colspan="8" style="text-align:center; color:#5b7b96; font-style:italic; padding: 14px;">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending approvals for all depts -->
+            <div class="card" id="supervisorPendingCard" style="margin-bottom: 28px; border: 2px solid #1b6b3f;">
+                <div class="card-header" style="background:#e2f0e6; color:#1b6b3f;">
+                    <span>✅</span> All Pending Co-Signatures (All Departments)
+                    <span id="supervisorPendingCount" style="margin-left:auto; background:#1b6b3f; color:white; padding: 3px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">0</span>
+                </div>
+                <div class="card-body">
+                    <div class="pending-list" id="supervisorPendingList">
+                        <div style="text-align:center; color:#5b7b96; font-style:italic; padding: 12px;">Loading…</div>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px;">
+                        <button class="btn-secondary" id="supervisorRefreshPendingBtn" style="padding: 10px 20px; font-size: 0.88rem;">🔄 Refresh</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons" style="margin-bottom: 20px;">
+                <button class="btn-pdf-all" id="supervisorDownloadAllBtn"><span>📚</span> Download ALL PMs (All Departments)</button>
+                <button class="btn-pdf" id="supervisorDownloadAnalysisBtn"><span>📊</span> Download Full Fleet Analysis</button>
+            </div>
+
+        </div>
+
         <div class="action-buttons" id="technicianActionButtons">
             <button class="btn-pdf" id="pdfBtn"><span>📄</span> Export Current as PDF</button>
             <button class="btn-pdf-all" id="historyPdfBtn"><span>📚</span> Download My PMs (Cloud)</button>
@@ -431,59 +533,55 @@
         </div>
     </div>
 
-    
-   <!-- LOGIN MODAL -->
-<div class="modal-overlay show" id="loginModal">
-    <div class="modal-box" style="max-width: 420px; text-align: center;">
-        <div style="font-size: 3rem; margin-bottom: 12px;">🔐</div>
-        <h2 style="justify-content: center;">Login</h2>
-        <p style="margin-bottom: 22px;">Select your role and enter your PIN.</p>
+    <!-- LOGIN MODAL -->
+    <div class="modal-overlay show" id="loginModal">
+        <div class="modal-box" style="max-width: 420px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 12px;">🔐</div>
+            <h2 style="justify-content: center;">Login</h2>
+            <p style="margin-bottom: 22px;">Select your role and enter your PIN.</p>
 
-        <!-- ====== ROLE SELECTOR ====== -->
-        <div class="field-group" style="text-align: left;">
-            <label for="loginRoleSelect">Login as</label>
-            <select id="loginRoleSelect" style="width: 100%;">
-                <option value="technician">👨‍🔧 Technician</option>
-                <option value="incharge">👔 In-Charge</option>
-            </select>
+            <div class="field-group" style="text-align: left;">
+                <label for="loginRoleSelect">Login as</label>
+                <select id="loginRoleSelect" style="width: 100%;">
+                    <option value="technician">👨‍🔧 Technician</option>
+                    <option value="incharge">👔 In-Charge</option>
+                </select>
+            </div>
+
+            <div class="field-group" style="text-align: left;" id="loginTechGroup">
+                <label for="loginTechSelect">Your name</label>
+                <select id="loginTechSelect" style="width: 100%;">
+                    <option value="">— Choose your name —</option>
+                    <option value="Hillaly KUBWIMANA">Hillaly KUBWIMANA</option>
+                    <option value="YANDEREYE Felecien">YANDEREYE Felecien</option>
+                    <option value="HIRWA Jean Deluce">HIRWA Jean Deluce</option>
+                    <option value="HABARUREMA Jean Claude">HABARUREMA Jean Claude</option>
+                    <option value="GATANGANWA Raissa">GATANGANWA Raissa</option>
+                </select>
+            </div>
+
+            <div class="field-group" style="text-align: left; display:none;" id="loginInchargeGroup">
+                <label for="loginInchargeDept">Your Department</label>
+                <select id="loginInchargeDept" style="width:100%;">
+                    <option value="">— Choose your department —</option>
+                </select>
+                <label for="loginInchargeName" style="margin-top:14px;">Your full name (as it appears in reports)</label>
+                <input type="text" id="loginInchargeName" list="loginInchargeSuggestions" placeholder="e.g. NZABANTERURA innocent" autocomplete="off">
+                <datalist id="loginInchargeSuggestions"></datalist>
+            </div>
+
+            <div class="field-group" style="text-align: left;">
+                <label for="loginPinInput">Your PIN</label>
+                <input type="password" id="loginPinInput" inputmode="numeric" maxlength="8" placeholder="••••" style="text-align: center; font-size: 1.5rem; letter-spacing: 8px;">
+            </div>
+
+            <div id="loginError" style="color: #b33a3a; font-size: 0.9rem; margin-top: 6px; min-height: 20px;"></div>
+
+            <button class="btn-primary" id="loginBtn" style="width: 100%; justify-content: center; margin-top: 14px;">
+                🔓 Unlock &amp; Continue
+            </button>
         </div>
-
-        <!-- ====== TECHNICIAN: name dropdown ====== -->
-        <div class="field-group" style="text-align: left;" id="loginTechGroup">
-            <label for="loginTechSelect">Your name</label>
-            <select id="loginTechSelect" style="width: 100%;">
-                <option value="">— Choose your name —</option>
-                <option value="Hillaly KUBWIMANA">Hillaly KUBWIMANA</option>
-                <option value="YANDEREYE Felecien">YANDEREYE Felecien</option>
-                <option value="HIRWA Jean Deluce">HIRWA Jean Deluce</option>
-                <option value="HABARUREMA Jean Claude">HABARUREMA Jean Claude</option>
-                <option value="GATANGANWA Raissa">GATANGANWA Raissa</option>
-            </select>
-        </div>
-
-        <!-- ====== IN-CHARGE: department + name ====== -->
-        <div class="field-group" style="text-align: left; display:none;" id="loginInchargeGroup">
-            <label for="loginInchargeDept">Your Department</label>
-            <select id="loginInchargeDept" style="width:100%;">
-                <option value="">— Choose your department —</option>
-            </select>
-            <label for="loginInchargeName" style="margin-top:14px;">Your full name (as it appears in reports)</label>
-            <input type="text" id="loginInchargeName" placeholder="e.g. NZABANTERURA innocent" autocomplete="off">
-        </div>
-
-        <!-- ====== PIN ====== -->
-        <div class="field-group" style="text-align: left;">
-            <label for="loginPinInput">Your PIN</label>
-            <input type="password" id="loginPinInput" inputmode="numeric" maxlength="8" placeholder="••••" style="text-align: center; font-size: 1.5rem; letter-spacing: 8px;">
-        </div>
-
-        <div id="loginError" style="color: #b33a3a; font-size: 0.9rem; margin-top: 6px; min-height: 20px;"></div>
-
-        <button class="btn-primary" id="loginBtn" style="width: 100%; justify-content: center; margin-top: 14px;">
-            🔓 Unlock &amp; Continue
-        </button>
     </div>
-</div>
 
     <!-- PFX AUTO PASSWORD MODAL -->
     <div class="modal-overlay" id="pfxPasswordModal">
@@ -610,6 +708,57 @@
         </div>
     </div>
 
+    <!-- EDIT AC MODAL (supervisor only) -->
+    <div class="modal-overlay" id="editAcModal">
+        <div class="modal-box">
+            <h2>✏️ Edit AC Unit</h2>
+            <input type="hidden" id="editAcIndex">
+            <div class="grid-3-wide" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="field-group">
+                    <label for="editAcTag">Tag Number / ID *</label>
+                    <input type="text" id="editAcTag">
+                </div>
+                <div class="field-group">
+                    <label for="editAcDept">Department *</label>
+                    <select id="editAcDept"></select>
+                </div>
+            </div>
+            <div class="field-group">
+                <label for="editAcLocation">Service / Room *</label>
+                <select id="editAcLocation"></select>
+            </div>
+            <div class="grid-3-wide" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="field-group">
+                    <label for="editAcBrand">Brand *</label>
+                    <input type="text" id="editAcBrand">
+                </div>
+                <div class="field-group">
+                    <label for="editAcModel">Model *</label>
+                    <input type="text" id="editAcModel">
+                </div>
+            </div>
+            <div class="grid-3-wide" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="field-group">
+                    <label for="editAcType">AC Type</label>
+                    <select id="editAcType">
+                        <option value="Split">Split</option>
+                        <option value="Cassette">Cassette</option>
+                        <option value="Window">Window</option>
+                        <option value="Portable">Portable</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label for="editAcSerial">Serial Number</label>
+                    <input type="text" id="editAcSerial">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="editAcCancel">Cancel</button>
+                <button class="btn-go" id="editAcSave">💾 Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function() {
             const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzq9Np0rhHJl0W9T4IhMaazb_5JHyUBfYmhWMLL2ny3HuQtRE-XkFZFcRskvHUA9Q6D/exec';
@@ -626,51 +775,66 @@
                 'GATANGANWA Raissa':      '0401'
             };
 
-const DEPARTMENTS = {
-    'Laboratory': {
-        defaultIncharge: 'Laboratory In-Charge',
-        services: [
-            'Genetics', 'Hematology', 'Biochemistry', 'Parasitology', 'TB',
-            'Sterilization', 'Molecular Pre-PCR', 'Molecular Post-PCR',
-            'Immunology', 'Culture Media', 'Direct Examination', 'Grossing Room',
-            'Embedding Room', 'Staining Room', 'Refrigerators Room',
-            'Stock Consumables', "Doctor's Office – Pathology", 'Lab UPS Room',
-            'Immunoserology', 'Old lab server-room', 'Cold chain fridge room'
-        ]
-    },
-    'Operating Theatre': {
-        defaultIncharge: 'Operating Theatre In-Charge',
-        services: ['Theatre 1', 'Theatre 2', 'Theatre 3', 'Recovery Room', 'Scrub Room', 'Anesthesia Room', 'CSSD']
-    },
-    'Pharmacy': {
-        defaultIncharge: 'Pharmacy In-Charge',
-        services: ['Main Store', 'Dispensary', 'Cold Chain', 'Compounding Room', 'Drug Store']
-    },
-    'Radiology': {
-        defaultIncharge: 'Radiology In-Charge',
-        services: ['X-Ray Room', 'CT Scan Room', 'Ultrasound Room', 'MRI Room', 'Reporting Room', 'Reception']
-    },
-    'Administration': {
-        defaultIncharge: 'Administration In-Charge',
-        services: ['Reception', 'Records Office', 'Accounts', 'HR Office', 'Director Office', 'Boardroom', 'Archives']
-    },
-    'Cancer Center': {
-        defaultIncharge: 'Cancer Center In-Charge',
-        services: ['Chemotherapy Room', 'Consultation Room', 'Day Care Ward', 'Reception', 'Radiotherapy Room']
-    },
-    'Simulation Center': {
-        defaultIncharge: 'Simulation Center In-Charge',
-        services: ['Simulation Lab 1', 'Simulation Lab 2', 'Debriefing Room', 'Control Room', 'Storage']
-    },
-    'I.M OPD': {
-        defaultIncharge: 'I.M OPD In-Charge',
-        services: ['Consultation 1', 'Consultation 2', 'Consultation 3', 'Triage', 'Waiting Area', 'Vaccination']
-    },
-    'Gynecology and Surgery': {
-        defaultIncharge: 'Gynecology and Surgery In-Charge',
-        services: ['Gynecology Ward', 'Antenatal', 'Postnatal', 'Delivery Room', 'Nursery', 'Surgical Ward', 'Consultation Room']
-    }
-};
+            // ⭐ RAISSA = supervisor role (no checklist, full control)
+            const SUPERVISOR_NAME = 'GATANGANWA Raissa';
+
+            // ⭐ Separated Surgery and Gynecology
+            const DEFAULT_DEPARTMENTS = {
+                'Laboratory': {
+                    defaultIncharge: 'Laboratory In-Charge',
+                    services: [
+                        'Genetics', 'Hematology', 'Biochemistry', 'Parasitology', 'TB',
+                        'Sterilization', 'Molecular Pre-PCR', 'Molecular Post-PCR',
+                        'Immunology', 'Culture Media', 'Direct Examination', 'Grossing Room',
+                        'Embedding Room', 'Staining Room', 'Refrigerators Room',
+                        'Stock Consumables', "Doctor's Office – Pathology", 'Lab UPS Room',
+                        'Immunoserology', 'Old lab server-room', 'Cold chain fridge room'
+                    ]
+                },
+                'Operating Theatre': {
+                    defaultIncharge: 'Operating Theatre In-Charge',
+                    services: ['Theatre 1', 'Theatre 2', 'Theatre 3', 'Recovery Room', 'Scrub Room', 'Anesthesia Room', 'CSSD']
+                },
+                'Pharmacy': {
+                    defaultIncharge: 'Pharmacy In-Charge',
+                    services: ['Main Store', 'Dispensary', 'Cold Chain', 'Compounding Room', 'Drug Store']
+                },
+                'Radiology': {
+                    defaultIncharge: 'Radiology In-Charge',
+                    services: ['X-Ray Room', 'CT Scan Room', 'Ultrasound Room', 'MRI Room', 'Reporting Room', 'Reception']
+                },
+                'Administration': {
+                    defaultIncharge: 'Administration In-Charge',
+                    services: ['Reception', 'Records Office', 'Accounts', 'HR Office', 'Director Office', 'Boardroom', 'Archives']
+                },
+                'Cancer Center': {
+                    defaultIncharge: 'Cancer Center In-Charge',
+                    services: ['Chemotherapy Room', 'Consultation Room', 'Day Care Ward', 'Reception', 'Radiotherapy Room']
+                },
+                'Simulation Center': {
+                    defaultIncharge: 'Simulation Center In-Charge',
+                    services: ['Simulation Lab 1', 'Simulation Lab 2', 'Debriefing Room', 'Control Room', 'Storage']
+                },
+                'I.M OPD': {
+                    defaultIncharge: 'I.M OPD In-Charge',
+                    services: ['Consultation 1', 'Consultation 2', 'Consultation 3', 'Triage', 'Waiting Area', 'Vaccination']
+                },
+                // ⭐ SEPARATED: Gynecology
+                'Gynecology': {
+                    defaultIncharge: 'Gynecology In-Charge',
+                    services: ['Gynecology Ward', 'Antenatal', 'Postnatal', 'Delivery Room', 'Nursery', 'Consultation Room']
+                },
+                // ⭐ SEPARATED: Surgery
+                'Surgery': {
+                    defaultIncharge: 'Surgery In-Charge',
+                    services: ['Surgical Ward', 'Minor Theatre', 'Major Theatre', 'Pre-Op Room', 'Post-Op Room', 'Consultation Room']
+                }
+            };
+
+            // ⭐ Dynamic DEPARTMENTS object (can be edited by supervisor, synced to cloud)
+            let DEPARTMENTS = JSON.parse(JSON.stringify(DEFAULT_DEPARTMENTS));
+            const DEPT_CLOUD_KEY = 'CHUB_DEPARTMENTS_V1';
+            const DEPT_CACHE_KEY = 'chub_departments_cache_v1';
 
             const DEFAULT_TECHNICIAN_SIGNATURES = {};
             const SIG_STORAGE_KEY = 'chub_ac_technician_signatures_v4';
@@ -746,24 +910,17 @@ const DEPARTMENTS = {
             function formatPmDate(d) { return d ? d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }
             function nextPmForPDF(dateVal) { return formatPmDate(addMonths(dateVal, PM_INTERVAL_MONTHS)); }
             function recordTime(rec) { const raw = rec['Timestamp'] || rec.timestamp || rec.workDate; const t = new Date(raw).getTime(); return isNaN(t) ? 0 : t; }
-         function normalizeText(val) {
-    if (val === null || val === undefined) return '';
-    return String(val)
-        // Unicode normalize (decompose accents)
-        .normalize('NFKD')
-        // Remove diacritics
-        .replace(/[\u0300-\u036f]/g, '')
-        // Remove zero-width and other invisible chars
-        .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '')
-        // Convert non-breaking spaces to normal spaces
-        .replace(/\u00A0/g, ' ')
-        // Collapse all whitespace runs into a single space
-        .replace(/\s+/g, ' ')
-        // Trim
-        .trim()
-        // Uppercase (case-insensitive matching)
-        .toUpperCase();
-}
+            function normalizeText(val) {
+                if (val === null || val === undefined) return '';
+                return String(val)
+                    .normalize('NFKD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '')
+                    .replace(/\u00A0/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .toUpperCase();
+            }
 
             // ================= SIGNATURE STORAGE =================
             function loadSignatures() {
@@ -886,6 +1043,44 @@ const DEPARTMENTS = {
                 } catch (e) {}
             }
 
+            // ⭐ Push departments to cloud
+            async function pushDepartmentsToCloud(depts) {
+                try {
+                    await fetch(GOOGLE_SHEET_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'config_set', key: DEPT_CLOUD_KEY, value: JSON.stringify(depts) }) });
+                    return true;
+                } catch(e) { return false; }
+            }
+            // ⭐ Fetch departments from cloud
+            async function fetchDepartmentsFromCloud() {
+                try {
+                    const res = await fetch(GOOGLE_SHEET_URL + '?type=config&_ts=' + Date.now(), { cache: 'no-store' });
+                    const json = await res.json();
+                    const raw = json.config && json.config[DEPT_CLOUD_KEY];
+                    if (!raw) return null;
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') return parsed;
+                    return null;
+                } catch(e) { return null; }
+            }
+            function cacheDepartmentsLocally(depts) { try { localStorage.setItem(DEPT_CACHE_KEY, JSON.stringify(depts)); } catch(e) {} }
+            function loadCachedDepartments() {
+                try { const raw = localStorage.getItem(DEPT_CACHE_KEY); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+            }
+            async function ensureDepartmentsLoaded() {
+                const cloud = await fetchDepartmentsFromCloud();
+                if (cloud && Object.keys(cloud).length > 0) {
+                    DEPARTMENTS = cloud;
+                    cacheDepartmentsLocally(cloud);
+                } else {
+                    const cached = loadCachedDepartments();
+                    if (cached && Object.keys(cached).length > 0) DEPARTMENTS = cached;
+                    else DEPARTMENTS = JSON.parse(JSON.stringify(DEFAULT_DEPARTMENTS));
+                }
+                populateLoginDepartmentSelect();
+                populateDepartmentSelect();
+                populateSupervisorDeptFilter();
+            }
+
             function askPfxPassword() {
                 return new Promise((resolve) => {
                     const modal = document.getElementById('pfxPasswordModal');
@@ -970,19 +1165,16 @@ const DEPARTMENTS = {
                 } catch (e) { return ''; }
             }
 
-            // ⭐ Fetch list of known in-charges (from Config sheet keys)
             async function fetchKnownIncharges() {
                 try {
                     const res = await fetch(GOOGLE_SHEET_URL + '?type=config&_ts=' + Date.now(), { cache: 'no-store' });
                     const json = await res.json();
                     const config = json.config || {};
                     const names = new Set();
-                    // From Config keys: InchargeSig_<Name>, InchargeSigner_<Name>
                     Object.keys(config).forEach(k => {
                         if (k.startsWith('InchargeSig_')) names.add(k.substring('InchargeSig_'.length));
                         else if (k.startsWith('InchargeSigner_')) names.add(k.substring('InchargeSigner_'.length));
                     });
-                    // Add defaults from DEPARTMENTS
                     Object.values(DEPARTMENTS).forEach(d => { if (d.defaultIncharge) names.add(d.defaultIncharge); });
                     return Array.from(names).filter(Boolean).sort();
                 } catch (e) { return []; }
@@ -999,7 +1191,6 @@ const DEPARTMENTS = {
                 const json = await res.json();
                 return json.records || [];
             }
-            // ⭐ Fetch ALL inventory (for in-charge department view)
             async function fetchAllInventory() {
                 try {
                     const res = await fetch(GOOGLE_SHEET_URL + '?type=inventory_all&_ts=' + Date.now(), { cache: 'no-store' });
@@ -1040,7 +1231,7 @@ const DEPARTMENTS = {
             ];
 
             let AC_INVENTORY = [];
-            let ALL_INVENTORY = []; // ⭐ for in-charge view
+            let ALL_INVENTORY = [];
             const USER_PM_KEYS = new Set();
 
             function buildAcIdentity(obj) {
@@ -1082,6 +1273,7 @@ const DEPARTMENTS = {
             let inchargeFilterScope = 'mine';
             let inventoryFilterStatus = 'all';
             let currentInchargeDept = '';
+            let supervisorStatusFilter = 'all';
 
             // ================= STATUS / SYNC =================
             function showStatus(msg, isSuccess = true) {
@@ -1198,18 +1390,16 @@ const DEPARTMENTS = {
                 }
             }
 
-            // ================= IN-CHARGE NAME SUGGESTIONS (datalist) =================
+            // ================= IN-CHARGE NAME SUGGESTIONS =================
             async function populateInchargeSuggestions() {
                 const datalist = document.getElementById('inchargeSuggestions');
                 const loginDatalist = document.getElementById('loginInchargeSuggestions');
-                datalist.innerHTML = '';
-                loginDatalist.innerHTML = '';
+                if (datalist) datalist.innerHTML = '';
+                if (loginDatalist) loginDatalist.innerHTML = '';
                 const names = await fetchKnownIncharges();
                 names.forEach(n => {
-                    const o1 = document.createElement('option');
-                    o1.value = n; datalist.appendChild(o1);
-                    const o2 = document.createElement('option');
-                    o2.value = n; loginDatalist.appendChild(o2);
+                    if (datalist) { const o1 = document.createElement('option'); o1.value = n; datalist.appendChild(o1); }
+                    if (loginDatalist) { const o2 = document.createElement('option'); o2.value = n; loginDatalist.appendChild(o2); }
                 });
             }
 
@@ -1219,6 +1409,7 @@ const DEPARTMENTS = {
             const newAcLocationSelect = document.getElementById('newAcLocation');
 
             function populateDepartmentSelect() {
+                if (!newAcDeptSelect) return;
                 newAcDeptSelect.innerHTML = '';
                 Object.keys(DEPARTMENTS).forEach(d => {
                     const opt = document.createElement('option');
@@ -1227,7 +1418,7 @@ const DEPARTMENTS = {
                 });
                 populateServiceSelect();
             }
-                        function populateLoginDepartmentSelect() {
+            function populateLoginDepartmentSelect() {
                 const sel = document.getElementById('loginInchargeDept');
                 if (!sel) return;
                 sel.innerHTML = '<option value="">— Choose your department —</option>';
@@ -1334,18 +1525,39 @@ const DEPARTMENTS = {
                 }
             }
 
+            // ================= ROLE VISIBILITY =================
             function applyRoleVisibility() {
                 const isIncharge = currentRole === 'incharge';
-                document.getElementById('technicianSection').style.display = isIncharge ? 'none' : 'block';
+                const isSupervisor = currentRole === 'supervisor';
+
+                document.getElementById('technicianSection').style.display = (isIncharge || isSupervisor) ? 'none' : 'block';
                 document.getElementById('inchargeSection').style.display = isIncharge ? 'block' : 'none';
-                document.getElementById('technicianActionButtons').style.display = isIncharge ? 'none' : 'flex';
-                document.getElementById('workdateTag').style.display = isIncharge ? 'none' : 'flex';
-                document.getElementById('inchargeSignatureSection').style.display = isIncharge ? 'block' : 'none';
-                document.getElementById('roleIcon').textContent = isIncharge ? '👔' : '👨‍🔧';
-                document.getElementById('roleLabel').textContent = isIncharge ? 'In-Charge:' : 'Technician:';
+                document.getElementById('supervisorSection').style.display = isSupervisor ? 'block' : 'none';
+                document.getElementById('technicianActionButtons').style.display = (isIncharge || isSupervisor) ? 'none' : 'flex';
+                document.getElementById('workdateTag').style.display = (isIncharge || isSupervisor) ? 'none' : 'flex';
+                document.getElementById('inchargeSignatureSection').style.display = (isIncharge || isSupervisor) ? 'block' : 'none';
+
+                const roleIcon = document.getElementById('roleIcon');
+                const roleLabel = document.getElementById('roleLabel');
+                if (isSupervisor) {
+                    roleIcon.textContent = '👑';
+                    roleLabel.textContent = 'Supervisor:';
+                } else if (isIncharge) {
+                    roleIcon.textContent = '👔';
+                    roleLabel.textContent = 'In-Charge:';
+                } else {
+                    roleIcon.textContent = '👨‍🔧';
+                    roleLabel.textContent = 'Technician:';
+                }
+
                 if (isIncharge) {
                     refreshPendingApprovals();
                     loadDepartmentInventory();
+                }
+                if (isSupervisor) {
+                    renderDeptEditor();
+                    refreshSupervisorInventory();
+                    refreshSupervisorPending();
                 }
             }
 
@@ -1477,10 +1689,8 @@ const DEPARTMENTS = {
                 pendingApprovalsList.innerHTML = '<div style="text-align:center; color:#5b7b96; font-style:italic; padding: 12px;">Loading…</div>';
                 try {
                     const records = await fetchAllLogs();
-                                     const myDept = currentInchargeDept || '';
+                    const myDept = currentInchargeDept || '';
                     const myName = normalizeText(technicianSelect.value);
-
-                    console.log('🔍 Pending filter — dept:', JSON.stringify(myDept), '| name:', JSON.stringify(myName));
 
                     const pending = records.filter(r => {
                         const at = safeStr(r['In-Charge Signed At'] || r.inchargeSignedAt).trim();
@@ -1489,15 +1699,9 @@ const DEPARTMENTS = {
                         if (inchargeFilterScope === 'mine') {
                             const recDept = normalizeText(r['Department'] || r.acDept);
                             const recIncharge = normalizeText(r['In-Charge Name'] || r.inchargeName);
-
-                            // 1) Match by department (primary)
                             if (myDept && recDept === normalizeText(myDept)) return true;
-                            // 2) Fallback: match by name
                             if (recIncharge === myName) return true;
-                            // 3) Safety: show records with no metadata
                             if (!recDept && !recIncharge) return true;
-
-                            console.log('   ❌ Filtered out:', safeStr(r['AC Tag'] || r.acTag), '| recDept:', JSON.stringify(recDept), '| recIncharge:', JSON.stringify(recIncharge));
                             return false;
                         }
                         return true;
@@ -1576,11 +1780,9 @@ const DEPARTMENTS = {
 
             // ================= IN-CHARGE: DEPARTMENT INVENTORY =================
             function inferDepartmentFromIncharge(inchargeName) {
-                // Try to find a department whose defaultIncharge matches
                 for (const dept of Object.keys(DEPARTMENTS)) {
                     if (normalizeText(DEPARTMENTS[dept].defaultIncharge) === normalizeText(inchargeName)) return dept;
                 }
-                // Fallback: match by first word (e.g. "RADIOLOGY In-Charge")
                 for (const dept of Object.keys(DEPARTMENTS)) {
                     if (normalizeText(DEPARTMENTS[dept].defaultIncharge).startsWith(normalizeText(inchargeName.split(' ')[0]))) return dept;
                 }
@@ -1588,7 +1790,6 @@ const DEPARTMENTS = {
             }
 
             function computeAcStatus(ac, records, now) {
-                // Find latest PM for this AC
                 const myId = buildAcIdentity({ acTag: ac.tag, acLocation: ac.loc, acSerial: ac.serial, acModel: ac.model });
                 const myRecords = records.filter(r => {
                     const rid = buildAcIdentity({ acTag: r['AC Tag'] || r.acTag, acLocation: r['Location'] || r.acLocation, acSerial: r['Serial Number'] || r.acSerial, acModel: r['Model'] || r.acModel });
@@ -1602,18 +1803,15 @@ const DEPARTMENTS = {
                 const lastDate = safeStr(lastPm['Work Date'] || lastPm.workDate);
                 const nextDate = addMonths(lastDate, PM_INTERVAL_MONTHS);
                 const nextDateStr = nextDate ? nextDate.toISOString().slice(0, 10) : '';
-
-                // Determine status
                 const daysUntil = nextDate ? Math.round((nextDate - now) / 86400000) : 9999;
                 let status;
                 if (daysUntil < 0) status = 'overdue';
                 else if (daysUntil <= 30) status = 'pending';
                 else status = 'maintained';
-
                 return { status, lastPm: lastDate, nextPm: nextDateStr };
             }
 
-                        async function loadDepartmentInventory() {
+            async function loadDepartmentInventory() {
                 const tbody = document.getElementById('inventoryTableBody');
                 const deptBadge = document.getElementById('invDeptBadge');
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#5b7b96; font-style:italic; padding: 14px;">Loading…</td></tr>';
@@ -1625,13 +1823,10 @@ const DEPARTMENTS = {
                 }
                 deptBadge.textContent = dept;
 
-                // Fetch all inventory + records
                 let allInv = await fetchAllInventory();
                 if (allInv.length === 0) {
-                    // Fallback: fetch from all technicians
                     allInv = [];
                     try {
-                        // Fetch from Hillaly's list if available (default owner)
                         const fallback = await fetchInventoryFromCloud(DEFAULT_LIST_OWNER);
                         allInv = fallback;
                     } catch (e) {}
@@ -1650,7 +1845,6 @@ const DEPARTMENTS = {
                     return { ac, ...info };
                 });
 
-                // Apply status filter
                 const filtered = inventoryFilterStatus === 'all' ? rows : rows.filter(r => r.status === inventoryFilterStatus);
 
                 if (filtered.length === 0) {
@@ -1671,7 +1865,6 @@ const DEPARTMENTS = {
                     </tr>`;
                 }).join('');
 
-                // Store for PDF generation
                 ALL_INVENTORY = rows;
             }
 
@@ -1723,7 +1916,344 @@ const DEPARTMENTS = {
                 this.disabled = false; this.innerHTML = orig;
             });
 
-            // ================= PDF GENERATION (same as before) =================
+            // ================= SUPERVISOR (RAISSA) FUNCTIONS =================
+            function renderDeptEditor() {
+                const wrap = document.getElementById('deptEditorList');
+                if (!wrap) return;
+                wrap.innerHTML = '';
+                const depts = Object.keys(DEPARTMENTS);
+                if (depts.length === 0) {
+                    wrap.innerHTML = '<div style="text-align:center; color:#5b7b96; font-style:italic; padding:12px;">No departments. Click "Add New Department".</div>';
+                    return;
+                }
+                depts.forEach(d => {
+                    const services = DEPARTMENTS[d].services || [];
+                    const incharge = DEPARTMENTS[d].defaultIncharge || '';
+                    const row = document.createElement('div');
+                    row.className = 'dept-editor-row';
+                    row.innerHTML = `
+                        <div>
+                            <label style="font-size:0.75rem; color:#5b7b96; font-weight:700;">DEPARTMENT</label>
+                            <input type="text" data-orig-dept="${d}" class="dept-name-input" value="${d.replace(/"/g, '&quot;')}" style="width:100%; font-weight:700;">
+                            <label style="font-size:0.75rem; color:#5b7b96; font-weight:700; margin-top:8px; display:block;">DEFAULT IN-CHARGE</label>
+                            <input type="text" class="dept-incharge-input" value="${incharge.replace(/"/g, '&quot;')}" style="width:100%;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem; color:#5b7b96; font-weight:700;">SERVICES (one per line)</label>
+                            <textarea class="dept-services-input" data-orig-dept="${d}" style="width:100%;">${services.join('\n')}</textarea>
+                        </div>
+                        <div class="actions">
+                            <button type="button" class="btn-danger" data-del-dept="${d}">🗑️</button>
+                        </div>
+                    `;
+                    wrap.appendChild(row);
+                });
+                // Delete handlers
+                wrap.querySelectorAll('[data-del-dept]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const dn = this.getAttribute('data-del-dept');
+                        if (!confirm('Delete department "' + dn + '"? This cannot be undone.')) return;
+                        delete DEPARTMENTS[dn];
+                        renderDeptEditor();
+                    });
+                });
+            }
+
+            document.getElementById('addDeptBtn')?.addEventListener('click', () => {
+                const name = prompt('New department name (e.g. "Maternity"):');
+                if (!name) return;
+                const trimmed = name.trim();
+                if (!trimmed) return;
+                if (DEPARTMENTS[trimmed]) { alert('Department already exists.'); return; }
+                DEPARTMENTS[trimmed] = { defaultIncharge: trimmed + ' In-Charge', services: ['Main Room'] };
+                renderDeptEditor();
+                showStatus('➕ Department added locally. Click "Save All Changes to Cloud" to publish.', true);
+            });
+
+            document.getElementById('saveDeptsBtn')?.addEventListener('click', async function() {
+                // Collect edits from DOM
+                const rows = document.querySelectorAll('#deptEditorList .dept-editor-row');
+                const newDepts = {};
+                let renamedFrom = {};
+                rows.forEach(row => {
+                    const nameInput = row.querySelector('.dept-name-input');
+                    const inchargeInput = row.querySelector('.dept-incharge-input');
+                    const servicesInput = row.querySelector('.dept-services-input');
+                    const newName = (nameInput.value || '').trim();
+                    if (!newName) return;
+                    const services = (servicesInput.value || '').split('\n').map(s => s.trim()).filter(Boolean);
+                    newDepts[newName] = {
+                        defaultIncharge: (inchargeInput.value || '').trim() || (newName + ' In-Charge'),
+                        services: services.length ? services : ['Main Room']
+                    };
+                });
+                if (Object.keys(newDepts).length === 0) { alert('At least one department is required.'); return; }
+                this.disabled = true;
+                const orig = this.innerHTML;
+                this.innerHTML = '⏳ Saving...';
+                DEPARTMENTS = newDepts;
+                cacheDepartmentsLocally(newDepts);
+                try {
+                    await pushDepartmentsToCloud(newDepts);
+                    showStatus('✅ Departments saved to cloud.', true);
+                } catch(e) {
+                    showStatus('⚠️ Saved locally, cloud sync failed.', false);
+                }
+                populateLoginDepartmentSelect();
+                populateDepartmentSelect();
+                populateSupervisorDeptFilter();
+                renderDeptEditor();
+                this.disabled = false;
+                this.innerHTML = orig;
+            });
+
+            function populateSupervisorDeptFilter() {
+                const sel = document.getElementById('supervisorDeptFilter');
+                if (!sel) return;
+                const current = sel.value || 'all';
+                sel.innerHTML = '<option value="all">🏢 All Departments</option>';
+                Object.keys(DEPARTMENTS).forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d; opt.textContent = d;
+                    sel.appendChild(opt);
+                });
+                sel.value = current;
+            }
+
+            document.querySelectorAll('#supervisorStatusFilterBar .filter-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    document.querySelectorAll('#supervisorStatusFilterBar .filter-chip').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    supervisorStatusFilter = this.dataset.status;
+                    refreshSupervisorInventory();
+                });
+            });
+            document.getElementById('supervisorDeptFilter')?.addEventListener('change', refreshSupervisorInventory);
+
+            async function refreshSupervisorInventory() {
+                const tbody = document.getElementById('supervisorInventoryTableBody');
+                const countBadge = document.getElementById('supervisorInvCount');
+                if (!tbody) return;
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#5b7b96; font-style:italic; padding: 14px;">Loading…</td></tr>';
+
+                let allInv = await fetchAllInventory();
+                if (!allInv || allInv.length === 0) {
+                    try { allInv = await fetchInventoryFromCloud(DEFAULT_LIST_OWNER); } catch(e) { allInv = []; }
+                }
+                if (!allInv || allInv.length === 0) {
+                    allInv = DEFAULT_AC_INVENTORY.slice();
+                }
+                const records = await fetchAllLogs();
+                const now = new Date();
+
+                const deptFilter = document.getElementById('supervisorDeptFilter')?.value || 'all';
+                const rows = allInv.map(ac => {
+                    const info = computeAcStatus(ac, records, now);
+                    return { ac, ...info };
+                }).filter(r => deptFilter === 'all' || normalizeText(r.ac.dept) === normalizeText(deptFilter))
+                  .filter(r => supervisorStatusFilter === 'all' || r.status === supervisorStatusFilter);
+
+                countBadge.textContent = rows.length + ' units';
+
+                if (rows.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#5b7b96; padding: 14px;">No ACs match filters.</td></tr>';
+                    return;
+                }
+                const statusLabels = { maintained: '✅ Maintained', pending: '⏳ Pending', overdue: '🚨 Overdue', never: '⚪ Never serviced' };
+                tbody.innerHTML = rows.map(r => {
+                    const ac = r.ac;
+                    return `<tr>
+                        <td><strong>${ac.tag}</strong></td>
+                        <td>${ac.dept}</td>
+                        <td>${ac.loc}</td>
+                        <td>${ac.brand} ${ac.model}</td>
+                        <td>${r.lastPm ? formatDateOnly(r.lastPm) : '—'}</td>
+                        <td>${r.nextPm ? formatDateOnly(r.nextPm) : '—'}</td>
+                        <td><span class="status-badge ${r.status}">${statusLabels[r.status]}</span></td>
+                        <td>
+                            <button class="btn-edit" data-edit-ac='${JSON.stringify(ac).replace(/'/g, "&#39;")}'>✏️</button>
+                            <button class="btn-danger" data-del-ac='${JSON.stringify(ac).replace(/'/g, "&#39;")}'>🗑️</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+
+                // Edit handlers
+                tbody.querySelectorAll('[data-edit-ac]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const ac = JSON.parse(this.getAttribute('data-edit-ac'));
+                        openEditAcModal(ac);
+                    });
+                });
+                // Delete handlers
+                tbody.querySelectorAll('[data-del-ac]').forEach(btn => {
+                    btn.addEventListener('click', async function() {
+                        const ac = JSON.parse(this.getAttribute('data-del-ac'));
+                        if (!confirm('Delete AC "' + ac.tag + ' — ' + ac.loc + '"?')) return;
+                        await deleteAcFromAll(ac);
+                    });
+                });
+            }
+
+            async function deleteAcFromAll(ac) {
+                const allInv = await fetchAllInventory();
+                const targetId = buildAcIdentity({ acTag: ac.tag, acLocation: ac.loc, acSerial: ac.serial, acModel: ac.model });
+                const remaining = allInv.filter(x => buildAcIdentity({ acTag: x.tag, acLocation: x.loc, acSerial: x.serial, acModel: x.model }) !== targetId);
+                // Save the remaining list under the current technician (Raissa)
+                const ownerTech = technicianSelect.value;
+                await pushInventoryToCloud(ownerTech, remaining);
+                showStatus('🗑️ AC deleted from cloud.', true);
+                refreshSupervisorInventory();
+            }
+
+            // ================= EDIT AC MODAL =================
+            const editAcModal = document.getElementById('editAcModal');
+            const editAcDeptSelect = document.getElementById('editAcDept');
+            const editAcLocationSelect = document.getElementById('editAcLocation');
+
+            function populateEditAcDeptSelect() {
+                if (!editAcDeptSelect) return;
+                editAcDeptSelect.innerHTML = '';
+                Object.keys(DEPARTMENTS).forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d; opt.textContent = d;
+                    editAcDeptSelect.appendChild(opt);
+                });
+            }
+            function populateEditAcServiceSelect() {
+                const dept = editAcDeptSelect.value;
+                const services = (DEPARTMENTS[dept] && DEPARTMENTS[dept].services) || [];
+                editAcLocationSelect.innerHTML = '';
+                services.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s; opt.textContent = s;
+                    editAcLocationSelect.appendChild(opt);
+                });
+            }
+            editAcDeptSelect?.addEventListener('change', populateEditAcServiceSelect);
+
+            function openEditAcModal(ac) {
+                populateEditAcDeptSelect();
+                document.getElementById('editAcTag').value = ac.tag || '';
+                document.getElementById('editAcDept').value = ac.dept || Object.keys(DEPARTMENTS)[0] || '';
+                populateEditAcServiceSelect();
+                document.getElementById('editAcLocation').value = ac.loc || '';
+                document.getElementById('editAcBrand').value = ac.brand || '';
+                document.getElementById('editAcModel').value = ac.model || '';
+                document.getElementById('editAcType').value = ac.type || 'Split';
+                document.getElementById('editAcSerial').value = ac.serial || '';
+                editAcModal._originalAc = ac;
+                editAcModal.classList.add('show');
+            }
+
+            document.getElementById('editAcCancel')?.addEventListener('click', () => editAcModal.classList.remove('show'));
+
+            document.getElementById('editAcSave')?.addEventListener('click', async function() {
+                const original = editAcModal._originalAc;
+                if (!original) return;
+                const updated = {
+                    tag: document.getElementById('editAcTag').value.trim(),
+                    dept: document.getElementById('editAcDept').value,
+                    loc: document.getElementById('editAcLocation').value,
+                    brand: document.getElementById('editAcBrand').value.trim(),
+                    model: document.getElementById('editAcModel').value.trim(),
+                    type: document.getElementById('editAcType').value,
+                    serial: document.getElementById('editAcSerial').value.trim() || 'N/A'
+                };
+                if (!updated.tag || !updated.dept || !updated.loc || !updated.brand || !updated.model) {
+                    alert('Please fill all required fields.');
+                    return;
+                }
+                this.disabled = true;
+                const orig = this.innerHTML;
+                this.innerHTML = '⏳ Saving...';
+
+                const allInv = await fetchAllInventory();
+                const targetId = buildAcIdentity({ acTag: original.tag, acLocation: original.loc, acSerial: original.serial, acModel: original.model });
+                const remaining = allInv.filter(x => buildAcIdentity({ acTag: x.tag, acLocation: x.loc, acSerial: x.serial, acModel: x.model }) !== targetId);
+                remaining.push(updated);
+                const ownerTech = technicianSelect.value;
+                await pushInventoryToCloud(ownerTech, remaining);
+                showStatus('✅ AC updated in cloud.', true);
+                editAcModal.classList.remove('show');
+                this.disabled = false;
+                this.innerHTML = orig;
+                refreshSupervisorInventory();
+            });
+
+            async function refreshSupervisorPending() {
+                const list = document.getElementById('supervisorPendingList');
+                const badge = document.getElementById('supervisorPendingCount');
+                if (!list) return;
+                list.innerHTML = '<div style="text-align:center; color:#5b7b96; font-style:italic; padding: 12px;">Loading…</div>';
+                try {
+                    const records = await fetchAllLogs();
+                    const pending = records.filter(r => !safeStr(r['In-Charge Signed At'] || r.inchargeSignedAt).trim())
+                        .sort((a, b) => recordTime(b) - recordTime(a));
+                    badge.textContent = pending.length;
+                    if (pending.length === 0) {
+                        list.innerHTML = '<div style="text-align:center; color:#1b6b3f; padding: 14px;">✅ No pending records.</div>';
+                        return;
+                    }
+                    list.innerHTML = pending.map((r) => {
+                        const tag = safeStr(r['AC Tag'] || r.acTag) || '—';
+                        const loc = safeStr(r['Location'] || r.acLocation) || '—';
+                        const dept = safeStr(r['Department'] || r.acDept) || '—';
+                        const tech = safeStr(r['Technician'] || r.technician) || '—';
+                        const wd = formatDateOnly(r['Work Date'] || r.workDate);
+                        const hash = safeStr(r['Report Hash'] || r.reportHash);
+                        return `<div class="pending-row">
+                            <div class="info">
+                                <div class="gen">❄️ ${tag} — ${loc}</div>
+                                <div class="meta">Dept: ${dept} · Tech: ${tech}</div>
+                                <div class="meta">Work date: ${wd}</div>
+                            </div>
+                            <button class="btn-approve" data-hash="${hash}">✅ Co-sign</button>
+                        </div>`;
+                    }).join('');
+                    list.querySelectorAll('.btn-approve').forEach(btn => {
+                        btn.addEventListener('click', async function() {
+                            const hash = this.getAttribute('data-hash');
+                            if (!hash) { alert('No Report Hash.'); return; }
+                            this.disabled = true; this.textContent = '⏳…';
+                            // Use current logged-in name (Raissa) as signer
+                            const ok = await cosignRecord(hash, technicianSelect.value);
+                            if (ok) { this.textContent = '✅ Signed'; setTimeout(() => refreshSupervisorPending(), 800); }
+                            else { this.disabled = false; this.textContent = '✅ Co-sign'; }
+                        });
+                    });
+                } catch (e) {
+                    list.innerHTML = '<div style="text-align:center; color:#b33a3a; padding: 12px;">⚠️ ' + e.message + '</div>';
+                }
+            }
+            document.getElementById('supervisorRefreshPendingBtn')?.addEventListener('click', refreshSupervisorPending);
+
+            document.getElementById('supervisorDownloadAllBtn')?.addEventListener('click', async function() {
+                this.disabled = true; const orig = this.innerHTML;
+                this.innerHTML = '<span>⏳</span> Fetching...';
+                try {
+                    const records = await fetchAllLogs();
+                    if (records.length === 0) { showStatus('📭 No PMs yet.', false); this.disabled = false; this.innerHTML = orig; return; }
+                    this.innerHTML = '<span>⏳</span> Generating ' + records.length + '...';
+                    await generatePDF(records);
+                    showStatus('📄 Full fleet PDF generated.', true);
+                } catch (err) { showStatus('⚠️ ' + err.message, false); }
+                this.disabled = false; this.innerHTML = orig;
+            });
+
+            document.getElementById('supervisorDownloadAnalysisBtn')?.addEventListener('click', async function() {
+                this.disabled = true; const orig = this.innerHTML;
+                this.innerHTML = '<span>⏳</span> Fetching...';
+                try {
+                    const records = await fetchAllLogs();
+                    if (records.length === 0) { showStatus('📭 No PMs yet.', false); this.disabled = false; this.innerHTML = orig; return; }
+                    this.innerHTML = '<span>⏳</span> Generating analysis...';
+                    await generateAnalysisPDF(records, 'All Departments');
+                    showStatus('📊 Full fleet analysis generated.', true);
+                } catch (err) { showStatus('⚠️ ' + err.message, false); }
+                this.disabled = false; this.innerHTML = orig;
+            });
+
+            // ================= PDF GENERATION =================
             async function generatePDF(records) {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -2036,7 +2566,6 @@ const DEPARTMENTS = {
                 else { doc.save(fname); showStatus('⚠️ PDF saved without digital signature.', false); }
             }
 
-            // ⭐ Simple analysis PDF for a single department
             async function generateAnalysisPDF(records, dept) {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -2055,7 +2584,6 @@ const DEPARTMENTS = {
                 doc.setDrawColor(212, 227, 239); doc.setLineWidth(0.5);
                 doc.line(mL, 32, pageW - mR, 32);
 
-                // KPIs
                 const totalPm = records.length;
                 const signed = records.filter(r => safeStr(r['In-Charge Signed At'] || r.inchargeSignedAt)).length;
                 const pending = totalPm - signed;
@@ -2085,7 +2613,6 @@ const DEPARTMENTS = {
                 });
                 y += 2 * (boxH + 4) + 4;
 
-                // Breakdown by AC
                 doc.setFillColor(238, 246, 252); doc.rect(mL, y - 4, cW, 6, 'F');
                 doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(18, 64, 94);
                 doc.text('BREAKDOWN BY AC UNIT', mL + 2, y); y += 6;
@@ -2112,7 +2639,6 @@ const DEPARTMENTS = {
                 }
                 y += 6;
 
-                // Breakdown by Technician
                 doc.setFillColor(238, 246, 252); doc.rect(mL, y - 4, cW, 6, 'F');
                 doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(18, 64, 94);
                 doc.text('BREAKDOWN BY TECHNICIAN', mL + 2, y); y += 6;
@@ -2136,7 +2662,6 @@ const DEPARTMENTS = {
                 }
                 y += 6;
 
-                // Anomalies
                 doc.setFillColor(255, 235, 235); doc.rect(mL, y - 4, cW, 6, 'F');
                 doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(179, 58, 58);
                 doc.text('ANOMALIES FOUND DURING PMs', mL + 2, y); y += 6;
@@ -2191,7 +2716,6 @@ const DEPARTMENTS = {
                     });
                 }
 
-                // Footer
                 doc.setFontSize(7); doc.setTextColor(150, 170, 190);
                 doc.text('Generated automatically from CHUB AC Fleet System', pageW / 2, pageH - 6, { align: 'center' });
 
@@ -2497,7 +3021,7 @@ const DEPARTMENTS = {
                     saveSignatureFor(name, pendingVisualSig);
                     await pushTechnicianSignatureToCloud(name, pendingVisualSig);
                 }
-                if (currentRole === 'incharge' && pendingInchargeSig) {
+                if ((currentRole === 'incharge' || currentRole === 'supervisor') && pendingInchargeSig) {
                     setInchargeSignatureCached(name, pendingInchargeSig);
                     await pushInchargeSignatureToCloud(name, pendingInchargeSig);
                     await pushInchargeMetaToCloud(name);
@@ -2533,7 +3057,7 @@ const DEPARTMENTS = {
             const lockedTechName = document.getElementById('lockedTechName');
             const loginTechGroup = document.getElementById('loginTechGroup');
             const loginInchargeGroup = document.getElementById('loginInchargeGroup');
-            const SESSION_KEY = 'chub_ac_session_v4';
+            const SESSION_KEY = 'chub_ac_session_v5';
 
             loginRoleSelect.addEventListener('change', () => {
                 const isIncharge = loginRoleSelect.value === 'incharge';
@@ -2560,25 +3084,46 @@ const DEPARTMENTS = {
                 window.__cachedPfxPassword = null;
                 clearCert();
 
-                currentRole = payload.role || 'technician';
+                // ⭐ Auto-detect supervisor (Raissa)
+                if (payload.name === SUPERVISOR_NAME) {
+                    currentRole = 'supervisor';
+                } else {
+                    currentRole = payload.role || 'technician';
+                }
+
                 technicianSelect.value = payload.name;
-                loggedInUserName.textContent = payload.name + (currentRole === 'incharge' ? ' (In-Charge)' : '');
+                const roleSuffix = currentRole === 'incharge' ? ' (In-Charge)' : (currentRole === 'supervisor' ? ' (Supervisor)' : '');
+                loggedInUserName.textContent = payload.name + roleSuffix;
                 lockedTechName.textContent = payload.name;
                 updateTechnicianDisplay();
                 applyRoleVisibility();
                 loginModal.classList.remove('show');
 
+                await ensureDepartmentsLoaded();
+
                 fetchTechnicianAssetsFromCloud(payload.name);
                 populateInchargeSuggestions();
 
-                               if (currentRole === 'incharge') {
-                    // ⭐ Use the department from login dropdown
+                if (currentRole === 'incharge') {
                     currentInchargeDept = payload.dept || inferDepartmentFromIncharge(payload.name);
-                    console.log('🔍 In-charge logged in — dept:', currentInchargeDept, '| name:', payload.name);
                     fetchInchargeSignatureFromCloud(payload.name).then(sig => { if (sig) currentInchargeSignature = sig; });
-                    // Refresh views now that department is set
                     setTimeout(() => refreshPendingApprovals(), 300);
                     setTimeout(() => loadDepartmentInventory(), 400);
+                } else if (currentRole === 'supervisor') {
+                    // Supervisor: no AC_INVENTORY needed for PM (no checklist),
+                    // but we still load Raissa's own list so add/remove works
+                    AC_INVENTORY = [];
+                    try {
+                        let inv = await fetchInventoryFromCloud(payload.name);
+                        AC_INVENTORY = inv || [];
+                        cacheInventoryLocally(payload.name, inv || []);
+                    } catch (e) {
+                        AC_INVENTORY = loadCachedInventory(payload.name) || [];
+                    }
+                    fetchInchargeSignatureFromCloud(payload.name).then(sig => { if (sig) currentInchargeSignature = sig; });
+                    setTimeout(() => refreshSupervisorInventory(), 300);
+                    setTimeout(() => refreshSupervisorPending(), 400);
+                    showStatus('👑 Welcome Supervisor ' + payload.name + '!', true);
                 } else {
                     AC_INVENTORY = [];
                     renderAcSelector();
@@ -2635,13 +3180,12 @@ const DEPARTMENTS = {
                         loginPinInput.value = ''; loginPinInput.focus();
                         return;
                     }
-                    saveSession({ name, role: 'technician' });
-                    unlockApp({ name, role: 'technician' });
+                    const autoRole = (name === SUPERVISOR_NAME) ? 'supervisor' : 'technician';
+                    saveSession({ name, role: autoRole });
+                    unlockApp({ name, role: autoRole });
                     return;
                 }
 
-                // In-Charge
-                                // In-Charge
                 const inDept = document.getElementById('loginInchargeDept').value;
                 const iname = loginInchargeName.value.trim();
                 if (!inDept) { loginError.textContent = 'Please choose your department.'; return; }
@@ -2667,12 +3211,15 @@ const DEPARTMENTS = {
             updatePendingCount();
             populateInchargeSuggestions();
 
-            const existingSession = loadSession();
-            if (existingSession && (TECHNICIAN_PINS[existingSession.name] || existingSession.role === 'incharge')) {
-                unlockApp(existingSession);
-            } else {
-                lockApp();
-            }
+            (async () => {
+                await ensureDepartmentsLoaded();
+                const existingSession = loadSession();
+                if (existingSession && (TECHNICIAN_PINS[existingSession.name] || existingSession.role === 'incharge' || existingSession.name === SUPERVISOR_NAME)) {
+                    unlockApp(existingSession);
+                } else {
+                    lockApp();
+                }
+            })();
 
             setTimeout(() => { if (getQueue().length > 0) flushQueue(); }, 1200);
         })();
@@ -2680,7 +3227,7 @@ const DEPARTMENTS = {
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js?v=30')
+                navigator.serviceWorker.register('sw.js?v=31')
                     .then(reg => console.log('✅ Service Worker registered:', reg.scope))
                     .catch(err => console.warn('⚠️ Service Worker failed:', err));
             });
