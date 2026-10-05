@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/forge/1.3.1/forge.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -88,6 +89,8 @@
         .btn-edit:hover { background: #1e4a6d; }
         .btn-danger { background: #b33a3a; color: white; border: none; padding: 8px 16px; border-radius: 40px; font-weight: 600; font-size: 0.82rem; cursor: pointer; transition: 0.15s; }
         .btn-danger:hover { background: #8f2929; }
+        .btn-qr { background: #0b3d91; color: white; border: none; padding: 12px 26px; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-qr:hover { background: #082b66; }
 
         .btn-add { background: #1b6b3f; color: white; border: none; padding: 12px 24px; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 8px; }
         .btn-add:hover { background: #155231; }
@@ -157,6 +160,43 @@
         .dept-editor-row .actions { display: flex; gap: 6px; }
         .dept-services-tag { display: inline-block; background: #eef6fc; color: #12405e; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; margin: 2px; }
 
+        /* ============ QR STICKER PRINT SHEET ============ */
+        .qr-sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 8px; }
+        .qr-sticker { border: 2px dashed #1e4a6d; border-radius: 12px; padding: 10px; background: white; text-align: center; page-break-inside: avoid; }
+        .qr-sticker .qr-canvas-wrap { display: flex; justify-content: center; align-items: center; margin-bottom: 6px; }
+        .qr-sticker .qr-canvas-wrap canvas, .qr-sticker .qr-canvas-wrap img { display: block; }
+        .qr-sticker .sticker-tag { font-weight: 800; font-size: 0.85rem; color: #0b3d91; margin-bottom: 2px; word-break: break-all; }
+        .qr-sticker .sticker-loc { font-size: 0.72rem; color: #12405e; margin-bottom: 2px; }
+        .qr-sticker .sticker-brand { font-size: 0.65rem; color: #5b7b96; margin-bottom: 4px; }
+        .qr-sticker .sticker-hint { font-size: 0.6rem; color: #1e4a6d; font-weight: 700; letter-spacing: 0.4px; }
+
+        /* ============ PUBLIC INFO PAGE (no login) ============ */
+        #acInfoPage { position: fixed; inset: 0; background: linear-gradient(135deg, #eef4fa 0%, #f5f7fa 100%); z-index: 5000; overflow-y: auto; padding: 18px 12px; display: none; }
+        #acInfoPage.show { display: block; }
+        .info-wrap { max-width: 720px; margin: 0 auto; }
+        .info-hero { background: linear-gradient(135deg, #0b3b5c 0%, #1e4a6d 60%, #2a6b96 100%); border-radius: 22px; padding: 22px 20px; color: white; box-shadow: 0 14px 30px -10px rgba(15, 56, 82, 0.5); margin-bottom: 16px; position: relative; overflow: hidden; }
+        .info-hero h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.3px; line-height: 1.25; display: flex; align-items: center; gap: 10px; }
+        .info-hero .sub { font-size: 0.85rem; color: #cbe4f7; margin-top: 6px; letter-spacing: 0.3px; }
+        .info-hero .badge { display: inline-block; margin-top: 10px; background: rgba(255,255,255,0.16); color: #eaf6ff; padding: 5px 14px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.4px; border: 1px solid rgba(255,255,255,0.25); }
+        .info-card { background: white; border-radius: 18px; border: 1px solid #e2eaf1; box-shadow: 0 6px 14px rgba(0,0,0,0.04); padding: 16px 18px; margin-bottom: 14px; }
+        .info-card h2 { font-size: 1.05rem; color: #12405e; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+        .info-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px dashed #e2eaf1; font-size: 0.9rem; }
+        .info-row:last-child { border-bottom: none; }
+        .info-row .k { color: #5b7b96; font-weight: 600; flex: 0 0 45%; }
+        .info-row .v { color: #0a2a3f; font-weight: 700; text-align: right; flex: 1; word-break: break-word; }
+        .info-status-pill { display: inline-block; padding: 6px 16px; border-radius: 40px; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; }
+        .info-status-pill.maintained { background: #e2f0e6; color: #1b6b3f; border: 1px solid #b8dfc3; }
+        .info-status-pill.pending { background: #fff3cd; color: #7a5300; border: 1px solid #f4d97a; }
+        .info-status-pill.overdue { background: #ffe6e6; color: #b33a3a; border: 1px solid #f0b8b8; }
+        .info-status-pill.never { background: #e7f0f8; color: #5b7b96; border: 1px solid #cfdfeb; }
+        .anomaly-item { background: #fff5f5; border-left: 4px solid #b33a3a; padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; font-size: 0.85rem; color: #8f2929; }
+        .anomaly-item.ok { background: #f0fdf4; border-left-color: #1b6b3f; color: #155231; }
+        .info-loading { text-align: center; padding: 30px 10px; color: #5b7b96; font-style: italic; }
+        .info-error { background: #ffe6e6; color: #b33a3a; padding: 14px 18px; border-radius: 12px; text-align: center; font-weight: 600; }
+        .info-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+        .info-actions button { padding: 10px 18px; border-radius: 40px; font-weight: 700; font-size: 0.85rem; border: none; cursor: pointer; }
+        .info-actions .refresh-btn { background: #1e4a6d; color: white; }
+
         @media (max-width: 900px) {
             .generator-selector { flex-direction: column; align-items: stretch; }
             .generator-selector label { margin-left: 0 !important; }
@@ -164,6 +204,7 @@
             .generator-selector > div { min-width: 100% !important; }
             .btn-add, .btn-remove { flex: 1; justify-content: center; }
             .chub-logo { margin: 10px auto; max-width: 220px; }
+            .qr-sticker-grid { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 700px) {
             body { padding: 12px 8px; }
@@ -183,10 +224,38 @@
             .inv-table { font-size: 0.75rem; }
             .inv-table th, .inv-table td { padding: 6px 8px; }
             .dept-editor-row { grid-template-columns: 1fr; }
+            .qr-sticker-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media print {
+            body * { visibility: hidden !important; }
+            #qrPrintArea, #qrPrintArea * { visibility: visible !important; }
+            #qrPrintArea { position: absolute; left: 0; top: 0; width: 100%; background: white; }
+            .qr-sticker { border: 1px solid #1e4a6d; }
         }
     </style>
 </head>
 <body>
+    <!-- =========================================================== -->
+    <!-- PUBLIC AC INFO PAGE (activated by ?acinfo=TAG — no login)  -->
+    <!-- =========================================================== -->
+    <div id="acInfoPage">
+        <div class="info-wrap">
+            <div class="info-hero">
+                <h1>❄️ <span id="infoTitle">AC Equipment Info</span></h1>
+                <div class="sub" id="infoSubtitle">Loading equipment data…</div>
+                <div class="badge" id="infoBadge">CHUB · Preventive Maintenance</div>
+            </div>
+            <div id="infoBody">
+                <div class="info-loading">⏳ Loading latest information…</div>
+            </div>
+            <div class="info-actions">
+                <button class="refresh-btn" onclick="window.__reloadAcInfo && window.__reloadAcInfo()">🔄 Refresh</button>
+                <button class="refresh-btn" style="background:#5b7b96;" onclick="window.location.href=window.location.pathname">🏠 Open Full App</button>
+            </div>
+            <div class="footer-note" style="margin-top:16px;">Powered by CHUB AC Fleet PM System · Always up-to-date</div>
+        </div>
+    </div>
+
     <div class="app-container">
         <div class="title-hero">
             <h1>
@@ -234,11 +303,8 @@
             </div>
         </div>
 
-        <!-- ============================================================ -->
-        <!-- ⭐ TECHNICIAN SECTION (for standard technicians) -->
-        <!-- ============================================================ -->
+        <!-- TECHNICIAN SECTION -->
         <div id="technicianSection">
-
             <div class="generator-selector">
                 <div class="field-group" style="margin-bottom:0; min-width: 240px;">
                     <label for="workDate">📅 Work date (auto-selected)</label>
@@ -248,6 +314,8 @@
                 <select id="acSelect"></select>
                 <button id="addAcBtn" class="btn-add">➕ Add New AC</button>
                 <button id="removeAcBtn" class="btn-remove">➖ Remove AC</button>
+                <button id="qrAcBtn" class="btn-qr">🔳 QR Sticker</button>
+                <button id="qrAllBtn" class="btn-qr">📄 Print All QR Stickers</button>
                 <img src="chub-logo.png" alt="CHUB Logo" class="chub-logo" onerror="this.style.display='none'">
             </div>
 
@@ -355,11 +423,8 @@
             </div>
         </div>
 
-        <!-- ============================================================ -->
-        <!-- ⭐ IN-CHARGE SECTION -->
-        <!-- ============================================================ -->
+        <!-- IN-CHARGE SECTION -->
         <div id="inchargeSection" style="display:none;">
-
             <div class="card" id="pendingApprovalsCard" style="margin-bottom: 28px; border: 2px solid #1b6b3f;">
                 <div class="card-header" style="background:#e2f0e6; color:#1b6b3f;">
                     <span>✅</span> Pending Co-Signatures
@@ -422,16 +487,12 @@
             <div class="action-buttons" style="margin-bottom: 20px;">
                 <button class="btn-pdf-all" id="inchargeDownloadAllBtn"><span>📚</span> Download All My Department PMs</button>
                 <button class="btn-pdf" id="inchargeDownloadAnalysisBtn"><span>📊</span> Download My Department Analysis</button>
+                <button class="btn-qr" id="inchargeQrAllBtn"><span>🔳</span> Print All QR Stickers (My Dept)</button>
             </div>
-
         </div>
 
-        <!-- ============================================================ -->
-        <!-- ⭐ RAISSA SUPERVISOR SECTION (no checklist) -->
-        <!-- ============================================================ -->
+        <!-- SUPERVISOR SECTION -->
         <div id="supervisorSection" style="display:none;">
-
-            <!-- Department Management -->
             <div class="card" style="margin-bottom: 28px; border: 2px solid #7a4c9c;">
                 <div class="card-header" style="background:#f3e8ff; color:#5d3578;">
                     <span>🏢</span> Department Management
@@ -447,7 +508,6 @@
                 </div>
             </div>
 
-            <!-- All ACs across departments -->
             <div class="card" style="margin-bottom: 28px;">
                 <div class="card-header">
                     <span>🌐</span> All AC Units — All Departments
@@ -488,10 +548,12 @@
                             </tbody>
                         </table>
                     </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+                        <button class="btn-qr" id="supervisorQrAllBtn"><span>🔳</span> Print All QR Stickers (Fleet)</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Pending approvals for all depts -->
             <div class="card" id="supervisorPendingCard" style="margin-bottom: 28px; border: 2px solid #1b6b3f;">
                 <div class="card-header" style="background:#e2f0e6; color:#1b6b3f;">
                     <span>✅</span> All Pending Co-Signatures (All Departments)
@@ -511,7 +573,6 @@
                 <button class="btn-pdf-all" id="supervisorDownloadAllBtn"><span>📚</span> Download ALL PMs (All Departments)</button>
                 <button class="btn-pdf" id="supervisorDownloadAnalysisBtn"><span>📊</span> Download Full Fleet Analysis</button>
             </div>
-
         </div>
 
         <div class="action-buttons" id="technicianActionButtons">
@@ -708,7 +769,7 @@
         </div>
     </div>
 
-    <!-- EDIT AC MODAL (supervisor only) -->
+    <!-- EDIT AC MODAL -->
     <div class="modal-overlay" id="editAcModal">
         <div class="modal-box">
             <h2>✏️ Edit AC Unit</h2>
@@ -759,6 +820,22 @@
         </div>
     </div>
 
+    <!-- QR STICKER MODAL -->
+    <div class="modal-overlay" id="qrModal">
+        <div class="modal-box" style="max-width: 720px;">
+            <h2>🔳 QR Code Sticker</h2>
+            <p>Print this sticker and attach it to the AC unit. Scanning it always shows the latest PM info — no need to reprint when data changes.</p>
+            <div id="qrModalContent" style="padding: 8px; background: #f9fcff; border-radius: 16px;"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="qrModalClose">Close</button>
+                <button class="btn-go" id="qrModalPrint">🖨️ Print / Save as PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRINT AREA (hidden except when printing) -->
+    <div id="qrPrintArea" style="display:none;"></div>
+
     <script>
         (function() {
             const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzq9Np0rhHJl0W9T4IhMaazb_5JHyUBfYmhWMLL2ny3HuQtRE-XkFZFcRskvHUA9Q6D/exec';
@@ -775,10 +852,8 @@
                 'GATANGANWA Raissa':      '0401'
             };
 
-            // ⭐ RAISSA = supervisor role (no checklist, full control)
             const SUPERVISOR_NAME = 'GATANGANWA Raissa';
 
-            // ⭐ Separated Surgery and Gynecology
             const DEFAULT_DEPARTMENTS = {
                 'Laboratory': {
                     defaultIncharge: 'Laboratory In-Charge',
@@ -819,19 +894,16 @@
                     defaultIncharge: 'I.M OPD In-Charge',
                     services: ['Consultation 1', 'Consultation 2', 'Consultation 3', 'Triage', 'Waiting Area', 'Vaccination']
                 },
-                // ⭐ SEPARATED: Gynecology
                 'Gynecology': {
                     defaultIncharge: 'Gynecology In-Charge',
                     services: ['Gynecology Ward', 'Antenatal', 'Postnatal', 'Delivery Room', 'Nursery', 'Consultation Room']
                 },
-                // ⭐ SEPARATED: Surgery
                 'Surgery': {
                     defaultIncharge: 'Surgery In-Charge',
                     services: ['Surgical Ward', 'Minor Theatre', 'Major Theatre', 'Pre-Op Room', 'Post-Op Room', 'Consultation Room']
                 }
             };
 
-            // ⭐ Dynamic DEPARTMENTS object (can be edited by supervisor, synced to cloud)
             let DEPARTMENTS = JSON.parse(JSON.stringify(DEFAULT_DEPARTMENTS));
             const DEPT_CLOUD_KEY = 'CHUB_DEPARTMENTS_V1';
             const DEPT_CACHE_KEY = 'chub_departments_cache_v1';
@@ -920,6 +992,10 @@
                     .replace(/\s+/g, ' ')
                     .trim()
                     .toUpperCase();
+            }
+            function escapeHtml(s) {
+                if (s === null || s === undefined) return '';
+                return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
             }
 
             // ================= SIGNATURE STORAGE =================
@@ -1042,15 +1118,12 @@
                     await fetch(GOOGLE_SHEET_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'config_set', key: 'InchargeUpdatedAt_' + inchargeName, value: new Date().toISOString() }) });
                 } catch (e) {}
             }
-
-            // ⭐ Push departments to cloud
             async function pushDepartmentsToCloud(depts) {
                 try {
                     await fetch(GOOGLE_SHEET_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'config_set', key: DEPT_CLOUD_KEY, value: JSON.stringify(depts) }) });
                     return true;
                 } catch(e) { return false; }
             }
-            // ⭐ Fetch departments from cloud
             async function fetchDepartmentsFromCloud() {
                 try {
                     const res = await fetch(GOOGLE_SHEET_URL + '?type=config&_ts=' + Date.now(), { cache: 'no-store' });
@@ -1616,6 +1689,14 @@
                     return { checked: true, duplicate: !!found, record: found || null };
                 } catch (e) { return { checked: false, error: e.message }; }
             }
+            async function fetchAcInfoFromCloud(acTag) {
+                try {
+                    const url = GOOGLE_SHEET_URL + '?type=ac_info&tag=' + encodeURIComponent(acTag) + '&_ts=' + Date.now();
+                    const res = await fetch(url, { method: 'GET', cache: 'no-store' });
+                    if (!res.ok) return { ok: false, error: 'HTTP ' + res.status };
+                    return await res.json();
+                } catch (e) { return { ok: false, error: e.message }; }
+            }
 
             // ================= SIGN-OFF =================
             signOffBtn.addEventListener('click', async function() {
@@ -1670,6 +1751,287 @@
                 if (showMsg) showStatus('Form has been reset.', true);
             }
             resetBtn.addEventListener('click', () => { lastSubmittedSnapshot = null; resetForm(true); });
+
+            // ================= QR CODE GENERATION =================
+            function buildAcInfoUrl(ac) {
+                const base = window.location.origin + window.location.pathname;
+                return base + '?acinfo=' + encodeURIComponent(ac.tag || '');
+            }
+            function generateQrElement(text, sizePx) {
+                // qrcodejs expects a container element
+                const container = document.createElement('div');
+                new QRCode(container, {
+                    text: text,
+                    width: sizePx || 140,
+                    height: sizePx || 140,
+                    colorDark: '#0b3d91',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                return container;
+            }
+            function buildStickerHtml(ac, sizePx) {
+                const url = buildAcInfoUrl(ac);
+                const sticker = document.createElement('div');
+                sticker.className = 'qr-sticker';
+                const canvasWrap = document.createElement('div');
+                canvasWrap.className = 'qr-canvas-wrap';
+                const qrContainer = generateQrElement(url, sizePx || 130);
+                canvasWrap.appendChild(qrContainer);
+                sticker.appendChild(canvasWrap);
+                const tag = document.createElement('div'); tag.className = 'sticker-tag'; tag.textContent = ac.tag || '—';
+                const loc = document.createElement('div'); loc.className = 'sticker-loc'; loc.textContent = ac.loc || '—';
+                const brand = document.createElement('div'); brand.className = 'sticker-brand'; brand.textContent = (ac.brand || '') + ' ' + (ac.model || '');
+                const hint = document.createElement('div'); hint.className = 'sticker-hint'; hint.textContent = '📱 Scan for live PM status';
+                sticker.appendChild(tag); sticker.appendChild(loc); sticker.appendChild(brand); sticker.appendChild(hint);
+                return sticker;
+            }
+
+            document.getElementById('qrAcBtn')?.addEventListener('click', () => {
+                const idx = acSelect.value;
+                if (idx === '' || !AC_INVENTORY[idx]) { showStatus('⚠️ Select an AC first.', false); return; }
+                const ac = AC_INVENTORY[idx];
+                const content = document.getElementById('qrModalContent');
+                content.innerHTML = '';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'qr-sticker-grid';
+                wrapper.style.gridTemplateColumns = 'repeat(1, 1fr)';
+                wrapper.style.maxWidth = '280px';
+                wrapper.style.margin = '0 auto';
+                wrapper.appendChild(buildStickerHtml(ac, 180));
+                content.appendChild(wrapper);
+                const urlLine = document.createElement('div');
+                urlLine.style.cssText = 'text-align:center; font-size:0.75rem; color:#5b7b96; margin-top:12px; word-break:break-all;';
+                urlLine.textContent = 'URL: ' + buildAcInfoUrl(ac);
+                content.appendChild(urlLine);
+                document.getElementById('qrModal').classList.add('show');
+                document.getElementById('qrModal')._stickerHtml = wrapper.innerHTML;
+                document.getElementById('qrModal')._stickerTitle = 'CHUB AC QR Sticker — ' + ac.tag;
+            });
+
+            document.getElementById('qrAllBtn')?.addEventListener('click', () => {
+                if (AC_INVENTORY.length === 0) { showStatus('⚠️ No ACs to print.', false); return; }
+                const content = document.getElementById('qrModalContent');
+                content.innerHTML = '';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'qr-sticker-grid';
+                AC_INVENTORY.forEach(ac => wrapper.appendChild(buildStickerHtml(ac, 130)));
+                content.appendChild(wrapper);
+                document.getElementById('qrModal').classList.add('show');
+                document.getElementById('qrModal')._stickerHtml = wrapper.innerHTML;
+                document.getElementById('qrModal')._stickerTitle = 'CHUB AC QR Stickers — ' + AC_INVENTORY.length + ' units';
+            });
+
+            document.getElementById('inchargeQrAllBtn')?.addEventListener('click', async () => {
+                showStatus('⏳ Loading inventory…', true);
+                let allInv = await fetchAllInventory();
+                if (!allInv || allInv.length === 0) { try { allInv = await fetchInventoryFromCloud(DEFAULT_LIST_OWNER); } catch(e) { allInv = []; } }
+                const dept = currentInchargeDept || '';
+                const mine = dept ? allInv.filter(a => normalizeText(a.dept) === normalizeText(dept)) : allInv;
+                if (mine.length === 0) { showStatus('⚠️ No ACs in your department.', false); return; }
+                const content = document.getElementById('qrModalContent');
+                content.innerHTML = '';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'qr-sticker-grid';
+                mine.forEach(ac => wrapper.appendChild(buildStickerHtml(ac, 130)));
+                content.appendChild(wrapper);
+                document.getElementById('qrModal').classList.add('show');
+                document.getElementById('qrModal')._stickerHtml = wrapper.innerHTML;
+                document.getElementById('qrModal')._stickerTitle = 'CHUB AC QR Stickers — ' + dept;
+            });
+
+            document.getElementById('supervisorQrAllBtn')?.addEventListener('click', async () => {
+                showStatus('⏳ Loading inventory…', true);
+                let allInv = await fetchAllInventory();
+                if (!allInv || allInv.length === 0) { try { allInv = await fetchInventoryFromCloud(DEFAULT_LIST_OWNER); } catch(e) { allInv = []; } }
+                if (allInv.length === 0) allInv = DEFAULT_AC_INVENTORY.slice();
+                const content = document.getElementById('qrModalContent');
+                content.innerHTML = '';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'qr-sticker-grid';
+                allInv.forEach(ac => wrapper.appendChild(buildStickerHtml(ac, 130)));
+                content.appendChild(wrapper);
+                document.getElementById('qrModal').classList.add('show');
+                document.getElementById('qrModal')._stickerHtml = wrapper.innerHTML;
+                document.getElementById('qrModal')._stickerTitle = 'CHUB AC QR Stickers — Full Fleet (' + allInv.length + ')';
+            });
+
+            document.getElementById('qrModalClose')?.addEventListener('click', () => {
+                document.getElementById('qrModal').classList.remove('show');
+            });
+            document.getElementById('qrModalPrint')?.addEventListener('click', () => {
+                const modal = document.getElementById('qrModal');
+                const html = modal._stickerHtml || '';
+                const printArea = document.getElementById('qrPrintArea');
+                printArea.innerHTML = '<div style="text-align:center; font-weight:800; color:#0b3d91; padding:14px; font-size:1.1rem;">' + escapeHtml(modal._stickerTitle || 'QR Stickers') + '</div>' +
+                    '<div class="qr-sticker-grid">' + html + '</div>' +
+                    '<div style="text-align:center; font-size:0.7rem; color:#5b7b96; padding:10px;">CHUB AC Fleet PM · Scan any QR code to see live PM status, next PM due, last technician, and in-charge approval.</div>';
+                printArea.style.display = 'block';
+                setTimeout(() => { window.print(); setTimeout(() => { printArea.style.display = 'none'; }, 500); }, 200);
+            });
+
+            // ================= PUBLIC AC INFO PAGE =================
+            function initAcInfoPage() {
+                const params = new URLSearchParams(window.location.search);
+                const tag = params.get('acinfo');
+                if (!tag) return false;
+                // Hide login modal & app, show info page
+                document.getElementById('acInfoPage').classList.add('show');
+                const loginModal = document.getElementById('loginModal');
+                if (loginModal) loginModal.classList.remove('show');
+                document.getElementById('infoTitle').textContent = 'AC: ' + tag;
+                document.getElementById('infoSubtitle').textContent = 'Loading live data from CHUB cloud…';
+                loadAcInfo(tag);
+                window.__reloadAcInfo = () => loadAcInfo(tag);
+                return true;
+            }
+
+            async function loadAcInfo(tag) {
+                const body = document.getElementById('infoBody');
+                const title = document.getElementById('infoTitle');
+                const subtitle = document.getElementById('infoSubtitle');
+                const badge = document.getElementById('infoBadge');
+                body.innerHTML = '<div class="info-loading">⏳ Fetching latest PM data…</div>';
+                const res = await fetchAcInfoFromCloud(tag);
+                if (!res || !res.ok) {
+                    body.innerHTML = '<div class="info-error">⚠️ Could not load data: ' + escapeHtml(res?.error || 'unknown error') + '</div>';
+                    subtitle.textContent = 'Connection error — try again in a moment.';
+                    return;
+                }
+                const records = res.records || [];
+                if (records.length === 0) {
+                    subtitle.textContent = 'No PM record found for this AC.';
+                    badge.textContent = 'CHUB · Awaiting first PM';
+                    body.innerHTML = `
+                        <div class="info-card">
+                            <h2>⚪ Equipment not yet serviced</h2>
+                            <div class="info-row"><span class="k">Tag</span><span class="v">${escapeHtml(tag)}</span></div>
+                            <div class="info-row"><span class="k">Status</span><span class="v"><span class="info-status-pill never">Never serviced</span></span></div>
+                            <div class="info-row"><span class="k">Next PM</span><span class="v">Will be scheduled after first PM</span></div>
+                        </div>
+                        <div class="info-card">
+                            <h2>ℹ️ Info</h2>
+                            <div style="font-size:0.85rem; color:#5b7b96;">This equipment has not yet been registered in the PM log. Please contact the maintenance team.</div>
+                        </div>`;
+                    return;
+                }
+                const latest = records[0];
+                const ac = {
+                    tag: latest['AC Tag'] || tag,
+                    loc: latest['Location'] || '—',
+                    dept: latest['Department'] || '—',
+                    brand: latest['Brand'] || '—',
+                    model: latest['Model'] || '—',
+                    serial: latest['Serial Number'] || '—',
+                    type: latest['Type'] || 'Split'
+                };
+                const lastWorkDate = latest['Work Date'] || latest['Timestamp'] || '';
+                const nextDate = addMonths(lastWorkDate, PM_INTERVAL_MONTHS);
+                const now = new Date();
+                const daysUntil = nextDate ? Math.round((nextDate - now) / 86400000) : 9999;
+                let status = 'maintained';
+                if (daysUntil < 0) status = 'overdue';
+                else if (daysUntil <= 30) status = 'pending';
+                const statusLabels = { maintained: '✅ Maintained', pending: '⏳ Due soon', overdue: '🚨 Overdue', never: '⚪ Never serviced' };
+                const statusPill = `<span class="info-status-pill ${status}">${statusLabels[status]}</span>`;
+
+                title.textContent = ac.tag;
+                subtitle.textContent = ac.loc + ' · ' + ac.dept;
+                badge.textContent = 'CHUB · Live PM Status';
+
+                // Build anomalies list from the LATEST record
+                const airflowTexts = ['Inspect, clean, or replace filters', 'Clean indoor evaporator coil', 'Clean outdoor condenser coil', 'Check blower motor and wheel', 'Verify proper airflow across unit'];
+                const electricalTexts = ['Verify correct refrigerant charge', 'Tighten and inspect electrical connections', 'Test relays, contactors, and capacitors', 'Measure compressor and fan motor amps', 'Inspect wiring for frays or heat damage'];
+                const drainageTexts = ['Clear condensate drain line and pan', 'Check thermostat calibration and controls', 'Measure supply/return air temperatures', 'Verify overall system efficiency', 'Inspect ductwork for leaks (visible)'];
+                const airSet = new Set(safeSplit(latest['Airflow Items'], '|'));
+                const elSet = new Set(safeSplit(latest['Electrical Items'], '|'));
+                const drSet = new Set(safeSplit(latest['Drainage Items'], '|'));
+                const anomalies = [];
+                airflowTexts.forEach((t, i) => { if (!airSet.has(String(i+1))) anomalies.push({ cat: 'Airflow', text: t }); });
+                electricalTexts.forEach((t, i) => { if (!elSet.has(String(i+6))) anomalies.push({ cat: 'Electrical', text: t }); });
+                drainageTexts.forEach((t, i) => { if (!drSet.has(String(i+11))) anomalies.push({ cat: 'Drainage', text: t }); });
+
+                const remarks = [
+                    latest['Airflow Remarks'], latest['Electrical Remarks'], latest['Drainage Remarks']
+                ].filter(r => r && r !== '—' && String(r).trim());
+
+                const inchargeSignedAt = safeStr(latest['In-Charge Signed At'] || latest.inchargeSignedAt);
+                const inchargeSigner = safeStr(latest['In-Charge Signer'] || latest.inchargeSigner) || safeStr(latest['In-Charge Name'] || latest.inchargeName) || '—';
+
+                body.innerHTML = `
+                    <div class="info-card">
+                        <h2>📊 Current PM Status</h2>
+                        <div class="info-row"><span class="k">Status</span><span class="v">${statusPill}</span></div>
+                        <div class="info-row"><span class="k">Last PM date</span><span class="v">${formatDateOnly(lastWorkDate)}</span></div>
+                        <div class="info-row"><span class="k">Next PM due</span><span class="v">${nextDate ? formatDateOnly(nextDate.toISOString().slice(0,10)) : '—'}</span></div>
+                        <div class="info-row"><span class="k">Days remaining</span><span class="v">${daysUntil < 0 ? 'Overdue by ' + Math.abs(daysUntil) + ' days' : (daysUntil === 0 ? 'Due today' : daysUntil + ' days')}</span></div>
+                    </div>
+
+                    <div class="info-card">
+                        <h2>❄️ Equipment</h2>
+                        <div class="info-row"><span class="k">Tag</span><span class="v">${escapeHtml(ac.tag)}</span></div>
+                        <div class="info-row"><span class="k">Department</span><span class="v">${escapeHtml(ac.dept)}</span></div>
+                        <div class="info-row"><span class="k">Location</span><span class="v">${escapeHtml(ac.loc)}</span></div>
+                        <div class="info-row"><span class="k">Brand / Model</span><span class="v">${escapeHtml(ac.brand + ' ' + ac.model)}</span></div>
+                        <div class="info-row"><span class="k">Serial</span><span class="v">${escapeHtml(ac.serial)}</span></div>
+                        <div class="info-row"><span class="k">Type</span><span class="v">${escapeHtml(ac.type)}</span></div>
+                    </div>
+
+                    <div class="info-card">
+                        <h2>👨‍🔧 Last PM performed by</h2>
+                        <div class="info-row"><span class="k">Technician</span><span class="v">${escapeHtml(latest['Technician'] || '—')}</span></div>
+                        <div class="info-row"><span class="k">Work date</span><span class="v">${formatDateOnly(lastWorkDate)}</span></div>
+                        <div class="info-row"><span class="k">Timestamp</span><span class="v">${escapeHtml(latest['Timestamp'] || '—')}</span></div>
+                    </div>
+
+                    <div class="info-card">
+                        <h2>👔 In-Charge Approval</h2>
+                        ${inchargeSignedAt ? `
+                            <div class="info-row"><span class="k">Approved by</span><span class="v">${escapeHtml(inchargeSigner)}</span></div>
+                            <div class="info-row"><span class="k">Approved at</span><span class="v">${formatDateOnly(inchargeSignedAt)}</span></div>
+                            <div class="info-row"><span class="k">Status</span><span class="v" style="color:#1b6b3f;">✅ Approved</span></div>
+                        ` : `
+                            <div class="info-row"><span class="k">Assigned to</span><span class="v">${escapeHtml(inchargeSigner)}</span></div>
+                            <div class="info-row"><span class="k">Status</span><span class="v" style="color:#b33a3a;">⏳ Awaiting co-signature</span></div>
+                        `}
+                    </div>
+
+                    <div class="info-card">
+                        <h2>⚠️ Anomalies on last PM</h2>
+                        ${anomalies.length === 0 ? `
+                            <div class="anomaly-item ok">✅ All checklist items passed on the last PM. No anomalies detected.</div>
+                        ` : anomalies.map(a => `
+                            <div class="anomaly-item"><strong>${escapeHtml(a.cat)}:</strong> ${escapeHtml(a.text)}</div>
+                        `).join('')}
+                        ${remarks.length > 0 ? `
+                            <div style="margin-top:10px; font-size:0.85rem; color:#3a6583;"><strong>Remarks:</strong> ${remarks.map(r => escapeHtml(r)).join(' · ')}</div>
+                        ` : ''}
+                    </div>
+
+                    <div class="info-card">
+                        <h2>📚 PM History (${records.length} record${records.length > 1 ? 's' : ''})</h2>
+                        ${records.slice(0, 6).map((r, idx) => {
+                            const wd = formatDateOnly(r['Work Date'] || r['Timestamp']);
+                            const tech = escapeHtml(r['Technician'] || '—');
+                            const signedAt = safeStr(r['In-Charge Signed At'] || r.inchargeSignedAt);
+                            const signedBy = escapeHtml(r['In-Charge Signer'] || r.inchargeSigner || r['In-Charge Name'] || '—');
+                            const signedBadge = signedAt ? `<span style="color:#1b6b3f; font-weight:700;">✅ ${signedBy}</span>` : `<span style="color:#b33a3a; font-weight:700;">⏳ pending</span>`;
+                            return `<div class="info-row" style="font-size:0.85rem;">
+                                <span class="k">${idx + 1}. ${wd}</span>
+                                <span class="v">${tech} · ${signedBadge}</span>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            // ================= INIT =================
+            // If URL has ?acinfo=TAG → show public info page, skip login
+            const showingPublicInfo = initAcInfoPage();
+            if (showingPublicInfo) {
+                // Hide main app + login for public view
+                document.querySelector('.app-container').style.display = 'none';
+            }
 
             // ================= IN-CHARGE: PENDING APPROVALS =================
             const pendingApprovalsList = document.getElementById('pendingApprovalsList');
@@ -1856,9 +2218,9 @@
                 tbody.innerHTML = filtered.map(r => {
                     const ac = r.ac;
                     return `<tr>
-                        <td><strong>${ac.tag}</strong></td>
-                        <td>${ac.loc}</td>
-                        <td>${ac.brand} ${ac.model}</td>
+                        <td><strong>${escapeHtml(ac.tag)}</strong></td>
+                        <td>${escapeHtml(ac.loc)}</td>
+                        <td>${escapeHtml(ac.brand + ' ' + ac.model)}</td>
                         <td>${r.lastPm ? formatDateOnly(r.lastPm) : '—'}</td>
                         <td>${r.nextPm ? formatDateOnly(r.nextPm) : '—'}</td>
                         <td><span class="status-badge ${r.status}">${statusLabels[r.status]}</span></td>
@@ -1916,7 +2278,7 @@
                 this.disabled = false; this.innerHTML = orig;
             });
 
-            // ================= SUPERVISOR (RAISSA) FUNCTIONS =================
+            // ================= SUPERVISOR FUNCTIONS =================
             function renderDeptEditor() {
                 const wrap = document.getElementById('deptEditorList');
                 if (!wrap) return;
@@ -1934,21 +2296,20 @@
                     row.innerHTML = `
                         <div>
                             <label style="font-size:0.75rem; color:#5b7b96; font-weight:700;">DEPARTMENT</label>
-                            <input type="text" data-orig-dept="${d}" class="dept-name-input" value="${d.replace(/"/g, '&quot;')}" style="width:100%; font-weight:700;">
+                            <input type="text" data-orig-dept="${escapeHtml(d)}" class="dept-name-input" value="${escapeHtml(d)}" style="width:100%; font-weight:700;">
                             <label style="font-size:0.75rem; color:#5b7b96; font-weight:700; margin-top:8px; display:block;">DEFAULT IN-CHARGE</label>
-                            <input type="text" class="dept-incharge-input" value="${incharge.replace(/"/g, '&quot;')}" style="width:100%;">
+                            <input type="text" class="dept-incharge-input" value="${escapeHtml(incharge)}" style="width:100%;">
                         </div>
                         <div>
                             <label style="font-size:0.75rem; color:#5b7b96; font-weight:700;">SERVICES (one per line)</label>
-                            <textarea class="dept-services-input" data-orig-dept="${d}" style="width:100%;">${services.join('\n')}</textarea>
+                            <textarea class="dept-services-input" data-orig-dept="${escapeHtml(d)}" style="width:100%;">${escapeHtml(services.join('\n'))}</textarea>
                         </div>
                         <div class="actions">
-                            <button type="button" class="btn-danger" data-del-dept="${d}">🗑️</button>
+                            <button type="button" class="btn-danger" data-del-dept="${escapeHtml(d)}">🗑️</button>
                         </div>
                     `;
                     wrap.appendChild(row);
                 });
-                // Delete handlers
                 wrap.querySelectorAll('[data-del-dept]').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const dn = this.getAttribute('data-del-dept');
@@ -1971,10 +2332,8 @@
             });
 
             document.getElementById('saveDeptsBtn')?.addEventListener('click', async function() {
-                // Collect edits from DOM
                 const rows = document.querySelectorAll('#deptEditorList .dept-editor-row');
                 const newDepts = {};
-                let renamedFrom = {};
                 rows.forEach(row => {
                     const nameInput = row.querySelector('.dept-name-input');
                     const inchargeInput = row.querySelector('.dept-incharge-input');
@@ -2062,32 +2421,31 @@
                 const statusLabels = { maintained: '✅ Maintained', pending: '⏳ Pending', overdue: '🚨 Overdue', never: '⚪ Never serviced' };
                 tbody.innerHTML = rows.map(r => {
                     const ac = r.ac;
+                    const acJson = JSON.stringify(ac).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
                     return `<tr>
-                        <td><strong>${ac.tag}</strong></td>
-                        <td>${ac.dept}</td>
-                        <td>${ac.loc}</td>
-                        <td>${ac.brand} ${ac.model}</td>
+                        <td><strong>${escapeHtml(ac.tag)}</strong></td>
+                        <td>${escapeHtml(ac.dept)}</td>
+                        <td>${escapeHtml(ac.loc)}</td>
+                        <td>${escapeHtml(ac.brand + ' ' + ac.model)}</td>
                         <td>${r.lastPm ? formatDateOnly(r.lastPm) : '—'}</td>
                         <td>${r.nextPm ? formatDateOnly(r.nextPm) : '—'}</td>
                         <td><span class="status-badge ${r.status}">${statusLabels[r.status]}</span></td>
                         <td>
-                            <button class="btn-edit" data-edit-ac='${JSON.stringify(ac).replace(/'/g, "&#39;")}'>✏️</button>
-                            <button class="btn-danger" data-del-ac='${JSON.stringify(ac).replace(/'/g, "&#39;")}'>🗑️</button>
+                            <button class="btn-edit" data-edit-ac='${acJson}'>✏️</button>
+                            <button class="btn-danger" data-del-ac='${acJson}'>🗑️</button>
                         </td>
                     </tr>`;
                 }).join('');
 
-                // Edit handlers
                 tbody.querySelectorAll('[data-edit-ac]').forEach(btn => {
                     btn.addEventListener('click', function() {
-                        const ac = JSON.parse(this.getAttribute('data-edit-ac'));
+                        const ac = JSON.parse(this.getAttribute('data-edit-ac').replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
                         openEditAcModal(ac);
                     });
                 });
-                // Delete handlers
                 tbody.querySelectorAll('[data-del-ac]').forEach(btn => {
                     btn.addEventListener('click', async function() {
-                        const ac = JSON.parse(this.getAttribute('data-del-ac'));
+                        const ac = JSON.parse(this.getAttribute('data-del-ac').replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
                         if (!confirm('Delete AC "' + ac.tag + ' — ' + ac.loc + '"?')) return;
                         await deleteAcFromAll(ac);
                     });
@@ -2098,7 +2456,6 @@
                 const allInv = await fetchAllInventory();
                 const targetId = buildAcIdentity({ acTag: ac.tag, acLocation: ac.loc, acSerial: ac.serial, acModel: ac.model });
                 const remaining = allInv.filter(x => buildAcIdentity({ acTag: x.tag, acLocation: x.loc, acSerial: x.serial, acModel: x.model }) !== targetId);
-                // Save the remaining list under the current technician (Raissa)
                 const ownerTech = technicianSelect.value;
                 await pushInventoryToCloud(ownerTech, remaining);
                 showStatus('🗑️ AC deleted from cloud.', true);
@@ -2203,8 +2560,8 @@
                         const hash = safeStr(r['Report Hash'] || r.reportHash);
                         return `<div class="pending-row">
                             <div class="info">
-                                <div class="gen">❄️ ${tag} — ${loc}</div>
-                                <div class="meta">Dept: ${dept} · Tech: ${tech}</div>
+                                <div class="gen">❄️ ${escapeHtml(tag)} — ${escapeHtml(loc)}</div>
+                                <div class="meta">Dept: ${escapeHtml(dept)} · Tech: ${escapeHtml(tech)}</div>
                                 <div class="meta">Work date: ${wd}</div>
                             </div>
                             <button class="btn-approve" data-hash="${hash}">✅ Co-sign</button>
@@ -2215,7 +2572,6 @@
                             const hash = this.getAttribute('data-hash');
                             if (!hash) { alert('No Report Hash.'); return; }
                             this.disabled = true; this.textContent = '⏳…';
-                            // Use current logged-in name (Raissa) as signer
                             const ok = await cosignRecord(hash, technicianSelect.value);
                             if (ok) { this.textContent = '✅ Signed'; setTimeout(() => refreshSupervisorPending(), 800); }
                             else { this.disabled = false; this.textContent = '✅ Co-sign'; }
@@ -2253,7 +2609,7 @@
                 this.disabled = false; this.innerHTML = orig;
             });
 
-            // ================= PDF GENERATION =================
+            // ================= PDF GENERATION (unchanged core) =================
             async function generatePDF(records) {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -3084,7 +3440,6 @@
                 window.__cachedPfxPassword = null;
                 clearCert();
 
-                // ⭐ Auto-detect supervisor (Raissa)
                 if (payload.name === SUPERVISOR_NAME) {
                     currentRole = 'supervisor';
                 } else {
@@ -3110,8 +3465,6 @@
                     setTimeout(() => refreshPendingApprovals(), 300);
                     setTimeout(() => loadDepartmentInventory(), 400);
                 } else if (currentRole === 'supervisor') {
-                    // Supervisor: no AC_INVENTORY needed for PM (no checklist),
-                    // but we still load Raissa's own list so add/remove works
                     AC_INVENTORY = [];
                     try {
                         let inv = await fetchInventoryFromCloud(payload.name);
@@ -3202,32 +3555,34 @@
             logoutBtn.addEventListener('click', function() { if (confirm('Log out?')) { lockApp(); showStatus('Logged out.', true); } });
 
             // ================= INIT =================
-            workDateInput.addEventListener('change', updateWorkDateDisplay);
-            syncBtn.addEventListener('click', flushQueue);
-            setAutoWorkDate();
-            populateDepartmentSelect();
-            populateLoginDepartmentSelect();
-            renderAcSelector();
-            updatePendingCount();
-            populateInchargeSuggestions();
+            if (!showingPublicInfo) {
+                workDateInput.addEventListener('change', updateWorkDateDisplay);
+                syncBtn.addEventListener('click', flushQueue);
+                setAutoWorkDate();
+                populateDepartmentSelect();
+                populateLoginDepartmentSelect();
+                renderAcSelector();
+                updatePendingCount();
+                populateInchargeSuggestions();
 
-            (async () => {
-                await ensureDepartmentsLoaded();
-                const existingSession = loadSession();
-                if (existingSession && (TECHNICIAN_PINS[existingSession.name] || existingSession.role === 'incharge' || existingSession.name === SUPERVISOR_NAME)) {
-                    unlockApp(existingSession);
-                } else {
-                    lockApp();
-                }
-            })();
+                (async () => {
+                    await ensureDepartmentsLoaded();
+                    const existingSession = loadSession();
+                    if (existingSession && (TECHNICIAN_PINS[existingSession.name] || existingSession.role === 'incharge' || existingSession.name === SUPERVISOR_NAME)) {
+                        unlockApp(existingSession);
+                    } else {
+                        lockApp();
+                    }
+                })();
 
-            setTimeout(() => { if (getQueue().length > 0) flushQueue(); }, 1200);
+                setTimeout(() => { if (getQueue().length > 0) flushQueue(); }, 1200);
+            }
         })();
     </script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js?v=31')
+                navigator.serviceWorker.register('sw.js?v=32')
                     .then(reg => console.log('✅ Service Worker registered:', reg.scope))
                     .catch(err => console.warn('⚠️ Service Worker failed:', err));
             });
